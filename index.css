@@ -1,0 +1,183 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    padding: 10px;
+    background-color: aliceblue;
+    color: #231F20;
+}
+
+#toggleSnowflakes {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 4px 8px;
+  cursor: pointer;
+  background-color: #0260E8;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 10px;
+}
+
+.titleContainer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.maskotImg {
+    width: 70px;
+}
+
+h1 {
+  font-family: "Kablammo", serif;
+  font-size: 40px;
+  background-image: linear-gradient(90deg, red, green);
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: colorShift 1s infinite alternate;
+}
+
+@keyframes colorShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+
+#uploadContainer {
+    margin-bottom: 30px;
+}
+
+#sheetLinkInput {
+    padding: 8px;
+    margin-bottom: 10px;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#uploadBtn {
+    padding: 8px 16px;
+    cursor: pointer;
+    background-color: #008736;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+#sheetTitle {
+  margin-bottom: 20px;
+}
+
+#selectContainer {
+    margin-bottom: 20px;
+    display: none;
+}
+
+.selectWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 15px
+}
+
+select {
+    padding: 8px;
+    margin-bottom: 3px;
+    height: 50px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.loader {
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #3498db;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 2s linear infinite;
+    margin: 20px auto;
+    display: none;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.error {
+    color: red;
+    margin-top: 20px;
+}
+
+.employee-header {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #2c3e50;
+}
+
+.day-card {
+    margin-bottom: 10px;
+}
+
+.day-header {
+    font-size: 1em;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: gray;
+}
+
+.values-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-left: 0px;
+}
+
+.values-list > li {
+  list-style: none;
+  position: relative;
+  padding-left: 30px;
+}
+
+li::before {
+  content: '';
+  background-image: url('./decoration.svg');
+  background-size: 20px 20px; /* Устанавливает размер иконки */
+  background-repeat: no-repeat;
+  width: 24px;
+  height: 24px;
+  position: absolute;
+  left: 0;
+  top: -1px;
+}
+
+#compareButton {
+    margin-top: 10px;
+    display: none;
+    background-color: #008736;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    text-decoration: none;
+    font-size: 14px;
+    text-align: center;
+}
+
+#compareButton:hover {
+    background-color: #2980b9;
+}
+
