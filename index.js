@@ -90,9 +90,39 @@ function displayData(data) {
   }
 }
 
-function displaySheetTitle(title) {
-  let sheetTitleElement = document.getElementById("sheetTitle");
-  sheetTitleElement.textContent = title;
+function displaySheetTitle(date, title) {
+  const sheetTitleElement = document.getElementById("sheetTitle");
+  if (!date) {
+    sheetTitleElement.textContent = title || 'Название таблицы';
+    return;
+  }
+
+  date = new Date(date);
+  const formattedDate = new Intl.DateTimeFormat('ru-RU', { dateStyle: 'short' }).format(date);
+  sheetTitleElement.textContent = `Таблица от ${formattedDate}`;
+
+  const today = cutTime(new Date());
+  const monday = getMonday(today);
+  let nextMonday = new Date(monday);
+  nextMonday = new Date(nextMonday.setDate(nextMonday.getDate() + 7));
+  const late = 'late', early = 'early', normal = 'normal';
+  const status = date < monday ? late
+    : date >= nextMonday ? early : normal;
+
+  const sheetStatusElement = document.getElementById("sheetStatus")
+  sheetStatusElement.classList.remove(late, early, normal)
+  sheetStatusElement.classList.add(status);
+}
+
+function cutTime(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function getMonday(date) {
+  date = new Date(date);
+  const day = date.getDay(),
+    diff = date.getDate() - day + (day == 0 ? -6 : 1);
+  return new Date(date.setDate(diff));
 }
 
 async function downloadAndStoreGoogleSheets(
@@ -160,21 +190,19 @@ async function downloadAndStoreGoogleSheets(
     }
     localStorage.setItem("googleSheetDataMap", JSON.stringify(masterData));
     console.log(workbook);
-    let sheetTitle = "Название таблицы";
+    let sheetDate;
     if (workbook.SheetNames.includes("Пн")) {
       const worksheet = workbook.Sheets["Пн"];
       const cellAddress = "B1";
       const cell = worksheet[cellAddress];
       if (cell && cell.v) {
         const date = XLSX.SSF.parse_date_code(cell.v);
-        sheetTitle = `Таблица от: ${String(date.d).padStart(2, "0")}.${String(
-          date.m
-        ).padStart(2, "0")}.${date.y}`;
+        sheetDate = new Date(date.y, date.m - 1, date.d);
       }
     }
 
-    localStorage.setItem("sheetTitle", sheetTitle);
-    displaySheetTitle(sheetTitle);
+    localStorage.setItem("sheetDate", sheetDate);
+    displaySheetTitle(sheetDate);
     populateEmployeeSelect(masterData);
     setDefaultDaySelect();
     displaySelectedData();
@@ -389,12 +417,21 @@ window.addEventListener("DOMContentLoaded", () => {
     day: "numeric",
   };
   const formattedDate = now.toLocaleDateString("ru-RU", options);
-  currentDateElement.textContent = `${
-    formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1)
-  }`;
+  currentDateElement.textContent = `${formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1)
+    }`;
 
-  const storedTitle = localStorage.getItem("sheetTitle");
-  if (storedTitle) {
-    displaySheetTitle(storedTitle);
+  let sheetDate = localStorage.getItem("sheetDate");
+  let sheetTitle;
+  if (!sheetDate) {
+    sheetTitle = localStorage.getItem("sheetTitle")
+    if (sheetTitle) {
+      const dateCompoments = /(\d+)\.(\d+)\.(\d+)$/.exec(sheetTitle);
+      if (dateCompoments) {
+        sheetDate = new Date(dateCompoments[3], dateCompoments[2] - 1, dateCompoments[1]);
+        localStorage.setItem("sheetDate", sheetDate);
+        localStorage.removeItem("sheetTitle")
+      }
+    }
   }
+  displaySheetTitle(sheetDate, sheetTitle);
 });

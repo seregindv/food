@@ -72,7 +72,7 @@ h1 {
     font-size: 14px;
 }
 
-#sheetTitle {
+.sheet-title {
   margin-bottom: 20px;
 }
 
@@ -181,3 +181,25 @@ li::before {
     background-color: #2980b9;
 }
 
+.inline{
+    display: inline;
+}
+
+.date-icon {
+    padding-left: 1.0545vw;
+    border-radius: 50%;
+    background-color: gainsboro;
+    margin-right: 4px;
+}
+
+.date-icon.early {
+    background-color: #FFC000;
+}
+
+.date-icon.late {
+    background-color: #E80000;
+}
+
+.date-icon.normal {
+    background-color: #00A000;
+}
