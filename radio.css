@@ -1,0 +1,59 @@
+.day {
+  list-style-type: none;
+  margin: 25px 0 0 0;
+  padding: 0;
+}
+
+.day>div {
+  float: left;
+  margin: 0 5px 0 0;
+  width: 60px;
+  height: 50px;
+  position: relative;
+}
+
+.day label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.day input[type="radio"] {
+  visibility: hidden;
+  margin: 0;
+}
+
+.day input[type="radio"]:checked+label {
+  background: #1B75D0;
+  color: white;
+}
+
+.day input[type="radio"]:checked+label:hover {
+  background: #155CA2;
+}
+
+.day input[type="radio"]:checked+label:active {
+  background: #0C3B6A;
+}
+
+.day label {
+  padding: 5px;
+  cursor: pointer;
+  z-index: 90;
+  border-radius: 6px;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #B8CCE0;
+}
+
+.day label:hover {
+  background: #CEE6FF;
+}
+
+.day label:active {
+  background: #BED2E5;
+}
