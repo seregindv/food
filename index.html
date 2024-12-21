@@ -11,6 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kablammo&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="index.css">
+  <link rel="stylesheet" href="radio.css">
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
 
 </head>
@@ -35,13 +36,28 @@
   <div id="selectContainer">
     <div class="selectWrapper">
 
-      <select id="daySelect">
-        <option value="Пн">Пн</option>
-        <option value="Вт">Вт</option>
-        <option value="Ср">Ср</option>
-        <option value="Чт">Чт</option>
-        <option value="Пт">Пт</option>
-      </select>
+      <div class="day">
+        <div>
+          <input id="1" type="radio" class="day" name="day" value="Пн">
+          <label for="1">Пн</label>
+        </div>
+        <div>
+          <input id="2" type="radio" class="day" name="day" value="Вт">
+          <label for="2">Вт</label>
+        </div>
+        <div>
+          <input id="3" type="radio" class="day" name="day" value="Ср">
+          <label for="3">Ср</label>
+        </div>
+        <div>
+          <input id="4" type="radio" class="day" name="day" value="Чт">
+          <label for="4">Чт</label>
+        </div>
+        <div>
+          <input id="5" type="radio" class="day" name="day" value="Пт">
+          <label for="5">Пт</label>
+        </div>
+      </div>
       <select id="employeeSelect">
         <option value="">Выберите сотрудника</option>
       </select>

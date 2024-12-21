@@ -254,40 +254,20 @@ function populateEmployeeSelect(data) {
 }
 
 function setDefaultDaySelect() {
-  const daySelect = document.getElementById("daySelect");
-  const currentDay = new Date().getDay();
-  let dayValue = "Пн";
-  switch (currentDay) {
-    case 1:
-      dayValue = "Пн";
-      break;
-    case 2:
-      dayValue = "Вт";
-      break;
-    case 3:
-      dayValue = "Ср";
-      break;
-    case 4:
-      dayValue = "Чт";
-      break;
-    case 5:
-      dayValue = "Пт";
-      break;
-    default:
-      dayValue = "Пн";
-  }
-  daySelect.value = dayValue;
+  let currentDay = new Date().getDay();
+  if (currentDay < 0 || currentDay > 5)
+    currentDay = 1;
+  document.getElementById(currentDay).checked = true;
 }
 
 function displaySelectedData() {
   const employeeSelect = document.getElementById("employeeSelect");
-  const daySelect = document.getElementById("daySelect");
   const display = document.getElementById("jsonDisplay");
   const dataMap = JSON.parse(
     localStorage.getItem("googleSheetDataMap") || "{}"
   );
   const selectedEmployee = employeeSelect.value;
-  const selectedDay = daySelect.value;
+  const selectedDay = document.querySelector('input[name="day"]:checked').value;
   const compareButton = document.getElementById("compareButton");
   const originalLink = localStorage.getItem("originalSheetLink");
 
@@ -351,7 +331,7 @@ document.getElementById("uploadBtn").addEventListener("click", () => {
 
 function setupSelectEventListeners() {
   const employeeSelect = document.getElementById("employeeSelect");
-  const daySelect = document.getElementById("daySelect");
+  const days = document.querySelectorAll('input[name="day"]');
   employeeSelect.addEventListener("change", () => {
     const selectedEmployee = employeeSelect.value;
     if (selectedEmployee) {
@@ -361,9 +341,9 @@ function setupSelectEventListeners() {
     }
     displaySelectedData();
   });
-  daySelect.addEventListener("change", () => {
+  days.forEach(e => e.addEventListener("change", () => {
     displaySelectedData();
-  });
+  }));
 }
 
 function initializeSelects() {
