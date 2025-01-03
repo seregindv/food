@@ -1,17 +1,10 @@
-.day {
-  list-style-type: none;
-  padding: 0;
-}
-
-.day>div {
-  float: left;
-  margin: 0 5px 0 0;
+.days>div {
   width: 60px;
   height: 50px;
   position: relative;
 }
 
-.day label {
+.days label {
   position: absolute;
   top: 0;
   left: 0;
@@ -19,25 +12,27 @@
   bottom: 0;
 }
 
-.day input[type="radio"] {
+.days input[type="radio"] {
   visibility: hidden;
   margin: 0;
 }
 
-.day input[type="radio"]:checked+label {
+.days input[type="radio"]:checked+label {
   background: #1B75D0;
   color: white;
 }
 
-.day input[type="radio"]:checked+label:hover {
-  background: #155CA2;
+@media (pointer: fine) {
+  .days input[type="radio"]:checked+label:hover {
+    background: #155CA2;
+  }
+
+  .days input[type="radio"]:checked+label:active {
+    background: #0C3B6A;
+  }
 }
 
-.day input[type="radio"]:checked+label:active {
-  background: #0C3B6A;
-}
-
-.day label {
+.days label {
   padding: 5px;
   cursor: pointer;
   z-index: 90;
@@ -49,10 +44,10 @@
   border: 1px solid #B8CCE0;
 }
 
-.day label:hover {
+.days label:hover {
   background: #CEE6FF;
 }
 
-.day label:active {
+.days label:active {
   background: #BED2E5;
 }

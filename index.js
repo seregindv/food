@@ -90,32 +90,30 @@ function displayData(data) {
   }
 }
 
-function displaySheetTitle(date, title) {
+function displaySheetTitle(sheetInfo, title) {
   const sheetTitleElement = document.getElementById("sheetTitle");
-  if (!date) {
+  if (!sheetInfo) {
     sheetTitleElement.textContent = title || 'Название таблицы';
     return;
   }
 
-  date = new Date(date);
-  const formattedDate = new Intl.DateTimeFormat('ru-RU', { dateStyle: 'short' }).format(date);
+  const sheetDate = sheetInfo.date;
+  const formattedDate = new Intl.DateTimeFormat('ru-RU', { dateStyle: 'short' }).format(new Date(sheetDate));
   sheetTitleElement.textContent = `Таблица от ${formattedDate}`;
 
-  const today = cutTime(new Date());
-  const monday = getMonday(today);
+  const today = new Date();
+  let monday = getMonday(today);
   let nextMonday = new Date(monday);
   nextMonday = new Date(nextMonday.setDate(nextMonday.getDate() + 7));
+  monday = getDateString(monday);
+  nextMonday = getDateString(nextMonday);
   const late = 'late', early = 'early', normal = 'normal';
-  const status = date < monday ? late
-    : date >= nextMonday ? early : normal;
+  const status = sheetDate < monday ? late
+    : sheetDate >= nextMonday ? early : normal;
 
   const sheetStatusElement = document.getElementById("sheetStatus")
   sheetStatusElement.classList.remove(late, early, normal)
   sheetStatusElement.classList.add(status);
-}
-
-function cutTime(date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
 function getMonday(date) {
@@ -201,8 +199,9 @@ async function downloadAndStoreGoogleSheets(
       }
     }
 
-    localStorage.setItem("sheetDate", sheetDate);
-    displaySheetTitle(sheetDate);
+    const sheetInfo = createSheetInfo(sheetDate);
+    localStorage.setItem("sheetInfo", JSON.stringify(sheetInfo));
+    displaySheetTitle(sheetInfo);
     populateEmployeeSelect(masterData);
     setDefaultDaySelect();
     displaySelectedData();
@@ -384,34 +383,31 @@ function initializeToggleSnowflakes() {
   toggleButton.addEventListener("click", toggleSnowflakes);
 }
 
+function createSheetInfo(sheetDate) {
+  return { date: getDateString(sheetDate) };
+}
+
+function getDateString(date) {
+  return date.toLocaleDateString('en-CA');
+}
+
 window.addEventListener("DOMContentLoaded", () => {
   loadMapFromLocalStorage();
   initializeSelects();
   initializeToggleSnowflakes();
-  const currentDateElement = document.getElementById("currentDate");
-  const now = new Date();
-  const options = {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  };
-  const formattedDate = now.toLocaleDateString("ru-RU", options);
-  currentDateElement.textContent = `${formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1)
-    }`;
 
-  let sheetDate = localStorage.getItem("sheetDate");
+  let sheetInfo = JSON.parse(localStorage.getItem("sheetInfo"));
   let sheetTitle;
-  if (!sheetDate) {
+  if (!sheetInfo) {
     sheetTitle = localStorage.getItem("sheetTitle")
     if (sheetTitle) {
       const dateCompoments = /(\d+)\.(\d+)\.(\d+)$/.exec(sheetTitle);
       if (dateCompoments) {
-        sheetDate = new Date(dateCompoments[3], dateCompoments[2] - 1, dateCompoments[1]);
-        localStorage.setItem("sheetDate", sheetDate);
+        sheetInfo = createSheetInfo(new Date(dateCompoments[3], dateCompoments[2] - 1, dateCompoments[1]));
+        localStorage.setItem("sheetInfo", JSON.stringify(sheetInfo));
         localStorage.removeItem("sheetTitle")
       }
     }
   }
-  displaySheetTitle(sheetDate, sheetTitle);
+  displaySheetTitle(sheetInfo, sheetTitle);
 });
