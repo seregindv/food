@@ -254,7 +254,7 @@ function populateEmployeeSelect(data) {
 
 function setDefaultDaySelect() {
   let currentDay = new Date().getDay();
-  if (currentDay < 0 || currentDay > 5)
+  if (currentDay < 1 || currentDay > 5)
     currentDay = 1;
   document.getElementById(currentDay).checked = true;
 }
