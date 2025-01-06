@@ -44,6 +44,7 @@ h1 {
     0% {
         background-position: 0% 50%;
     }
+
     100% {
         background-position: 100% 50%;
     }
@@ -96,7 +97,7 @@ select {
     height: 50px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    font-size: larger;
+    font-size: medium;
 }
 
 .loader {
@@ -148,6 +149,10 @@ select {
     }
 }
 
+.days input.today:not(:checked)+label {
+    box-shadow: 0 0 0 1px #1B75D0;
+}
+
 .day-card {
     margin-bottom: 10px;
 }
@@ -166,7 +171,7 @@ select {
     padding-left: 0px;
 }
 
-.values-list > li {
+.values-list>li {
     list-style: none;
     position: relative;
     padding-left: 30px;
@@ -175,7 +180,8 @@ select {
 li::before {
     content: '';
     background-image: url('./decoration.svg');
-    background-size: 20px 20px; /* Устанавливает размер иконки */
+    background-size: 20px 20px;
+    /* Устанавливает размер иконки */
     background-repeat: no-repeat;
     width: 24px;
     height: 24px;
