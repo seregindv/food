@@ -207,6 +207,7 @@ async function downloadAndStoreGoogleSheets(
     displaySelectedData();
     document.getElementById("selectContainer").style.display = "block";
   } catch (error) {
+    console.error(error);
     displayError(error.message);
   } finally {
     toggleLoader(false);
@@ -223,6 +224,7 @@ function loadMapFromLocalStorage() {
       displaySelectedData();
       document.getElementById("selectContainer").style.display = "block";
     } catch (error) {
+      console.error(error);
       displayError("Ошибка при загрузке данных из localStorage.");
     }
   } else {
@@ -253,25 +255,66 @@ function populateEmployeeSelect(data) {
 }
 
 function setDefaultDaySelect() {
-  let currentDay = new Date().getDay();
-  if (currentDay < 1 || currentDay > 5)
-    currentDay = 1;
-  document.getElementById(currentDay).checked = true;
+  const currentDay = getDefaultSelect();
+  currentDay.checked = true;
 }
 
-function displaySelectedData() {
+function getDefaultSelect() {
+  const currentDay = new Date().getDay();
+  if (currentDay < 1 || currentDay > 5)
+    currentDay = 1;
+  return document.getElementById(currentDay);
+}
+
+function displaySelectedData(mealOnly) {
   const employeeSelect = document.getElementById("employeeSelect");
   const display = document.getElementById("jsonDisplay");
   const dataMap = JSON.parse(
     localStorage.getItem("googleSheetDataMap") || "{}"
   );
   const selectedEmployee = employeeSelect.value;
-  const selectedDay = document.querySelector('input[name="day"]:checked').value;
+  const checkedDay = document.querySelector('input[name="day"]:checked');
+  let selectedDay = checkedDay && checkedDay.value;
+  if (!selectedDay) {
+    const defaultSelect = getDefaultSelect();
+    selectedDay = defaultSelect.value;
+    defaultSelect.checked = true;
+  }
   const compareButton = document.getElementById("compareButton");
   const originalLink = localStorage.getItem("originalSheetLink");
 
-  if (selectedEmployee && selectedDay) {
+  if (selectedEmployee) {
     const employeeData = dataMap[selectedEmployee];
+    if (!mealOnly) {
+      const radios = document.querySelectorAll('input[name="day"]');
+      let uncheckedIndex;
+      for (const i in radios) {
+        const radio = radios[i];
+        const radioData = employeeData && employeeData[radio.value];
+        const disabled = !radioData || !radioData[0];
+        radio.disabled = disabled
+        if (uncheckedIndex !== undefined && !disabled) {
+          uncheckedIndex = undefined;
+          radio.checked = true;
+          selectedDay = radio.value;
+        }
+        if (disabled && radio.checked) {
+          radio.checked = false;
+          selectedDay = undefined;
+          uncheckedIndex = i;
+        }
+      }
+      if (uncheckedIndex !== undefined) {
+        for (let i = uncheckedIndex; i >= 0; i--) {
+          const radio = radios[i];
+          if (!radio.disabled) {
+            radio.checked = true;
+            selectedDay = radio.value;
+            break;
+          }
+        }
+      }
+    }
     if (employeeData && employeeData[selectedDay]) {
       const valuesArray = employeeData[selectedDay];
       display.innerHTML = "";
@@ -341,7 +384,7 @@ function setupSelectEventListeners() {
     displaySelectedData();
   });
   days.forEach(e => e.addEventListener("change", () => {
-    displaySelectedData();
+    displaySelectedData(true);
   }));
 }
 

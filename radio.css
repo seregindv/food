@@ -32,9 +32,17 @@
   }
 }
 
+.days input[type="radio"]:not(:disabled)+label {
+  cursor: pointer;
+}
+
+.days input[type="radio"]:disabled+label {
+  color: #D0D0D0;
+  border-color: #E0E0E0;
+}
+
 .days label {
   padding: 5px;
-  cursor: pointer;
   z-index: 90;
   border-radius: 6px;
   user-select: none;
@@ -44,10 +52,10 @@
   border: 1px solid #B8CCE0;
 }
 
-.days label:hover {
+.days input[type="radio"]:not(:disabled):not(:checked)+label:hover {
   background: #CEE6FF;
 }
 
-.days label:active {
+.days input[type="radio"]:not(:disabled):not(:checked)+label:active {
   background: #BED2E5;
 }
