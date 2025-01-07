@@ -61,6 +61,7 @@ h1 {
     width: 100%;
     border: 1px solid #ccc;
     border-radius: 5px;
+    box-sizing: border-box;
 }
 
 #uploadBtn {
@@ -139,7 +140,7 @@ select {
 
 @media (orientation: landscape) {
     .days {
-        gap: 5px;
+        gap: 6px;
     }
 }
 
