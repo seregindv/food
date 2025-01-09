@@ -115,12 +115,9 @@ function displaySheetTitle(sheetInfo, title) {
   sheetStatusElement.classList.remove(late, early, normal)
   sheetStatusElement.classList.add(status);
 
-  if (status === normal) {
-    const day = today.getDay();
-    if (day >= 1 && day <= 5) {
-      document.querySelector(`input[id=\\${day + 30}]`).classList.add('today');
-    }
-  }
+  const day = today.getDay() - 1;
+  document.querySelectorAll('input[name="day"]').forEach(
+    (e, i) => e.classList.toggle('today', status === normal && i == day));
 }
 
 function getMonday(date) {
