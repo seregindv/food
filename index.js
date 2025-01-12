@@ -264,7 +264,7 @@ function setDefaultDaySelect() {
 }
 
 function getDefaultSelect() {
-  const currentDay = new Date().getDay();
+  let currentDay = new Date().getDay();
   if (currentDay < 1 || currentDay > 5)
     currentDay = 1;
   return document.getElementById(currentDay);
