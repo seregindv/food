@@ -59,3 +59,23 @@
 .days input[type="radio"]:not(:disabled):not(:checked)+label:active {
   background: #BED2E5;
 }
+
+/*******************************************************************/
+
+.meal {
+  display: flex;
+  align-items: flex-start;
+}
+
+.meal input[type="checkbox"] {
+  margin: 0.2rem 0.4rem;
+}
+
+.meal input[type="checkbox"]:checked {
+  accent-color: lightgray;
+}
+
+.meal input[type="checkbox"]:checked+label {
+  text-decoration: line-through;
+  color: lightgray;
+}

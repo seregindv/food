@@ -226,3 +226,7 @@ li::before {
 .date-icon.normal {
     background-color: #00A000;
 }
+
+.hidden {
+    display: none !important;
+}

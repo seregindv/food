@@ -17,11 +17,9 @@
 </head>
 
 <body>
-  <button id="toggleSnowflakes"></button>
   <div class="titleContainer">
     <img class="maskotImg" src="./mascot.png" />
     <h1>YoFood</h1>
-
   </div>
 
   <div id="uploadContainer">
@@ -34,7 +32,6 @@
   </div>
   <div id="selectContainer">
     <div class="selectWrapper">
-
       <div class="days">
         <div>
           <input id="1" type="radio" name="day" value="Пн">
@@ -63,8 +60,22 @@
     </div>
   </div>
   <div class="loader" id="loader"></div>
-  <div id="jsonDisplay"></div>
-  <a id="compareButton" target="_blank">Сверить с таблицей</a>
+  <div id="jsonDisplay">
+    <div class="employee-card">
+      <div class="day-card">
+        <ul class="values-list hidden">
+          <li class="meal"></li>
+          <li class="meal"></li>
+          <li class="meal"></li>
+          <li class="meal"></li>
+          <li class="meal"></li>
+          <li class="meal"></li>
+          <li class="meal"></li>
+        </ul>
+        <div id="noData" class="hidden"></div>
+      </div>
+    </div>
+  </div>
   <div class="error" id="errorDisplay"></div>
 </body>
 

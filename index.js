@@ -1,39 +1,6 @@
 let SHEET_ID = null;
 const SHEETS = ["Пн", "Вт", "Ср", "Чт", "Пт"];
 
-function createSnowflake() {
-  const snowflake = document.createElement("div");
-  snowflake.innerText = "❄";
-  snowflake.style.position = "fixed";
-  snowflake.style.top = "-50px";
-  snowflake.style.left = `${Math.random() * 95}vw`;
-  snowflake.style.fontSize = `${Math.random() * 20 + 10}px`;
-  snowflake.style.color = "#64C7FF";
-  snowflake.style.pointerEvents = "none";
-  snowflake.style.zIndex = "9999";
-
-  document.body.appendChild(snowflake);
-
-  // Анимация падения снежинки
-  const duration = Math.random() * 10 + 5; // 3-8 секунд падения
-  const animation = snowflake.animate(
-    [
-      { transform: `translateY(0px) rotate(0deg)`, opacity: 1 },
-      {
-        transform: `translateY(${window.innerHeight + 100}px) rotate(360deg)`,
-        opacity: 0,
-      },
-    ],
-    {
-      duration: duration * 1000,
-      easing: "linear",
-    }
-  );
-
-  // Удаляем снежинку после завершения анимации
-  animation.onfinish = () => snowflake.remove();
-}
-
 function toggleLoader(show) {
   const loader = document.getElementById("loader");
   loader.style.display = show ? "block" : "none";
@@ -45,55 +12,16 @@ function displayError(message) {
 }
 
 function clearDisplays() {
-  document.getElementById("jsonDisplay").innerHTML = "";
+  document.querySelector(".values-list").classList.toggle("hidden", true);
+  document.getElementById("noData").classList.toggle("hidden", true);
   document.getElementById("errorDisplay").textContent = "";
 }
 
-function displayData(data) {
-  const display = document.getElementById("jsonDisplay");
-  display.innerHTML = "";
-  if (Object.keys(data).length === 0) {
-    display.textContent = "Нет данных для отображения.";
-    return;
-  }
-  for (const [employee, daysData] of Object.entries(data)) {
-    const employeeCard = document.createElement("div");
-    employeeCard.className = "employee-card";
-    const employeeHeader = document.createElement("div");
-    employeeHeader.className = "employee-header";
-    employeeHeader.textContent = employee;
-    employeeCard.appendChild(employeeHeader);
-    for (const [day, valuesArray] of Object.entries(daysData)) {
-      const dayCard = document.createElement("div");
-      dayCard.className = "day-card";
-      const dayHeader = document.createElement("div");
-      dayHeader.className = "day-header";
-      dayHeader.textContent = day;
-      dayCard.appendChild(dayHeader);
-      if (valuesArray.length > 0) {
-        const valuesList = document.createElement("ul");
-        valuesList.className = "values-list";
-        valuesArray.forEach((value) => {
-          const listItem = document.createElement("li");
-          listItem.textContent = value;
-          valuesList.appendChild(listItem);
-        });
-        dayCard.appendChild(valuesList);
-      } else {
-        const noData = document.createElement("div");
-        noData.textContent = "Нет данных.";
-        dayCard.appendChild(noData);
-      }
-      employeeCard.appendChild(dayCard);
-    }
-    display.appendChild(employeeCard);
-  }
-}
-
-function displaySheetTitle(sheetInfo, title) {
+function displaySheetTitle(sheetInfo) {
   const sheetTitleElement = document.getElementById("sheetTitle");
+  document.querySelector(".sheet-title").classList.toggle("hidden", !sheetInfo);
   if (!sheetInfo) {
-    sheetTitleElement.textContent = title || 'Название таблицы';
+    sheetTitleElement.textContent = '';
     return;
   }
 
@@ -229,7 +157,7 @@ function loadMapFromLocalStorage() {
       document.getElementById("selectContainer").style.display = "block";
     } catch (error) {
       console.error(error);
-      displayError("Ошибка при загрузке данных из localStorage.");
+      displayError("Ошибка при загрузке данных из localStorage");
     }
   } else {
     document.getElementById("selectContainer").style.display = "none";
@@ -273,6 +201,7 @@ function getDefaultSelect() {
 function displaySelectedData(mealOnly) {
   const employeeSelect = document.getElementById("employeeSelect");
   const display = document.getElementById("jsonDisplay");
+  const status = document.getElementById("noData");
   const dataMap = JSON.parse(
     localStorage.getItem("googleSheetDataMap") || "{}"
   );
@@ -284,8 +213,6 @@ function displaySelectedData(mealOnly) {
     selectedDay = defaultSelect.value;
     defaultSelect.checked = true;
   }
-  const compareButton = document.getElementById("compareButton");
-  const originalLink = localStorage.getItem("originalSheetLink");
 
   if (selectedEmployee) {
     const employeeData = dataMap[selectedEmployee];
@@ -320,42 +247,26 @@ function displaySelectedData(mealOnly) {
       }
     }
     if (employeeData && employeeData[selectedDay]) {
-      const valuesArray = employeeData[selectedDay];
-      display.innerHTML = "";
-      const employeeCard = document.createElement("div");
-      employeeCard.className = "employee-card";
-      const dayCard = document.createElement("div");
-      dayCard.className = "day-card";
-      if (valuesArray.length > 0) {
-        const valuesList = document.createElement("ul");
-        valuesList.className = "values-list";
-        valuesArray.forEach((value) => {
-          const listItem = document.createElement("li");
-          listItem.textContent = value;
-          valuesList.appendChild(listItem);
-        });
-        dayCard.appendChild(valuesList);
+      const meals = employeeData[selectedDay];
+      const hasMeal = !!meals[0];
+      display.querySelector(".values-list").classList.toggle("hidden", !hasMeal);
+      status.classList.toggle("hidden", hasMeal);
+      if (hasMeal) {
+        let i = 0;
+        for (const listItem of display.querySelectorAll(".meal")) {
+          const meal = meals[i];
+          listItem.innerText = meal || null;
+          listItem.classList.toggle("hidden", !meal);
+          ++i;
+        }
       } else {
-        const noData = document.createElement("div");
-        noData.textContent = "Нет данных.";
-        dayCard.appendChild(noData);
-      }
-      employeeCard.appendChild(dayCard);
-      display.appendChild(employeeCard);
-
-      if (originalLink) {
-        compareButton.href = originalLink;
-        compareButton.style.display = "inline-block";
-      } else {
-        compareButton.style.display = "none";
+        status.innerText = "Нет данных";
       }
     } else {
-      display.innerHTML = "Нет данных для выбранных опций.";
-      compareButton.style.display = "none";
+      status.innerHTML = "Нет данных для выбранных опций";
     }
   } else {
-    display.innerHTML = "Пожалуйста, выберите сотрудника и день недели.";
-    compareButton.style.display = "none";
+    status.innerHTML = "Пожалуйста, выберите сотрудника и день недели";
   }
 }
 
@@ -396,40 +307,6 @@ function initializeSelects() {
   setupSelectEventListeners();
 }
 
-function initializeToggleSnowflakes() {
-  const STORAGE_KEY = "snowflakes";
-  const toggleButton = document.getElementById("toggleSnowflakes");
-  let snowingInterval;
-
-  // Инициализация состояния по умолчанию
-  const isSnowing = () => JSON.parse(localStorage.getItem(STORAGE_KEY)) ?? true;
-
-  function startSnowfall() {
-    snowingInterval = setInterval(createSnowflake, 1000);
-  }
-
-  function stopSnowfall() {
-    clearInterval(snowingInterval);
-  }
-
-  function updateButtonIcon() {
-    toggleButton.innerHTML = isSnowing() ? "❄️ 🚫" : "❄️";
-  }
-
-  function toggleSnowflakes() {
-    const currentValue = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    localStorage.setItem(STORAGE_KEY, !currentValue);
-    const snowing = !currentValue;
-    snowing ? startSnowfall() : stopSnowfall();
-    updateButtonIcon();
-  }
-
-  if (isSnowing()) startSnowfall();
-  updateButtonIcon();
-
-  toggleButton.addEventListener("click", toggleSnowflakes);
-}
-
 function createSheetInfo(sheetDate) {
   return { date: getDateString(sheetDate) };
 }
@@ -441,7 +318,6 @@ function getDateString(date) {
 window.addEventListener("DOMContentLoaded", () => {
   loadMapFromLocalStorage();
   initializeSelects();
-  initializeToggleSnowflakes();
 
   let sheetInfo = JSON.parse(localStorage.getItem("sheetInfo"));
   let sheetTitle;
@@ -456,5 +332,5 @@ window.addEventListener("DOMContentLoaded", () => {
       }
     }
   }
-  displaySheetTitle(sheetInfo, sheetTitle);
+  displaySheetTitle(sheetInfo);
 });
