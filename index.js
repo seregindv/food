@@ -1,33 +1,18 @@
+import * as page from './page.js';
+
 let SHEET_ID = null;
 const SHEETS = ["Пн", "Вт", "Ср", "Чт", "Пт"];
 
-function toggleLoader(show) {
-  const loader = document.getElementById("loader");
-  loader.style.display = show ? "block" : "none";
-}
-
-function displayError(message) {
-  const errorDisplay = document.getElementById("errorDisplay");
-  errorDisplay.textContent = message;
-}
-
-function clearDisplays() {
-  document.querySelector(".values-list").classList.toggle("hidden", true);
-  document.getElementById("noData").classList.toggle("hidden", true);
-  document.getElementById("errorDisplay").textContent = "";
-}
-
 function displaySheetTitle(sheetInfo) {
-  const sheetTitleElement = document.getElementById("sheetTitle");
-  document.querySelector(".sheet-title").classList.toggle("hidden", !sheetInfo);
+  page.showTitle(sheetInfo);
   if (!sheetInfo) {
-    sheetTitleElement.textContent = '';
+    page.setTitle('');
     return;
   }
 
   const sheetDate = sheetInfo.date;
   const formattedDate = new Intl.DateTimeFormat('ru-RU', { dateStyle: 'short' }).format(new Date(sheetDate));
-  sheetTitleElement.textContent = `Таблица от ${formattedDate}`;
+  page.setTitle(`Таблица от ${formattedDate}`);
 
   const today = new Date();
   let monday = getMonday(today);
@@ -35,17 +20,13 @@ function displaySheetTitle(sheetInfo) {
   nextMonday = new Date(nextMonday.setDate(nextMonday.getDate() + 7));
   monday = getDateString(monday);
   nextMonday = getDateString(nextMonday);
-  const late = 'late', early = 'early', normal = 'normal';
-  const status = sheetDate < monday ? late
-    : sheetDate >= nextMonday ? early : normal;
 
-  const sheetStatusElement = document.getElementById("sheetStatus")
-  sheetStatusElement.classList.remove(late, early, normal)
-  sheetStatusElement.classList.add(status);
+  const status = sheetDate < monday ? page.sheetStatus.late
+    : sheetDate >= nextMonday ? page.sheetStatus.early : page.sheetStatus.normal;
+  page.setSheetStatus(status);
 
   const day = today.getDay() - 1;
-  document.querySelectorAll('input[name="day"]').forEach(
-    (e, i) => e.classList.toggle('today', status === normal && i == day));
+  page.setToday(i => status === page.sheetStatus.normal && i == day);
 }
 
 function getMonday(date) {
@@ -62,8 +43,8 @@ async function downloadAndStoreGoogleSheets(
 ) {
   const exportUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=xlsx`;
   try {
-    toggleLoader(true);
-    clearDisplays();
+    page.showLoading(true);
+    page.clearDisplays();
     const response = await fetch(exportUrl, {
       method: "GET",
       headers: {
@@ -138,12 +119,12 @@ async function downloadAndStoreGoogleSheets(
     populateEmployeeSelect(masterData);
     setDefaultDaySelect();
     displaySelectedData();
-    document.getElementById("selectContainer").style.display = "block";
+    page.showSelectors(true);
   } catch (error) {
     console.error(error);
-    displayError(error.message);
+    page.displayError(error.message);
   } finally {
-    toggleLoader(false);
+    page.showLoading(false);
   }
 }
 
@@ -155,13 +136,13 @@ function loadMapFromLocalStorage() {
       populateEmployeeSelect(dataObject);
       setDefaultDaySelect();
       displaySelectedData();
-      document.getElementById("selectContainer").style.display = "block";
+      page.showSelectors(true);
     } catch (error) {
       console.error(error);
-      displayError("Ошибка при загрузке данных из localStorage");
+      page.displayError("Ошибка при загрузке данных из localStorage");
     }
   } else {
-    document.getElementById("selectContainer").style.display = "none";
+    page.showSelectors(false);
   }
 }
 
@@ -172,19 +153,9 @@ function extractSheetId(url) {
 }
 
 function populateEmployeeSelect(data) {
-  const employeeSelect = document.getElementById("employeeSelect");
-  employeeSelect.innerHTML = '<option value="">Выберите сотрудника</option>';
   const employees = Object.keys(data).sort();
-  employees.forEach((employee) => {
-    const option = document.createElement("option");
-    option.value = employee;
-    option.textContent = employee;
-    employeeSelect.appendChild(option);
-  });
-  const savedEmployee = localStorage.getItem("selectedEmployee");
-  if (savedEmployee && employees.includes(savedEmployee)) {
-    employeeSelect.value = savedEmployee;
-  }
+  const selectedEmployee = localStorage.getItem("selectedEmployee");
+  page.populateEmployees(employees, selectedEmployee);
 }
 
 function setDefaultDaySelect() {
@@ -201,12 +172,12 @@ function getDefaultSelect() {
 
 function displaySelectedData(mealOnly) {
   const employeeSelect = document.getElementById("employeeSelect");
-  const display = document.getElementById("jsonDisplay");
+  const selectedEmployee = employeeSelect.value;
+
   const status = document.getElementById("noData");
   const dataMap = JSON.parse(
     localStorage.getItem("googleSheetDataMap") || "{}"
   );
-  const selectedEmployee = employeeSelect.value;
   const checkedDay = document.querySelector('input[name="day"]:checked');
   let selectedDay = checkedDay && checkedDay.value;
   if (!selectedDay) {
@@ -220,8 +191,8 @@ function displaySelectedData(mealOnly) {
     if (!mealOnly) {
       const radios = document.querySelectorAll('input[name="day"]');
       let uncheckedIndex;
-      for (const i in radios) {
-        const radio = radios[i];
+      let i = 0;
+      for (const radio of radios) {
         const radioData = employeeData && employeeData[radio.value];
         const disabled = !radioData || !radioData[0];
         radio.disabled = disabled
@@ -235,6 +206,7 @@ function displaySelectedData(mealOnly) {
           selectedDay = undefined;
           uncheckedIndex = i;
         }
+        ++i;
       }
       if (uncheckedIndex !== undefined) {
         for (let i = uncheckedIndex; i >= 0; i--) {
@@ -250,6 +222,7 @@ function displaySelectedData(mealOnly) {
     if (employeeData && employeeData[selectedDay]) {
       const meals = employeeData[selectedDay];
       const hasMeal = !!meals[0];
+      const display = document.getElementById("jsonDisplay");
       display.querySelector(".values-list").classList.toggle("hidden", !hasMeal);
       status.classList.toggle("hidden", hasMeal);
       if (hasMeal) {
@@ -276,12 +249,12 @@ function displaySelectedData(mealOnly) {
 document.getElementById("uploadBtn").addEventListener("click", () => {
   const sheetLink = document.getElementById("sheetLinkInput").value.trim();
   if (!sheetLink) {
-    displayError("Пожалуйста, введите ссылку");
+    page.displayError("Пожалуйста, введите ссылку");
     return;
   }
   const sheetId = extractSheetId(sheetLink);
   if (!sheetId) {
-    displayError("Неверная ссылка на Google Таблицу.");
+    page.displayError("Неверная ссылка на Google Таблицу.");
     return;
   }
   SHEET_ID = sheetId;
@@ -344,7 +317,6 @@ function applyMealState() {
 }
 
 function updateMealState(e) {
-  // console.log(e);
   let id = /(\d+)$/.exec(e.target.id);
   if (!id) {
     return;
