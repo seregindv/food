@@ -133,6 +133,7 @@ async function downloadAndStoreGoogleSheets(
 
     const sheetInfo = createSheetInfo(sheetDate);
     localStorage.setItem("sheetInfo", JSON.stringify(sheetInfo));
+    localStorage.removeItem("eaten");
     displaySheetTitle(sheetInfo);
     populateEmployeeSelect(masterData);
     setDefaultDaySelect();
@@ -260,6 +261,7 @@ function displaySelectedData(mealOnly) {
           wrapper.classList.toggle("hidden", !meal);
           ++i;
         }
+        applyMealState();
       } else {
         status.innerText = "Нет данных";
       }
@@ -287,9 +289,8 @@ document.getElementById("uploadBtn").addEventListener("click", () => {
   downloadAndStoreGoogleSheets(SHEET_ID, SHEETS, "B5:M50");
 });
 
-function setupSelectEventListeners() {
+function setupEventListeners() {
   const employeeSelect = document.getElementById("employeeSelect");
-  const days = document.querySelectorAll('input[name="day"]');
   employeeSelect.addEventListener("change", () => {
     const selectedEmployee = employeeSelect.value;
     if (selectedEmployee) {
@@ -299,13 +300,13 @@ function setupSelectEventListeners() {
     }
     displaySelectedData();
   });
+
+  const days = document.querySelectorAll('input[name="day"]');
   days.forEach(e => e.addEventListener("change", () => {
     displaySelectedData(true);
   }));
-}
 
-function initializeSelects() {
-  setupSelectEventListeners();
+  document.querySelectorAll('input[name="meal"]').forEach(e => e.addEventListener("change", e => updateMealState(e)));
 }
 
 function createSheetInfo(sheetDate) {
@@ -316,9 +317,85 @@ function getDateString(date) {
   return date.toLocaleDateString('en-CA');
 }
 
+function applyMealState() {
+  const employeeSelect = document.getElementById('employeeSelect')
+  const employee = employeeSelect && employeeSelect.value;
+  if (!employee) {
+    return;
+  }
+
+  const checkedDay = document.querySelector('input[name="day"]:checked');
+  const day = checkedDay && checkedDay.value;
+  if (!day) {
+    return;
+  }
+
+  const eaten = JSON.parse(localStorage.getItem('eaten'));
+  let days;
+  if (eaten) {
+    const employeeData = eaten[employee];
+    if (employeeData) {
+      days = employeeData[day];
+    }
+  }
+
+  days = new Set(days);
+  document.querySelectorAll('input[name="meal"]').forEach((e, i) => e.checked = days.has(i));
+}
+
+function updateMealState(e) {
+  // console.log(e);
+  let id = /(\d+)$/.exec(e.target.id);
+  if (!id) {
+    return;
+  }
+  id = id[1] - 1;
+
+  const employeeSelect = document.getElementById('employeeSelect')
+  const employee = employeeSelect && employeeSelect.value;
+  if (!employee) {
+    return;
+  }
+
+  const checkedDay = document.querySelector('input[name="day"]:checked');
+  const day = checkedDay && checkedDay.value;
+  if (!day) {
+    return;
+  }
+
+  let eaten = localStorage.getItem('eaten');
+  if (!eaten) {
+    eaten = {};
+  } else {
+    eaten = JSON.parse(eaten);
+  }
+
+  let employeeData = eaten[employee];
+  if (!employeeData) {
+    eaten[employee] = employeeData = {};
+  }
+
+  let dayData = employeeData[day];
+  if (!dayData) {
+    employeeData[day] = dayData = [];
+  }
+
+  const mealIndex = dayData.indexOf(id);
+  if (e.target.checked) {
+    if (mealIndex === -1) {
+      dayData.push(id)
+    }
+  } else {
+    if (mealIndex !== -1) {
+      dayData.splice(mealIndex, 1);
+    }
+  }
+  localStorage.setItem("eaten", JSON.stringify(eaten));
+}
+
 window.addEventListener("DOMContentLoaded", () => {
   loadMapFromLocalStorage();
-  initializeSelects();
+  setupEventListeners();
 
   let sheetInfo = JSON.parse(localStorage.getItem("sheetInfo"));
   let sheetTitle;
