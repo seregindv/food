@@ -6,23 +6,11 @@ body {
     color: #231F20;
 }
 
-#toggleSnowflakes {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    padding: 4px 8px;
-    cursor: pointer;
-    background-color: #0260E8;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 10px;
-}
-
 .titleContainer {
     display: flex;
     align-items: center;
     gap: 10px;
+    margin-bottom: 20px;
 }
 
 .maskotImg {
@@ -38,6 +26,7 @@ h1 {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: colorShift 1s infinite alternate;
+    margin: 0;
 }
 
 @keyframes colorShift {
@@ -82,11 +71,11 @@ h1 {
 }
 
 #selectContainer {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     display: none;
 }
 
-.selectWrapper {
+.select-wrapper {
     display: flex;
     flex-direction: column;
     gap: 15px
@@ -127,13 +116,6 @@ select {
     margin-top: 20px;
 }
 
-.employee-header {
-    font-size: 1.2em;
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #2c3e50;
-}
-
 .days {
     display: flex;
 }
@@ -156,56 +138,6 @@ select {
 
 .day-card {
     margin-bottom: 10px;
-}
-
-.day-header {
-    font-size: 1em;
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: gray;
-}
-
-.values-list {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    padding-left: 0px;
-}
-
-.values-list>li {
-    list-style: none;
-    position: relative;
-    padding-left: 30px;
-}
-
-li::before {
-    content: '';
-    background-image: url('./decoration.svg');
-    background-size: 20px 20px;
-    /* Устанавливает размер иконки */
-    background-repeat: no-repeat;
-    width: 24px;
-    height: 24px;
-    position: absolute;
-    left: 0;
-    top: -1px;
-}
-
-#compareButton {
-    margin-top: 10px;
-    display: none;
-    background-color: #008736;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    padding: 10px;
-    text-decoration: none;
-    font-size: 14px;
-    text-align: center;
-}
-
-#compareButton:hover {
-    background-color: #2980b9;
 }
 
 .date-icon {

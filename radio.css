@@ -60,22 +60,40 @@
   background: #BED2E5;
 }
 
-/*******************************************************************/
-
 .meal {
   display: flex;
   align-items: flex-start;
 }
 
-.meal input[type="checkbox"] {
-  margin: 0.2rem 0.4rem;
+.meal>input {
+  flex: 0 0 auto;
+  cursor: pointer;
+  padding-top: 10px;
 }
 
-.meal input[type="checkbox"]:checked {
-  accent-color: lightgray;
+.meal>label{
+  flex: 1 1 auto;
+  cursor: pointer;
+  padding: 10px 0 10px 10px;
+}
+
+.meal input[type="checkbox"] {
+  appearance: none;
+  background-color: rgba(0, 0, 0, 0);
+  margin: 0;
+  width: 20px;
+  height: 20px;
+  background-image: url('./decoration.svg');
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  transform: translateY(-0.075em) translateY(10px);
+}
+
+input[type="checkbox"]:checked {
+  opacity: .65;
 }
 
 .meal input[type="checkbox"]:checked+label {
   text-decoration: line-through;
-  color: lightgray;
+  color: #A2A6A9;
 }

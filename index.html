@@ -13,7 +13,6 @@
   <link rel="stylesheet" href="index.css">
   <link rel="stylesheet" href="radio.css">
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
-
 </head>
 
 <body>
@@ -26,12 +25,14 @@
     <input type="text" id="sheetLinkInput" autocomplete="off" placeholder="Вставьте ссылку на Google Таблицу">
     <button id="uploadBtn">Загрузить</button>
   </div>
+
   <div class="sheet-title">
     <div id="sheetStatus" class="date-icon"></div>
     <div id="sheetTitle"></div>
   </div>
+
   <div id="selectContainer">
-    <div class="selectWrapper">
+    <div class="select-wrapper">
       <div class="days">
         <div>
           <input id="1" type="radio" name="day" value="Пн">
@@ -59,23 +60,47 @@
       </select>
     </div>
   </div>
+
   <div class="loader" id="loader"></div>
+
   <div id="jsonDisplay">
     <div class="employee-card">
       <div class="day-card">
-        <ul class="values-list hidden">
-          <li class="meal"></li>
-          <li class="meal"></li>
-          <li class="meal"></li>
-          <li class="meal"></li>
-          <li class="meal"></li>
-          <li class="meal"></li>
-          <li class="meal"></li>
-        </ul>
+        <div class="values-list hidden">
+          <div class="meal">
+            <input type="checkbox" id="meal1" />
+            <label for="meal1" class="meal-name"></label>
+          </div>
+          <div class="meal">
+            <input type="checkbox" id="meal2" />
+            <label for="meal2" class="meal-name"></label>
+          </div>
+          <div class="meal">
+            <input type="checkbox" id="meal3" />
+            <label for="meal3" class="meal-name"></label>
+          </div>
+          <div class="meal">
+            <input type="checkbox" id="meal4" />
+            <label for="meal4" class="meal-name"></label>
+          </div>
+          <div class="meal">
+            <input type="checkbox" id="meal5" />
+            <label for="meal5" class="meal-name"></label>
+          </div>
+          <div class="meal">
+            <input type="checkbox" id="meal6" />
+            <label for="meal6" class="meal-name"></label>
+          </div>
+          <div class="meal">
+            <input type="checkbox" id="meal7" />
+            <label for="meal7" class="meal-name"></label>
+          </div>
+        </div>
         <div id="noData" class="hidden"></div>
       </div>
     </div>
   </div>
+
   <div class="error" id="errorDisplay"></div>
 </body>
 

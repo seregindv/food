@@ -253,10 +253,11 @@ function displaySelectedData(mealOnly) {
       status.classList.toggle("hidden", hasMeal);
       if (hasMeal) {
         let i = 0;
-        for (const listItem of display.querySelectorAll(".meal")) {
+        for (const listItem of display.querySelectorAll(".meal-name")) {
           const meal = meals[i];
           listItem.innerText = meal || null;
-          listItem.classList.toggle("hidden", !meal);
+          const wrapper = listItem.closest(".meal");
+          wrapper.classList.toggle("hidden", !meal);
           ++i;
         }
       } else {
