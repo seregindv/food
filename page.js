@@ -90,6 +90,49 @@ export function setStatusVisibility(visible) {
     setHidden(getStatusElement(), !visible);
 }
 
+export function getSelectedDay() {
+    const checkedDay = document.querySelector('input[name="day"]:checked');
+    return checkedDay && checkedDay.value;
+}
+
+export function checkMeals(indexes) {
+    const indexSet = new Set(indexes);
+    document.querySelectorAll('input[name="meal"]').forEach((e, i) => e.checked = indexSet.has(i));
+}
+
+export function onUpload(action) {
+    document.getElementById("uploadBtn").addEventListener("click", () => {
+        const sheetLink = document.getElementById("sheetLinkInput").value.trim();
+        action(sheetLink);
+    });
+}
+
+export function onEmployeeChanged(action) {
+    const employeeSelect = document.getElementById("employeeSelect");
+    employeeSelect.addEventListener("change", () => action(employeeSelect.value));
+}
+
+export function onDayChanged(action) {
+    const days = document.querySelectorAll('input[name="day"]');
+    days.forEach(e => e.addEventListener("change", () => action()));
+}
+
+export function onMealCheckChanged(action) {
+    document.querySelectorAll('input[name="meal"]').forEach(e => e.addEventListener("change", e => {
+        const id = /(\d+)$/.exec(e.target.id);
+        if (!id) {
+            return;
+        }
+        const index = id[1] - 1;
+        const checked = e.target.checked;
+        action({ index, checked });
+    }));
+}
+
+export function onLoaded(action) {
+    window.addEventListener("DOMContentLoaded", () => action());
+}
+
 function setHidden(element, value) {
     element.classList.toggle("hidden", value);
 }

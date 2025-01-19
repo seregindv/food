@@ -144,6 +144,9 @@ function loadMapFromLocalStorage() {
   } else {
     page.showSelectors(false);
   }
+
+  const sheetInfo = JSON.parse(localStorage.getItem("sheetInfo"));
+  displaySheetTitle(sheetInfo);
 }
 
 function extractSheetId(url) {
@@ -174,9 +177,7 @@ function displaySelectedData(mealOnly) {
   page.setStatusVisibility(false);
   const meals = page.getMeals();
   const radios = document.querySelectorAll('input[name="day"]');
-
-  const employeeSelect = document.getElementById("employeeSelect");
-  const selectedEmployee = employeeSelect.value;
+  const selectedEmployee = page.getSelectedEmployee();
 
   if (!selectedEmployee) {
     radios.forEach(r => { r.disabled = true; r.checked = false; });
@@ -187,8 +188,7 @@ function displaySelectedData(mealOnly) {
   const sheetData = JSON.parse(
     localStorage.getItem("googleSheetDataMap") || "{}"
   );
-  const checkedDay = document.querySelector('input[name="day"]:checked');
-  let selectedDay = checkedDay && checkedDay.value;
+  let selectedDay = page.getSelectedDay();
   if (!selectedDay) {
     const defaultSelect = getDefaultSelect();
     selectedDay = defaultSelect.value;
@@ -240,40 +240,34 @@ function displaySelectedData(mealOnly) {
   }
 }
 
-document.getElementById("uploadBtn").addEventListener("click", () => {
-  const sheetLink = document.getElementById("sheetLinkInput").value.trim();
-  if (!sheetLink) {
-    page.displayError("Пожалуйста, введите ссылку");
-    return;
-  }
-  const sheetId = extractSheetId(sheetLink);
-  if (!sheetId) {
-    page.displayError("Неверная ссылка на Google Таблицу.");
-    return;
-  }
-  SHEET_ID = sheetId;
-  localStorage.setItem("originalSheetLink", sheetLink);
-  downloadAndStoreGoogleSheets(SHEET_ID, SHEETS, "B5:M50");
-});
-
 function setupEventListeners() {
-  const employeeSelect = document.getElementById("employeeSelect");
-  employeeSelect.addEventListener("change", () => {
-    const selectedEmployee = employeeSelect.value;
-    if (selectedEmployee) {
-      localStorage.setItem("selectedEmployee", selectedEmployee);
+  page.onUpload(sheetLink => {
+    if (!sheetLink) {
+      page.displayError("Пожалуйста, введите ссылку");
+      return;
+    }
+    const sheetId = extractSheetId(sheetLink);
+    if (!sheetId) {
+      page.displayError("Неверная ссылка на Google-таблицу");
+      return;
+    }
+    SHEET_ID = sheetId;
+    localStorage.setItem("originalSheetLink", sheetLink);
+    downloadAndStoreGoogleSheets(SHEET_ID, SHEETS, "B5:M50");
+  });
+
+
+  page.onEmployeeChanged(employee => {
+    if (employee) {
+      localStorage.setItem("selectedEmployee", employee);
     } else {
       localStorage.removeItem("selectedEmployee");
     }
     displaySelectedData();
   });
 
-  const days = document.querySelectorAll('input[name="day"]');
-  days.forEach(e => e.addEventListener("change", () => {
-    displaySelectedData(true);
-  }));
-
-  document.querySelectorAll('input[name="meal"]').forEach(e => e.addEventListener("change", e => updateMealState(e)));
+  page.onDayChanged(() => displaySelectedData(true));
+  page.onMealCheckChanged(({ index, checked }) => updateMealState(index, checked));
 }
 
 function createSheetInfo(sheetDate) {
@@ -285,46 +279,35 @@ function getDateString(date) {
 }
 
 function applyMealState() {
-  const employeeSelect = document.getElementById('employeeSelect')
-  const employee = employeeSelect && employeeSelect.value;
+  const employee = page.getSelectedEmployee();
   if (!employee) {
     return;
   }
 
-  const checkedDay = document.querySelector('input[name="day"]:checked');
-  const day = checkedDay && checkedDay.value;
+  const day = page.getSelectedDay();
   if (!day) {
     return;
   }
 
   const eaten = JSON.parse(localStorage.getItem('eaten'));
-  let days;
+  let meals;
   if (eaten) {
     const employeeData = eaten[employee];
     if (employeeData) {
-      days = employeeData[day];
+      meals = employeeData[day];
     }
   }
 
-  days = new Set(days);
-  document.querySelectorAll('input[name="meal"]').forEach((e, i) => e.checked = days.has(i));
+  page.checkMeals(meals);
 }
 
-function updateMealState(e) {
-  let id = /(\d+)$/.exec(e.target.id);
-  if (!id) {
-    return;
-  }
-  id = id[1] - 1;
-
-  const employeeSelect = document.getElementById('employeeSelect')
-  const employee = employeeSelect && employeeSelect.value;
+function updateMealState(id, checked) {
+  const employee = page.getSelectedEmployee();
   if (!employee) {
     return;
   }
 
-  const checkedDay = document.querySelector('input[name="day"]:checked');
-  const day = checkedDay && checkedDay.value;
+  const day = page.getSelectedDay();
   if (!day) {
     return;
   }
@@ -347,7 +330,7 @@ function updateMealState(e) {
   }
 
   const mealIndex = dayData.indexOf(id);
-  if (e.target.checked) {
+  if (checked) {
     if (mealIndex === -1) {
       dayData.push(id)
     }
@@ -359,22 +342,7 @@ function updateMealState(e) {
   localStorage.setItem("eaten", JSON.stringify(eaten));
 }
 
-window.addEventListener("DOMContentLoaded", () => {
+page.onLoaded(() => {
   loadMapFromLocalStorage();
   setupEventListeners();
-
-  let sheetInfo = JSON.parse(localStorage.getItem("sheetInfo"));
-  let sheetTitle;
-  if (!sheetInfo) {
-    sheetTitle = localStorage.getItem("sheetTitle")
-    if (sheetTitle) {
-      const dateCompoments = /(\d+)\.(\d+)\.(\d+)$/.exec(sheetTitle);
-      if (dateCompoments) {
-        sheetInfo = createSheetInfo(new Date(dateCompoments[3], dateCompoments[2] - 1, dateCompoments[1]));
-        localStorage.setItem("sheetInfo", JSON.stringify(sheetInfo));
-        localStorage.removeItem("sheetTitle")
-      }
-    }
-  }
-  displaySheetTitle(sheetInfo);
 });
