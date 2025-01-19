@@ -1,8 +1,5 @@
 import * as page from './page.js';
 
-let SHEET_ID = null;
-const SHEETS = ["Пн", "Вт", "Ср", "Чт", "Пт"];
-
 function displaySheetTitle(sheetInfo) {
   page.showTitle(sheetInfo);
   if (!sheetInfo) {
@@ -36,11 +33,18 @@ function getMonday(date) {
   return new Date(date.setDate(diff));
 }
 
-async function downloadAndStoreGoogleSheets(
-  sheetId,
-  sheetNames,
-  range = "B4:M100"
-) {
+async function downloadSheet(sheetLink) {
+  if (!sheetLink) {
+    page.displayError("Пожалуйста, введите ссылку");
+    return;
+  }
+  const sheetId = extractSheetId(sheetLink);
+  if (!sheetId) {
+    page.displayError("Неверная ссылка на Google-таблицу");
+    return;
+  }
+  localStorage.setItem("sheetLink", sheetLink);
+
   const exportUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=xlsx`;
   try {
     page.showLoading(true);
@@ -58,14 +62,14 @@ async function downloadAndStoreGoogleSheets(
     const arrayBuffer = await response.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer, { type: "array" });
     const masterData = {};
-    for (const sheetName of sheetNames) {
+    for (const sheetName of ["Пн", "Вт", "Ср", "Чт", "Пт"]) {
       if (!workbook.SheetNames.includes(sheetName)) {
         continue;
       }
       const worksheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json(worksheet, {
         defval: null,
-        range: range,
+        range: "B4:M100",
         header: 1,
         blankrows: false,
       });
@@ -75,11 +79,7 @@ async function downloadAndStoreGoogleSheets(
       for (let i = 0; i < jsonData.length; i++) {
         const row = jsonData[i];
         const employeeName = row[0];
-        if (
-          employeeName === undefined ||
-          employeeName === null ||
-          employeeName.toString().trim() === ""
-        ) {
+        if (employeeName == null || employeeName.toString().trim() === "") {
           continue;
         }
         if (!masterData.hasOwnProperty(employeeName)) {
@@ -87,19 +87,14 @@ async function downloadAndStoreGoogleSheets(
         }
         const valuesArray = row
           .slice(1)
-          .filter(
-            (value) =>
-              value !== null &&
-              value !== undefined &&
-              value.toString().trim() !== ""
-          );
+          .filter(value => value != null && value.toString().trim() !== "");
         masterData[employeeName][sheetName] = valuesArray;
       }
     }
     if (Object.keys(masterData).length === 0) {
       throw new Error("Не удалось создать объект из данных");
     }
-    localStorage.setItem("googleSheetDataMap", JSON.stringify(masterData));
+    localStorage.setItem("sheetData", JSON.stringify(masterData));
     console.log(workbook);
     let sheetDate;
     if (workbook.SheetNames.includes("Пн")) {
@@ -112,7 +107,7 @@ async function downloadAndStoreGoogleSheets(
       }
     }
 
-    const sheetInfo = createSheetInfo(sheetDate);
+    const sheetInfo = { date: getDateString(sheetDate) };;
     localStorage.setItem("sheetInfo", JSON.stringify(sheetInfo));
     localStorage.removeItem("eaten");
     displaySheetTitle(sheetInfo);
@@ -129,7 +124,7 @@ async function downloadAndStoreGoogleSheets(
 }
 
 function loadMapFromLocalStorage() {
-  const mapData = localStorage.getItem("googleSheetDataMap");
+  const mapData = localStorage.getItem("sheetData");
   if (mapData) {
     try {
       const dataObject = JSON.parse(mapData);
@@ -185,9 +180,7 @@ function displaySelectedData(mealOnly) {
     return;
   }
 
-  const sheetData = JSON.parse(
-    localStorage.getItem("googleSheetDataMap") || "{}"
-  );
+  const sheetData = JSON.parse(localStorage.getItem("sheetData")) || {};
   let selectedDay = page.getSelectedDay();
   if (!selectedDay) {
     const defaultSelect = getDefaultSelect();
@@ -241,21 +234,7 @@ function displaySelectedData(mealOnly) {
 }
 
 function setupEventListeners() {
-  page.onUpload(sheetLink => {
-    if (!sheetLink) {
-      page.displayError("Пожалуйста, введите ссылку");
-      return;
-    }
-    const sheetId = extractSheetId(sheetLink);
-    if (!sheetId) {
-      page.displayError("Неверная ссылка на Google-таблицу");
-      return;
-    }
-    SHEET_ID = sheetId;
-    localStorage.setItem("originalSheetLink", sheetLink);
-    downloadAndStoreGoogleSheets(SHEET_ID, SHEETS, "B5:M50");
-  });
-
+  page.onUpload(sheetLink => downloadSheet(sheetLink));
 
   page.onEmployeeChanged(employee => {
     if (employee) {
@@ -268,10 +247,6 @@ function setupEventListeners() {
 
   page.onDayChanged(() => displaySelectedData(true));
   page.onMealCheckChanged(({ index, checked }) => updateMealState(index, checked));
-}
-
-function createSheetInfo(sheetDate) {
-  return { date: getDateString(sheetDate) };
 }
 
 function getDateString(date) {
@@ -301,7 +276,7 @@ function applyMealState() {
   page.checkMeals(meals);
 }
 
-function updateMealState(id, checked) {
+function updateMealState(index, checked) {
   const employee = page.getSelectedEmployee();
   if (!employee) {
     return;
@@ -329,10 +304,10 @@ function updateMealState(id, checked) {
     employeeData[day] = dayData = [];
   }
 
-  const mealIndex = dayData.indexOf(id);
+  const mealIndex = dayData.indexOf(index);
   if (checked) {
     if (mealIndex === -1) {
-      dayData.push(id)
+      dayData.push(index)
     }
   } else {
     if (mealIndex !== -1) {
