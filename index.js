@@ -97,7 +97,7 @@ async function downloadAndStoreGoogleSheets(
       }
     }
     if (Object.keys(masterData).length === 0) {
-      throw new Error("Не удалось создать объект из данных.");
+      throw new Error("Не удалось создать объект из данных");
     }
     localStorage.setItem("googleSheetDataMap", JSON.stringify(masterData));
     console.log(workbook);
@@ -171,11 +171,20 @@ function getDefaultSelect() {
 }
 
 function displaySelectedData(mealOnly) {
+  page.setStatusVisibility(false);
+  const meals = page.getMeals();
+  const radios = document.querySelectorAll('input[name="day"]');
+
   const employeeSelect = document.getElementById("employeeSelect");
   const selectedEmployee = employeeSelect.value;
 
-  const status = document.getElementById("noData");
-  const dataMap = JSON.parse(
+  if (!selectedEmployee) {
+    radios.forEach(r => { r.disabled = true; r.checked = false; });
+    meals.show(false);
+    return;
+  }
+
+  const sheetData = JSON.parse(
     localStorage.getItem("googleSheetDataMap") || "{}"
   );
   const checkedDay = document.querySelector('input[name="day"]:checked');
@@ -186,63 +195,48 @@ function displaySelectedData(mealOnly) {
     defaultSelect.checked = true;
   }
 
-  if (selectedEmployee) {
-    const employeeData = dataMap[selectedEmployee];
-    if (!mealOnly) {
-      const radios = document.querySelectorAll('input[name="day"]');
-      let uncheckedIndex;
-      let i = 0;
-      for (const radio of radios) {
-        const radioData = employeeData && employeeData[radio.value];
-        const disabled = !radioData || !radioData[0];
-        radio.disabled = disabled
-        if (uncheckedIndex !== undefined && !disabled) {
-          uncheckedIndex = undefined;
+  const employeeData = sheetData[selectedEmployee];
+  if (!mealOnly) {
+    let uncheckedIndex;
+    let i = 0;
+    for (const radio of radios) {
+      const radioData = employeeData && employeeData[radio.value];
+      const disabled = !radioData || !radioData[0];
+      radio.disabled = disabled
+      if (uncheckedIndex !== undefined && !disabled) {
+        uncheckedIndex = undefined;
+        radio.checked = true;
+        selectedDay = radio.value;
+      }
+      if (disabled && radio.checked) {
+        radio.checked = false;
+        selectedDay = undefined;
+        uncheckedIndex = i;
+      }
+      ++i;
+    }
+    if (uncheckedIndex !== undefined) {
+      for (let i = uncheckedIndex; i >= 0; i--) {
+        const radio = radios[i];
+        if (!radio.disabled) {
           radio.checked = true;
           selectedDay = radio.value;
-        }
-        if (disabled && radio.checked) {
-          radio.checked = false;
-          selectedDay = undefined;
-          uncheckedIndex = i;
-        }
-        ++i;
-      }
-      if (uncheckedIndex !== undefined) {
-        for (let i = uncheckedIndex; i >= 0; i--) {
-          const radio = radios[i];
-          if (!radio.disabled) {
-            radio.checked = true;
-            selectedDay = radio.value;
-            break;
-          }
+          break;
         }
       }
     }
-    if (employeeData && employeeData[selectedDay]) {
-      const meals = employeeData[selectedDay];
-      const hasMeal = !!meals[0];
-      const display = document.getElementById("jsonDisplay");
-      display.querySelector(".values-list").classList.toggle("hidden", !hasMeal);
-      status.classList.toggle("hidden", hasMeal);
-      if (hasMeal) {
-        let i = 0;
-        for (const listItem of display.querySelectorAll(".meal-name")) {
-          const meal = meals[i];
-          listItem.innerText = meal || null;
-          const wrapper = listItem.closest(".meal");
-          wrapper.classList.toggle("hidden", !meal);
-          ++i;
-        }
-        applyMealState();
-      } else {
-        status.innerText = "Нет данных";
-      }
-    } else {
-      status.innerHTML = "Нет данных для выбранных опций";
+  }
+  if (employeeData) {
+    const employeeMeals = employeeData[selectedDay];
+    const hasMeal = employeeMeals && employeeMeals[0];
+    meals.show(hasMeal);
+    if (hasMeal) {
+      meals.setNames(i => employeeMeals[i]);
+      applyMealState();
     }
   } else {
-    status.innerHTML = "Пожалуйста, выберите сотрудника и день недели";
+    meals.show(false);
+    page.setStatus("Нет еды для сотрудника");
   }
 }
 

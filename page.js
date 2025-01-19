@@ -15,8 +15,8 @@ export function displayError(message) {
 }
 
 export function clearDisplays() {
-    document.querySelector(".values-list").classList.toggle("hidden", true);
-    document.getElementById("noData").classList.toggle("hidden", true);
+    setHidden(document.querySelector(".values-list"), true);
+    setHidden(document.getElementById("noData"), true);
     document.getElementById("errorDisplay").textContent = "";
 }
 
@@ -32,7 +32,7 @@ export function setToday(isToday) {
 }
 
 export function showTitle(show) {
-    document.querySelector(".sheet-title").classList.toggle("hidden", !show);
+    setHidden(document.querySelector(".sheet-title"), !show);
 }
 
 export function setTitle(title) {
@@ -60,6 +60,42 @@ export function populateEmployees(employees, selectedEmployee) {
 export function getSelectedEmployee() {
     const employeeSelect = getEmployeeSelect();
     return employeeSelect && employeeSelect.value;
+}
+
+export function getMeals() {
+    const display = document.getElementById("jsonDisplay");
+    return {
+        show: function (show) {
+            setHidden(display.querySelector(".values-list"), !show);
+        },
+        setNames: function (getName) {
+            let i = 0;
+            for (const listItem of display.querySelectorAll(".meal-name")) {
+                const meal = getName(i);
+                listItem.innerText = meal || null;
+                setHidden(listItem.closest(".meal"), !meal);
+                ++i;
+            }
+        }
+    }
+}
+
+export function setStatus(message) {
+    const element = getStatusElement();
+    setHidden(element, !message);
+    element.innerText = message || null;
+}
+
+export function setStatusVisibility(visible) {
+    setHidden(getStatusElement(), !visible);
+}
+
+function setHidden(element, value) {
+    element.classList.toggle("hidden", value);
+}
+
+function getStatusElement() {
+    return document.getElementById("noData");
 }
 
 function getEmployeeSelect() {
