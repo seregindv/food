@@ -63,6 +63,7 @@
 .meal {
   display: flex;
   align-items: flex-start;
+  font-size: 18px;
 }
 
 .meal>input {
@@ -84,14 +85,14 @@
   margin: 0;
   width: 22px;
   height: 20px;
-  transform: translateY(-0.35em) translateY(10px);
+  transform: translateY(-0.075em) translateY(10px);
 }
 
 .meal input[type="checkbox"]::before {
   position: absolute;
   top: 0;
   content: attr(icon);
-  font-size: 20px;
+  font-size: 18px;
 }
 
 input[type="checkbox"]:checked {
