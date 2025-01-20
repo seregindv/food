@@ -76,19 +76,24 @@ async function downloadSheet(sheetLink) {
       if (jsonData.length === 0) {
         continue;
       }
-      for (let i = 0; i < jsonData.length; i++) {
+      const mealIndexes = jsonData[0].reduce((res, curr, i) => { if (curr) res.push(i); return res; }, []);
+      for (let i = 1; i < jsonData.length; i++) {
         const row = jsonData[i];
-        const employeeName = row[0];
-        if (employeeName == null || employeeName.toString().trim() === "") {
+        let employeeName = row[0];
+        if (employeeName == null || !(employeeName = employeeName.toString().trim()) || !employeeName.includes(" ")) {
           continue;
         }
-        if (!masterData.hasOwnProperty(employeeName)) {
-          masterData[employeeName] = {};
+        let mealsByDay = masterData[employeeName];
+        if (!mealsByDay) {
+          masterData[employeeName] = mealsByDay = {};
         }
-        const valuesArray = row
-          .slice(1)
-          .filter(value => value != null && value.toString().trim() !== "");
-        masterData[employeeName][sheetName] = valuesArray;
+        const meals = new Array(7).fill(null);
+        mealIndexes.forEach((index, i) => meals[i] = row[index]);
+        let j = meals.length - 1;
+        for (; j >= 0 && !meals[j]; j--);
+        if (j > 0) {
+          mealsByDay[sheetName] = meals.slice(0, j + 1);
+        }
       }
     }
     if (Object.keys(masterData).length === 0) {
@@ -194,7 +199,7 @@ function displaySelectedData(mealOnly) {
     let i = 0;
     for (const radio of radios) {
       const radioData = employeeData && employeeData[radio.value];
-      const disabled = !radioData || !radioData[0];
+      const disabled = !radioData || radioData.length === 0;
       radio.disabled = disabled
       if (uncheckedIndex !== undefined && !disabled) {
         uncheckedIndex = undefined;
@@ -221,7 +226,7 @@ function displaySelectedData(mealOnly) {
   }
   if (employeeData) {
     const employeeMeals = employeeData[selectedDay];
-    const hasMeal = employeeMeals && employeeMeals[0];
+    const hasMeal = employeeMeals && employeeMeals.length > 0;
     meals.show(hasMeal);
     if (hasMeal) {
       meals.setNames(i => employeeMeals[i]);

@@ -71,26 +71,31 @@
   padding-top: 10px;
 }
 
-.meal>label{
+.meal>label {
   flex: 1 1 auto;
   cursor: pointer;
   padding: 10px 0 10px 10px;
 }
 
 .meal input[type="checkbox"] {
+  position: relative;
   appearance: none;
   background-color: rgba(0, 0, 0, 0);
   margin: 0;
-  width: 20px;
+  width: 22px;
   height: 20px;
-  background-image: url('./decoration.svg');
-  background-size: 20px 20px;
-  background-repeat: no-repeat;
-  transform: translateY(-0.075em) translateY(10px);
+  transform: translateY(-0.35em) translateY(10px);
+}
+
+.meal input[type="checkbox"]::before {
+  position: absolute;
+  top: 0;
+  content: attr(icon);
+  font-size: 20px;
 }
 
 input[type="checkbox"]:checked {
-  opacity: .65;
+  opacity: .5;
 }
 
 .meal input[type="checkbox"]:checked+label {
