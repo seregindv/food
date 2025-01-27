@@ -1,8 +1,4 @@
-export const sheetStatus = {
-    late: 'late',
-    normal: 'normal',
-    early: 'early'
-};
+import * as dates from './dates.js';
 
 export function showLoading(show) {
     const loader = document.getElementById("loader");
@@ -18,12 +14,6 @@ export function clearDisplays() {
     setHidden(document.querySelector(".values-list"), true);
     setHidden(document.getElementById("noData"), true);
     document.getElementById("errorDisplay").textContent = "";
-}
-
-export function setSheetStatus(status) {
-    const sheetStatusElement = document.getElementById("sheetStatus")
-    sheetStatusElement.classList.remove(sheetStatus.late, sheetStatus.early, sheetStatus.normal)
-    sheetStatusElement.classList.add(status);
 }
 
 export function setToday(isToday) {
@@ -131,6 +121,19 @@ export function onMealCheckChanged(action) {
 
 export function onLoaded(action) {
     window.addEventListener("DOMContentLoaded", () => action());
+}
+
+export function initDates(sheetDates, onChange) {
+    dates.render({
+        element: document.getElementById('sheetTitle'),
+        template: document.getElementById('sheetDate'),
+        sheetDates,
+        onChange
+    });
+}
+
+export function selectDefaultDate() {
+    dates.selectDefault();
 }
 
 function setHidden(element, value) {

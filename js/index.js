@@ -1,4 +1,6 @@
 import * as page from './page.js';
+import * as storage from './storage.js';
+import { getDateString } from './common.js';
 
 function displaySheetTitle(sheetInfo) {
   page.showTitle(sheetInfo);
@@ -7,30 +9,11 @@ function displaySheetTitle(sheetInfo) {
     return;
   }
 
-  const sheetDate = sheetInfo.date;
-  const formattedDate = new Intl.DateTimeFormat('ru-RU', { dateStyle: 'short' }).format(new Date(sheetDate));
-  page.setTitle(`Таблица от ${formattedDate}`);
-
   const today = new Date();
-  let monday = getMonday(today);
-  let nextMonday = new Date(monday);
-  nextMonday = new Date(nextMonday.setDate(nextMonday.getDate() + 7));
-  monday = getDateString(monday);
-  nextMonday = getDateString(nextMonday);
-
-  const status = sheetDate < monday ? page.sheetStatus.late
-    : sheetDate >= nextMonday ? page.sheetStatus.early : page.sheetStatus.normal;
-  page.setSheetStatus(status);
-
   const day = today.getDay() - 1;
-  page.setToday(i => status === page.sheetStatus.normal && i == day);
-}
 
-function getMonday(date) {
-  date = new Date(date);
-  const day = date.getDay(),
-    diff = date.getDate() - day + (day == 0 ? -6 : 1);
-  return new Date(date.setDate(diff));
+  // TODO status
+  page.setToday(i => status === page.sheetStatus.normal && i == day);
 }
 
 async function downloadSheet(sheetLink) {
@@ -43,7 +26,6 @@ async function downloadSheet(sheetLink) {
     page.displayError("Неверная ссылка на Google-таблицу");
     return;
   }
-  localStorage.setItem("sheetLink", sheetLink);
 
   const exportUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=xlsx`;
   try {
@@ -112,7 +94,8 @@ async function downloadSheet(sheetLink) {
       }
     }
 
-    const sheetInfo = { date: getDateString(sheetDate) };;
+    const sheetDateString = getDateString(sheetDate);
+    const sheetInfo = { dates: sheetDateString };
     localStorage.setItem("sheetInfo", JSON.stringify(sheetInfo));
     localStorage.removeItem("eaten");
     displaySheetTitle(sheetInfo);
@@ -129,10 +112,11 @@ async function downloadSheet(sheetLink) {
 }
 
 function loadMapFromLocalStorage() {
-  const mapData = localStorage.getItem("sheetData");
-  if (mapData) {
+  const sheetInfo = storage.getInfo();
+  page.initDates(sheetInfo.dates, sheet => onSheetChanged(sheet));
+  page.selectDefaultDate();
+  if (sheetInfo) {
     try {
-      const dataObject = JSON.parse(mapData);
       populateEmployeeSelect(dataObject);
       setDefaultDaySelect();
       displaySelectedData();
@@ -145,7 +129,6 @@ function loadMapFromLocalStorage() {
     page.showSelectors(false);
   }
 
-  const sheetInfo = JSON.parse(localStorage.getItem("sheetInfo"));
   displaySheetTitle(sheetInfo);
 }
 
@@ -252,10 +235,6 @@ function setupEventListeners() {
 
   page.onDayChanged(() => displaySelectedData(true));
   page.onMealCheckChanged(({ index, checked }) => updateMealState(index, checked));
-}
-
-function getDateString(date) {
-  return date.toLocaleDateString('en-CA');
 }
 
 function applyMealState() {
