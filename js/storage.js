@@ -12,7 +12,7 @@ export function dropOldSheets(mondayString) {
             i++;
             continue;
         }
-        dates = dates.splice(i, 1);
+        dates.splice(i, 1);
         localStorage.removeItem(eatenKey(date));
         localStorage.removeItem(dataKey(date));
         changed = true;
