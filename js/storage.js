@@ -3,12 +3,13 @@ export function dropOldSheets(mondayString) {
     if (!sheetInfo || !sheetInfo.dates || !sheetInfo.dates[0]) {
         return;
     }
-    const dates = sheetInfo.dates;
+    let dates = sheetInfo.dates;
     let i = 0;
     let changed;
     while (i < dates.length) {
         const date = dates[i];
         if (date >= mondayString) {
+            i++;
             continue;
         }
         dates = dates.splice(i, 1);
@@ -35,8 +36,16 @@ export function setSheetData(dateString, data) {
     setInfo(sheetInfo);
 }
 
+export function getEatean(dateString) {
+    return getItem(eatenKey(dateString));
+}
+
+export function setEaten(dateString, data) {
+    return setItem(eatenKey(dateString), data);
+}
+
 export function getSheetData(dateString) {
-    return getItem(`sheetData${dateString}`);
+    return getItem(dataKey(dateString));
 }
 
 export function getInfo() {
@@ -48,11 +57,11 @@ function setInfo(data) {
 }
 
 function dataKey(dateString) {
-    return `sheetData${dateString}`;
+    return `sheetData_${dateString}`;
 }
 
 function eatenKey(dateString) {
-    return `eaten${dateString}`;
+    return `eaten_${dateString}`;
 }
 
 function setItem(key, data) {

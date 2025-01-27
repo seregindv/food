@@ -13,6 +13,10 @@
   box-sizing: border-box;
 }
 
+.rect-radios input:not(:disabled)+label {
+  cursor: pointer;
+}
+
 .days>div {
   width: 60px;
   height: 50px;
@@ -31,10 +35,6 @@
   .days input[type="radio"]:checked+label:active {
     background: #0C3B6A;
   }
-}
-
-.days input[type="radio"]:not(:disabled)+label {
-  cursor: pointer;
 }
 
 .days input[type="radio"]:disabled+label {
@@ -97,4 +97,39 @@ input[type="checkbox"]:checked {
 .meal input[type="checkbox"]:checked+label {
   text-decoration: line-through;
   color: #A2A6A9;
+}
+
+.sheet-date label {
+  padding: 8px 16px;
+  border-radius: 5px;
+}
+
+.sheet-date.normal input[type="radio"]:not(:checked)+label {
+  color: #24663b;
+  background-color: #d2f9dd;
+}
+
+.sheet-date.late input[type="radio"]:not(:checked)+label {
+  color: #ae1800;
+  background-color: #ffe7e2;
+}
+
+.sheet-date.early input[type="radio"]:not(:checked)+label {
+  color: #867600;
+  background-color: #ffffe3;
+}
+
+.sheet-date.normal input[type="radio"]:checked+label {
+  color: white;
+  background-color: #008736;
+}
+
+.sheet-date.late input[type="radio"]:checked+label {
+  color: white;
+  background-color: #ad1700;
+}
+
+.sheet-date.early input[type="radio"]:checked+label {
+  color: white;
+  background-color: #c2ab00;
 }

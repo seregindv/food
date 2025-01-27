@@ -16,17 +16,13 @@ export function clearDisplays() {
     document.getElementById("errorDisplay").textContent = "";
 }
 
-export function setToday(isToday) {
+export function setToday(day) {
     document.querySelectorAll('input[name="day"]').forEach(
-        (e, i) => e.classList.toggle('today', isToday(i)));
+        (e, i) => e.classList.toggle('today', i == day));
 }
 
 export function showTitle(show) {
-    setHidden(document.querySelector(".sheet-title"), !show);
-}
-
-export function setTitle(title) {
-    document.getElementById("sheetTitle").textContent = title;
+    setHidden(document.getElementById("sheetDates"), !show);
 }
 
 export function showSelectors(show) {
@@ -125,15 +121,31 @@ export function onLoaded(action) {
 
 export function initDates(sheetDates, onChange) {
     dates.render({
-        element: document.getElementById('sheetTitle'),
+        element: document.getElementById('sheetDates'),
         template: document.getElementById('sheetDate'),
-        sheetDates,
         onChange
     });
+    dates.setDates(sheetDates);
 }
 
 export function selectDefaultDate() {
     dates.selectDefault();
+}
+
+export function setDates(sheetDates) {
+    dates.setDates(sheetDates);
+}
+
+export function selectDate(dateString) {
+    dates.select(dateString);
+}
+
+export function getSelectedDate() {
+    return dates.getSelectedDate();
+}
+
+export function getSelectedDateStatus() {
+    return dates.getSelectedDateStatus();
 }
 
 function setHidden(element, value) {

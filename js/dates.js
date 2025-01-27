@@ -1,9 +1,10 @@
-import { getDateString } from './common.js';
+import { getDateString, getMonday } from './common.js';
 
 let _element;
 let _dates;
 let _template;
 let _onChange;
+let _selectedDate;
 const _formatter = new Intl.DateTimeFormat('ru-RU', { dateStyle: 'short' });
 
 export const sheetPriority = {
@@ -12,46 +13,16 @@ export const sheetPriority = {
     late: 3
 };
 
-export function render({ element, template, dates, onChange }) {
+export function render({ element, template, onChange }) {
     _element = element;
     _template = template;
     _onChange = onChange;
-    element.innerHTML = "";
-    let i = 1;
-    for (var date of dates.sort()) {
-        const templateClone = template.clone();
-        const input = templateClone.querySelector("input");
-        const label = templateClone.querySelector("label");
-        const id = `date${i}`;
-        label.for = id;
-        input.id = id;
-        input.name = "date";
-        input.value = date;
-        label.innerHTML = _formatter.format(new Date(date));
-
-        const today = new Date();
-        let monday = getMonday(today);
-        let nextMonday = new Date(monday);
-        nextMonday = new Date(nextMonday.setDate(nextMonday.getDate() + 7));
-        monday = getDateString(monday);
-        nextMonday = getDateString(nextMonday);
-
-        const priority = date < monday ? sheetPriority.late
-            : date >= nextMonday ? sheetPriority.early : sheetPriority.normal;
-        templateClone.classList.add(priorityToClass(priority));
-
-        _dates.push({ date, priority });
-        element.appendChild(templateClone);
-        ++i;
-    }
-    const elements = element.querySelectorAll('input');
-    elements.forEach(e => e.addEventListener("change", e => onChange(e.target.value)));
 }
 
 export function selectDefault() {
     let selectedData;
     for (const data of _dates) {
-        if (data.status === sheetPriority.normal) {
+        if (data.priority === sheetPriority.normal) {
             selectedData = data;
             break;
         }
@@ -63,30 +34,86 @@ export function selectDefault() {
             selectedData = data;
         }
     }
-    if (!selectedData) {
-        return;
-    }
-    select(selectedData.date);
+    select(selectedData?.date);
 }
 
 export function setDates(dates) {
-    // TODO
+    let i = 0;
+    const elements = _element.querySelectorAll('.sheet-date');
+    _dates = [];
+    if (dates) {
+        for (var date of dates.sort()) {
+            let element = elements[i];
+            const append = !element;
+            if (append) {
+                const template = _template.content.cloneNode(true);
+                element = template.querySelector(".sheet-date");
+                element.addEventListener("change", e => onChange(e));
+            }
+
+            const input = element.querySelector("input");
+            const label = element.querySelector("label");
+            const id = `date${i + 1}`;
+            label.htmlFor = id;
+            input.id = id;
+            input.name = "date";
+            input.value = date;
+            label.innerHTML = _formatter.format(new Date(date));
+
+            let monday = getMonday();
+            let nextMonday = new Date(monday);
+            nextMonday = new Date(nextMonday.setDate(nextMonday.getDate() + 7));
+            monday = getDateString(monday);
+            nextMonday = getDateString(nextMonday);
+
+            const priority = date < monday ? sheetPriority.late
+                : date >= nextMonday ? sheetPriority.early : sheetPriority.normal;
+            if (!append) {
+                element.classList.remove(priorityToClass(1));
+                element.classList.remove(priorityToClass(2));
+                element.classList.remove(priorityToClass(3));
+            }
+            element.classList.add(priorityToClass(priority));
+
+            _dates.push({ date, priority });
+            if (append) {
+                _element.appendChild(element);
+            } else {
+                element.classList.remove('hidden');
+            }
+            ++i;
+        }
+    }
+
+    for (; i < elements.length; i++) {
+        elements[i].classList.add('hidden');
+    }
 }
 
 export function select(dateString) {
-    const input = _element.querySelector(`input[value${dateString}]`);
-    if (!input) {
-        return;
+    const input = _element.querySelector(`input[value="${dateString}"]`);
+    if (input) {
+        input.checked = true;
+        _selectedDate = dateString;
+    } else {
+        _selectedDate = null;
     }
-    input.checked = true;
-    _onChange(input.value);
+    _onChange(input?.value);
 }
 
-function getMonday(date) {
-    date = new Date(date);
-    const day = date.getDay(),
-        diff = date.getDate() - day + (day == 0 ? -6 : 1);
-    return new Date(date.setDate(diff));
+export function getSelectedDate() {
+    return _selectedDate;
+}
+
+export function getSelectedDateStatus() {
+    if (!_dates || !_selectedDate) {
+        return null;
+    }
+    const priority = _dates.find(d => d.date === _selectedDate)?.priority;
+    if (!priority) {
+        return null;
+    }
+    return priorityToClass(priority);
 }
 
 function priorityToClass(priority) {
@@ -95,4 +122,9 @@ function priorityToClass(priority) {
         case sheetPriority.early: return 'early';
         case sheetPriority.late: return 'late';
     }
+}
+
+function onChange(e) {
+    _selectedDate = e.target.value;
+    _onChange(_selectedDate);
 }
