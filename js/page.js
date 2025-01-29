@@ -1,8 +1,8 @@
 import * as dates from './dates.js';
 
 export function showLoading(show) {
-    const loader = document.getElementById("loader");
-    loader.style.display = show ? "block" : "none";
+    const loader = document.getElementById('loader');
+    loader.classList.toggle('invisible', !show);
 }
 
 export function displayError(message) {
