@@ -1,11 +1,10 @@
-import { getDateString, getMonday } from './common.js';
+import { getDateString, getMonday, getMonthName } from './common.js';
 
 let _element;
 let _dates;
 let _template;
 let _onChange;
 let _selectedDate;
-const _formatter = new Intl.DateTimeFormat('ru-RU', { dateStyle: 'short' });
 
 export const sheetPriority = {
     normal: 1,
@@ -53,12 +52,15 @@ export function setDates(dates) {
 
             const input = element.querySelector("input");
             const label = element.querySelector("label");
+            const header = element.querySelector(".header");
+            const content = element.querySelector(".content");
             const id = `date${i + 1}`;
             label.htmlFor = id;
             input.id = id;
             input.name = "date";
             input.value = date;
-            label.innerHTML = _formatter.format(new Date(date));
+            header.innerHTML = getMonthName(date);
+            content.innerHTML  = new Date(date).getDate();
 
             let monday = getMonday();
             let nextMonday = new Date(monday);

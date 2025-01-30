@@ -59,8 +59,7 @@ h1 {
 
 .sheet-dates {
     display: flex;
-    align-items: center;
-    gap: 4px;
+    gap: 6px;
 }
 
 #selectContainer {
@@ -81,6 +80,7 @@ select {
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: medium;
+    background: white;
 }
 
 .loader {
@@ -154,7 +154,6 @@ select {
     transform: translateX(90px);
 }
 
-
 .error {
     color: red;
     margin-top: 20px;
@@ -178,25 +177,6 @@ select {
 
 .days input.today:not(:checked)+label {
     box-shadow: 0 0 0 1px #1B75D0;
-}
-
-.date-icon {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background-color: gainsboro;
-}
-
-.date-icon.early {
-    background-color: #FFC000;
-}
-
-.date-icon.late {
-    background-color: #E80000;
-}
-
-.date-icon.normal {
-    background-color: #00A000;
 }
 
 .hidden {
