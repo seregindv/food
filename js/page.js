@@ -1,12 +1,8 @@
-export const sheetStatus = {
-    late: 'late',
-    normal: 'normal',
-    early: 'early'
-};
+import * as dates from './dates.js';
 
 export function showLoading(show) {
-    const loader = document.getElementById("loader");
-    loader.style.display = show ? "block" : "none";
+    const loader = document.getElementById('loader');
+    loader.classList.toggle('invisible', !show);
 }
 
 export function displayError(message) {
@@ -20,23 +16,13 @@ export function clearDisplays() {
     document.getElementById("errorDisplay").textContent = "";
 }
 
-export function setSheetStatus(status) {
-    const sheetStatusElement = document.getElementById("sheetStatus")
-    sheetStatusElement.classList.remove(sheetStatus.late, sheetStatus.early, sheetStatus.normal)
-    sheetStatusElement.classList.add(status);
-}
-
-export function setToday(isToday) {
+export function setToday(day) {
     document.querySelectorAll('input[name="day"]').forEach(
-        (e, i) => e.classList.toggle('today', isToday(i)));
+        (e, i) => e.classList.toggle('today', i == day));
 }
 
 export function showTitle(show) {
-    setHidden(document.querySelector(".sheet-title"), !show);
-}
-
-export function setTitle(title) {
-    document.getElementById("sheetTitle").textContent = title;
+    setHidden(document.getElementById("sheetDates"), !show);
 }
 
 export function showSelectors(show) {
@@ -131,6 +117,35 @@ export function onMealCheckChanged(action) {
 
 export function onLoaded(action) {
     window.addEventListener("DOMContentLoaded", () => action());
+}
+
+export function initDates(sheetDates, onChange) {
+    dates.render({
+        element: document.getElementById('sheetDates'),
+        template: document.getElementById('sheetDate'),
+        onChange
+    });
+    dates.setDates(sheetDates);
+}
+
+export function selectDefaultDate() {
+    dates.selectDefault();
+}
+
+export function setDates(sheetDates) {
+    dates.setDates(sheetDates);
+}
+
+export function selectDate(dateString) {
+    dates.select(dateString);
+}
+
+export function getSelectedDate() {
+    return dates.getSelectedDate();
+}
+
+export function getSelectedDateStatus() {
+    return dates.getSelectedDateStatus();
 }
 
 function setHidden(element, value) {

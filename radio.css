@@ -13,6 +13,10 @@
   box-sizing: border-box;
 }
 
+.rect-radios input:not(:disabled)+label {
+  cursor: pointer;
+}
+
 .days>div {
   width: 60px;
   height: 50px;
@@ -31,10 +35,6 @@
   .days input[type="radio"]:checked+label:active {
     background: #0C3B6A;
   }
-}
-
-.days input[type="radio"]:not(:disabled)+label {
-  cursor: pointer;
 }
 
 .days input[type="radio"]:disabled+label {
@@ -97,4 +97,74 @@ input[type="checkbox"]:checked {
 .meal input[type="checkbox"]:checked+label {
   text-decoration: line-through;
   color: #A2A6A9;
+}
+
+.sheet-date {
+  position: relative;
+  width: 50px;
+  height: 50px;
+}
+
+.sheet-date>div {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -9999;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.sheet-date .header {
+  font-size: 10px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
+  padding-bottom: 1px;
+  font-weight: 600;
+}
+
+.sheet-date .header:first-letter {
+  text-transform: uppercase;
+}
+
+.sheet-date .content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 0 auto;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: -2px;
+  background-color: white;
+}
+
+.sheet-date.early .header {
+  background-color: #F9B330;
+  color: white;
+}
+
+.sheet-date.normal .header {
+  background-color: #58B32C;
+  color: white;
+}
+
+.sheet-date.late .header {
+  background-color: #D20D0E;
+  color: white;
+}
+
+.sheet-date.early input[type="radio"]:checked~div {
+  box-shadow: 0px 0px 0px 2px #F9B330;
+}
+
+.sheet-date.normal input[type="radio"]:checked~div {
+  box-shadow: 0px 0px 0px 2px #58B32C;
+}
+
+.sheet-date.late input[type="radio"]:checked~div {
+  box-shadow: 0px 0px 0px 2px #D20D0E;
 }

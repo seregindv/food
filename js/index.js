@@ -1,37 +1,6 @@
 import * as page from './page.js';
-
-function displaySheetTitle(sheetInfo) {
-  page.showTitle(sheetInfo);
-  if (!sheetInfo) {
-    page.setTitle('');
-    return;
-  }
-
-  const sheetDate = sheetInfo.date;
-  const formattedDate = new Intl.DateTimeFormat('ru-RU', { dateStyle: 'short' }).format(new Date(sheetDate));
-  page.setTitle(`Таблица от ${formattedDate}`);
-
-  const today = new Date();
-  let monday = getMonday(today);
-  let nextMonday = new Date(monday);
-  nextMonday = new Date(nextMonday.setDate(nextMonday.getDate() + 7));
-  monday = getDateString(monday);
-  nextMonday = getDateString(nextMonday);
-
-  const status = sheetDate < monday ? page.sheetStatus.late
-    : sheetDate >= nextMonday ? page.sheetStatus.early : page.sheetStatus.normal;
-  page.setSheetStatus(status);
-
-  const day = today.getDay() - 1;
-  page.setToday(i => status === page.sheetStatus.normal && i == day);
-}
-
-function getMonday(date) {
-  date = new Date(date);
-  const day = date.getDay(),
-    diff = date.getDate() - day + (day == 0 ? -6 : 1);
-  return new Date(date.setDate(diff));
-}
+import * as storage from './storage.js';
+import { getDateString, getMonday } from './common.js';
 
 async function downloadSheet(sheetLink) {
   if (!sheetLink) {
@@ -43,7 +12,6 @@ async function downloadSheet(sheetLink) {
     page.displayError("Неверная ссылка на Google-таблицу");
     return;
   }
-  localStorage.setItem("sheetLink", sheetLink);
 
   const exportUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=xlsx`;
   try {
@@ -61,12 +29,23 @@ async function downloadSheet(sheetLink) {
     }
     const arrayBuffer = await response.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer, { type: "array" });
-    const masterData = {};
+    const sheetData = {};
+    let sheetDate;
+    let i = 0;
     for (const sheetName of ["Пн", "Вт", "Ср", "Чт", "Пт"]) {
       if (!workbook.SheetNames.includes(sheetName)) {
         continue;
       }
+
       const worksheet = workbook.Sheets[sheetName];
+      if (!sheetDate) {
+        const cell = worksheet["B1"];
+        if (cell?.v) {
+          const date = XLSX.SSF.parse_date_code(cell.v);
+          sheetDate = new Date(date.y, date.m - 1, date.d - i);
+        }
+      }
+
       const jsonData = XLSX.utils.sheet_to_json(worksheet, {
         defval: null,
         range: "B4:M100",
@@ -83,9 +62,9 @@ async function downloadSheet(sheetLink) {
         if (employeeName == null || !(employeeName = employeeName.toString().trim()) || !employeeName.includes(" ")) {
           continue;
         }
-        let mealsByDay = masterData[employeeName];
+        let mealsByDay = sheetData[employeeName];
         if (!mealsByDay) {
-          masterData[employeeName] = mealsByDay = {};
+          sheetData[employeeName] = mealsByDay = {};
         }
         const meals = new Array(7).fill(null);
         mealIndexes.forEach((index, i) => meals[i] = row[index]);
@@ -95,31 +74,23 @@ async function downloadSheet(sheetLink) {
           mealsByDay[sheetName] = meals.slice(0, j + 1);
         }
       }
+      ++i;
     }
-    if (Object.keys(masterData).length === 0) {
-      throw new Error("Не удалось создать объект из данных");
+    if (Object.keys(sheetData).length === 0) {
+      throw new Error("Не удалось ничего прочитать");
     }
-    localStorage.setItem("sheetData", JSON.stringify(masterData));
-    console.log(workbook);
-    let sheetDate;
-    if (workbook.SheetNames.includes("Пн")) {
-      const worksheet = workbook.Sheets["Пн"];
-      const cellAddress = "B1";
-      const cell = worksheet[cellAddress];
-      if (cell && cell.v) {
-        const date = XLSX.SSF.parse_date_code(cell.v);
-        sheetDate = new Date(date.y, date.m - 1, date.d);
-      }
+    if (!sheetDate) {
+      throw new Error("Не удалось найти дату");
     }
 
-    const sheetInfo = { date: getDateString(sheetDate) };;
-    localStorage.setItem("sheetInfo", JSON.stringify(sheetInfo));
-    localStorage.removeItem("eaten");
-    displaySheetTitle(sheetInfo);
-    populateEmployeeSelect(masterData);
-    setDefaultDaySelect();
-    displaySelectedData();
-    page.showSelectors(true);
+    const monday = getMonday();
+    storage.dropOldSheets(getDateString(monday));
+
+    const sheetDateString = getDateString(sheetDate);
+    storage.setSheetData(sheetDateString, sheetData);
+    const info = storage.getInfo();
+    page.setDates(info.dates);
+    page.selectDate(sheetDateString);
   } catch (error) {
     console.error(error);
     page.displayError(error.message);
@@ -129,24 +100,30 @@ async function downloadSheet(sheetLink) {
 }
 
 function loadMapFromLocalStorage() {
-  const mapData = localStorage.getItem("sheetData");
-  if (mapData) {
-    try {
-      const dataObject = JSON.parse(mapData);
-      populateEmployeeSelect(dataObject);
-      setDefaultDaySelect();
-      displaySelectedData();
-      page.showSelectors(true);
-    } catch (error) {
-      console.error(error);
-      page.displayError("Ошибка при загрузке данных из localStorage");
-    }
-  } else {
-    page.showSelectors(false);
-  }
+  const sheetInfo = storage.getInfo();
+  page.initDates(sheetInfo?.dates, date => onDateChanged(date));
+  page.selectDefaultDate();
+}
 
-  const sheetInfo = JSON.parse(localStorage.getItem("sheetInfo"));
-  displaySheetTitle(sheetInfo);
+function onDateChanged(date) {
+  const data = date && storage.getSheetData(date);
+  if (!data) {
+    page.showSelectors(false);
+    return;
+  }
+  try {
+    const status = page.getSelectedDateStatus();
+    const day = status === 'normal' ? new Date().getDay() - 1 : -1;
+    page.setToday(day);
+
+    populateEmployeeSelect(data);
+    setDefaultDaySelect();
+    displaySelectedData();
+    page.showSelectors(true);
+  } catch (error) {
+    console.error(error);
+    page.displayError("Ошибка при загрузке данных из localStorage");
+  }
 }
 
 function extractSheetId(url) {
@@ -185,7 +162,8 @@ function displaySelectedData(mealOnly) {
     return;
   }
 
-  const sheetData = JSON.parse(localStorage.getItem("sheetData")) || {};
+  const selectedDate = page.getSelectedDate();
+  const sheetData = storage.getSheetData(selectedDate) || {};
   let selectedDay = page.getSelectedDay();
   if (!selectedDay) {
     const defaultSelect = getDefaultSelect();
@@ -254,11 +232,12 @@ function setupEventListeners() {
   page.onMealCheckChanged(({ index, checked }) => updateMealState(index, checked));
 }
 
-function getDateString(date) {
-  return date.toLocaleDateString('en-CA');
-}
-
 function applyMealState() {
+  const date = page.getSelectedDate();
+  if (!date) {
+    return;
+  }
+
   const employee = page.getSelectedEmployee();
   if (!employee) {
     return;
@@ -269,7 +248,7 @@ function applyMealState() {
     return;
   }
 
-  const eaten = JSON.parse(localStorage.getItem('eaten'));
+  const eaten = storage.getEatean(date);
   let meals;
   if (eaten) {
     const employeeData = eaten[employee];
@@ -282,6 +261,11 @@ function applyMealState() {
 }
 
 function updateMealState(index, checked) {
+  const date = page.getSelectedDate();
+  if (!date) {
+    return;
+  }
+
   const employee = page.getSelectedEmployee();
   if (!employee) {
     return;
@@ -292,12 +276,7 @@ function updateMealState(index, checked) {
     return;
   }
 
-  let eaten = localStorage.getItem('eaten');
-  if (!eaten) {
-    eaten = {};
-  } else {
-    eaten = JSON.parse(eaten);
-  }
+  const eaten = storage.getEatean(date) || {};
 
   let employeeData = eaten[employee];
   if (!employeeData) {
@@ -319,7 +298,7 @@ function updateMealState(index, checked) {
       dayData.splice(mealIndex, 1);
     }
   }
-  localStorage.setItem("eaten", JSON.stringify(eaten));
+  storage.setEaten(date, eaten);
 }
 
 page.onLoaded(() => {
