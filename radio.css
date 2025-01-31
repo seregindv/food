@@ -115,16 +115,17 @@ input[type="checkbox"]:checked {
   display: flex;
   flex-direction: column;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  border-radius: 6px;
+  border-radius: 5px;
   overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: white;
 }
 
 .sheet-date .header {
   font-size: 10px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   text-align: center;
-  padding-bottom: 1px;
-  font-weight: 600;
+  padding-bottom: 2px;
 }
 
 .sheet-date .header:first-letter {
@@ -133,38 +134,34 @@ input[type="checkbox"]:checked {
 
 .sheet-date .content {
   display: flex;
-  align-items: center;
+  align-items: end;
   justify-content: center;
   flex: 1 0 auto;
   font-size: 30px;
   line-height: 1;
   letter-spacing: -2px;
-  background-color: white;
 }
 
-.sheet-date.early .header {
-  background-color: #F9B330;
-  color: white;
+.sheet-date.early input[type="radio"]:not(:checked)~div .content {
+  color: #F9B330;
 }
 
-.sheet-date.normal .header {
-  background-color: #58B32C;
-  color: white;
+.sheet-date.normal input[type="radio"]:not(:checked)~div .content {
+  color: #58B32C;
 }
 
-.sheet-date.late .header {
-  background-color: #D20D0E;
-  color: white;
+.sheet-date.late input[type="radio"]:not(:checked)~div .content {
+  color: #D20D0E;
 }
 
 .sheet-date.early input[type="radio"]:checked~div {
-  box-shadow: 0px 0px 0px 2px #F9B330;
+  background-color: #FFFFBF;
 }
 
 .sheet-date.normal input[type="radio"]:checked~div {
-  box-shadow: 0px 0px 0px 2px #58B32C;
+  background-color: #DEFFCF;
 }
 
 .sheet-date.late input[type="radio"]:checked~div {
-  box-shadow: 0px 0px 0px 2px #D20D0E;
+  background-color: #FFDFDF;
 }
