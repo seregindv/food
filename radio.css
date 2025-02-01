@@ -155,13 +155,16 @@ input[type="checkbox"]:checked {
 }
 
 .sheet-date.early input[type="radio"]:checked~div {
-  background-color: #FFFFBF;
+  background-color: #eeb509;
+  color: white;
 }
 
 .sheet-date.normal input[type="radio"]:checked~div {
-  background-color: #DEFFCF;
+  background-color: #28a745;
+  color: white;
 }
 
 .sheet-date.late input[type="radio"]:checked~div {
-  background-color: #FFDFDF;
+  background-color: #dc3545;
+  color: white;
 }

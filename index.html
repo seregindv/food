@@ -16,111 +16,113 @@
 </head>
 
 <body>
-  <div class="titleContainer">
-    <img class="maskotImg" src="./mascot.png" />
-    <h1>YoFood</h1>
-  </div>
+  <div class="main">
+    <div class="title-container">
+      <div class="title">
+        <img class="maskot" src="./mascot.png" />
+        <h1>YoFood</h1>
+      </div>
+      <div class="sheet-dates rect-radios" id="sheetDates"> </div>
+    </div>
 
-  <div id="uploadContainer">
-    <input type="text" id="sheetLinkInput" autocomplete="off" placeholder="Ссылка на Google-таблицу">
-    <div class="flex gap-8">
-      <button id="uploadBtn" style="align-self: flex-start">Загрузить</button>
-      <div id="loader" class="flex flex-stretch invisible">
-        <img src="excel.svg" height="32">
-        <div class="loader">
-          <span>🥪</span>
-          <span>🥗</span>
-          <span>🍲</span>
-          <span>🍗</span>
-          <span>🍟</span>
-          <span>🧋</span>
-          <span>🍰</span>
+    <div id="uploadContainer">
+      <input type="text" id="sheetLinkInput" autocomplete="off" placeholder="Ссылка на Google-таблицу">
+      <div class="flex gap-8">
+        <button id="uploadBtn" style="align-self: flex-start">Загрузить</button>
+        <div id="loader" class="flex flex-stretch invisible">
+          <img src="excel.svg" height="32">
+          <div class="loader">
+            <span>🥪</span>
+            <span>🥗</span>
+            <span>🍲</span>
+            <span>🍗</span>
+            <span>🍟</span>
+            <span>🧋</span>
+            <span>🍰</span>
+          </div>
+          <img src="fridge.svg" height="62">
         </div>
-        <img src="fridge.svg" height="62">
       </div>
     </div>
-  </div>
 
-  <div class="flex gap-8" style="margin-bottom: 20px">
-    <select id="employeeSelect" class="flex-stretch">
+    <select id="employeeSelect">
       <option value="">Выберите сотрудника</option>
     </select>
-    <div class="sheet-dates rect-radios" id="sheetDates"> </div>
-  </div>
 
-  <template id="sheetDate">
-    <div class="sheet-date">
-      <input type="radio">
-      <label></label>
-      <div>
-        <div class="content"></div>
-        <div class="header"></div>
+    <template id="sheetDate">
+      <div class="sheet-date">
+        <input type="radio">
+        <label></label>
+        <div>
+          <div class="content"></div>
+          <div class="header"></div>
+        </div>
+      </div>
+    </template>
+
+    <div id="selectContainer">
+      <div class="select-wrapper">
+        <div class="days rect-radios">
+          <div>
+            <input id="1" type="radio" name="day" value="Пн">
+            <label for="1">Пн</label>
+          </div>
+          <div>
+            <input id="2" type="radio" name="day" value="Вт">
+            <label for="2">Вт</label>
+          </div>
+          <div>
+            <input id="3" type="radio" name="day" value="Ср">
+            <label for="3">Ср</label>
+          </div>
+          <div>
+            <input id="4" type="radio" name="day" value="Чт">
+            <label for="4">Чт</label>
+          </div>
+          <div>
+            <input id="5" type="radio" name="day" value="Пт">
+            <label for="5">Пт</label>
+          </div>
+        </div>
       </div>
     </div>
-  </template>
 
-  <div id="selectContainer">
-    <div class="select-wrapper">
-      <div class="days rect-radios">
-        <div>
-          <input id="1" type="radio" name="day" value="Пн">
-          <label for="1">Пн</label>
+    <div id="jsonDisplay">
+      <div class="values-list hidden">
+        <div class="meal">
+          <input type="checkbox" id="meal1" name="meal" icon="🥪" />
+          <label for="meal1" class="meal-name"></label>
         </div>
-        <div>
-          <input id="2" type="radio" name="day" value="Вт">
-          <label for="2">Вт</label>
+        <div class="meal">
+          <input type="checkbox" id="meal2" name="meal" icon="🧋" />
+          <label for="meal2" class="meal-name"></label>
         </div>
-        <div>
-          <input id="3" type="radio" name="day" value="Ср">
-          <label for="3">Ср</label>
+        <div class="meal">
+          <input type="checkbox" id="meal3" name="meal" icon="🍲" />
+          <label for="meal3" class="meal-name"></label>
         </div>
-        <div>
-          <input id="4" type="radio" name="day" value="Чт">
-          <label for="4">Чт</label>
+        <div class="meal">
+          <input type="checkbox" id="meal4" name="meal" icon="🥗" />
+          <label for="meal4" class="meal-name"></label>
         </div>
-        <div>
-          <input id="5" type="radio" name="day" value="Пт">
-          <label for="5">Пт</label>
+        <div class="meal">
+          <input type="checkbox" id="meal5" name="meal" icon="🍗" />
+          <label for="meal5" class="meal-name"></label>
+        </div>
+        <div class="meal">
+          <input type="checkbox" id="meal6" name="meal" icon="🍟" />
+          <label for="meal6" class="meal-name"></label>
+        </div>
+        <div class="meal">
+          <input type="checkbox" id="meal7" name="meal" icon="🍰" />
+          <label for="meal7" class="meal-name"></label>
         </div>
       </div>
+      <div id="noData" class="hidden"></div>
     </div>
-  </div>
 
-  <div id="jsonDisplay">
-    <div class="values-list hidden">
-      <div class="meal">
-        <input type="checkbox" id="meal1" name="meal" icon="🥪" />
-        <label for="meal1" class="meal-name"></label>
-      </div>
-      <div class="meal">
-        <input type="checkbox" id="meal2" name="meal" icon="🧋" />
-        <label for="meal2" class="meal-name"></label>
-      </div>
-      <div class="meal">
-        <input type="checkbox" id="meal3" name="meal" icon="🍲" />
-        <label for="meal3" class="meal-name"></label>
-      </div>
-      <div class="meal">
-        <input type="checkbox" id="meal4" name="meal" icon="🥗" />
-        <label for="meal4" class="meal-name"></label>
-      </div>
-      <div class="meal">
-        <input type="checkbox" id="meal5" name="meal" icon="🍗" />
-        <label for="meal5" class="meal-name"></label>
-      </div>
-      <div class="meal">
-        <input type="checkbox" id="meal6" name="meal" icon="🍟" />
-        <label for="meal6" class="meal-name"></label>
-      </div>
-      <div class="meal">
-        <input type="checkbox" id="meal7" name="meal" icon="🍰" />
-        <label for="meal7" class="meal-name"></label>
-      </div>
-    </div>
-    <div id="noData" class="hidden"></div>
+    <div class="error" id="errorDisplay"></div>
   </div>
-
-  <div class="error" id="errorDisplay"></div>
 </body>
 
 </html>
