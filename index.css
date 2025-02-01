@@ -195,6 +195,20 @@ select {
     box-shadow: 0 0 0 1px #1B75D0;
 }
 
+.refresh {
+    background-color: white;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: black;
+}
+
+.refresh>div {
+    position: absolute;
+    bottom: 5px;
+    left: 20px;
+}
+
 .hidden {
     display: none !important;
 }

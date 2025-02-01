@@ -1,8 +1,9 @@
 import * as page from './page.js';
 import * as storage from './storage.js';
 import { getDateString, getMonday } from './common.js';
+import * as refresh from './refresh.js';
 
-async function downloadSheet(sheetLink) {
+function onDownloadSheet(sheetLink) {
   if (!sheetLink) {
     page.displayError("Пожалуйста, введите ссылку");
     return;
@@ -14,14 +15,17 @@ async function downloadSheet(sheetLink) {
   }
 
   const exportUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=xlsx`;
+  downloadSheet(exportUrl, false);
+}
+
+async function downloadSheet(url, refreshing) {
   try {
     page.showLoading(true);
-    page.clearDisplays();
-    const response = await fetch(exportUrl, {
+    page.clearDisplays(refresh);
+    const response = await fetch(url, {
       method: "GET",
       headers: {
-        "Content-Type":
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       },
     });
     if (!response.ok) {
@@ -83,13 +87,17 @@ async function downloadSheet(sheetLink) {
       throw new Error("Не удалось найти дату");
     }
 
-    const monday = getMonday();
-    storage.dropOldSheets(getDateString(monday));
+    if (!refreshing) {
+      const monday = getMonday();
+      storage.dropOldSheets(getDateString(monday));
+    }
 
     const sheetDateString = getDateString(sheetDate);
-    storage.setSheetData(sheetDateString, sheetData);
-    const info = storage.getInfo();
-    page.setDates(info.dates);
+    storage.setSheetData(sheetDateString, sheetData, url);
+    const dates = storage.getSheetDates();
+    if (!refreshing) {
+      page.setDates(dates);
+    }
     page.selectDate(sheetDateString);
   } catch (error) {
     console.error(error);
@@ -100,8 +108,8 @@ async function downloadSheet(sheetLink) {
 }
 
 function loadMapFromLocalStorage() {
-  const sheetInfo = storage.getInfo();
-  page.initDates(sheetInfo?.dates, date => onDateChanged(date));
+  const sheetDates = storage.getSheetDates();
+  page.initDates(sheetDates, date => onDateChanged(date));
   page.selectDefaultDate();
 }
 
@@ -217,7 +225,7 @@ function displaySelectedData(mealOnly) {
 }
 
 function setupEventListeners() {
-  page.onUpload(sheetLink => downloadSheet(sheetLink));
+  page.onUpload(sheetLink => onDownloadSheet(sheetLink));
 
   page.onEmployeeChanged(employee => {
     if (employee) {
@@ -230,6 +238,7 @@ function setupEventListeners() {
 
   page.onDayChanged(() => displaySelectedData(true));
   page.onMealCheckChanged(({ index, checked }) => updateMealState(index, checked));
+  refresh.onRefresh(onRefresh)
 }
 
 function applyMealState() {
@@ -299,6 +308,12 @@ function updateMealState(index, checked) {
     }
   }
   storage.setEaten(date, eaten);
+}
+
+function onRefresh() {
+  const date = page.getSelectedDate();
+  const link = storage.getLink(date);
+  downloadSheet(link, true);
 }
 
 page.onLoaded(() => {

@@ -10,8 +10,10 @@ export function displayError(message) {
     errorDisplay.textContent = message;
 }
 
-export function clearDisplays() {
-    setHidden(document.querySelector(".values-list"), true);
+export function clearDisplays(refreshing) {
+    if (!refreshing) {
+        setHidden(document.querySelector(".values-list"), true);
+    }
     setHidden(document.getElementById("noData"), true);
     document.getElementById("errorDisplay").textContent = "";
 }

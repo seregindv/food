@@ -1,9 +1,8 @@
 export function dropOldSheets(mondayString) {
-    const sheetInfo = getInfo();
-    if (!sheetInfo || !sheetInfo.dates || !sheetInfo.dates[0]) {
+    const dates = getSheetDates();
+    if (!dates || !dates[0]) {
         return;
     }
-    let dates = sheetInfo.dates;
     let i = 0;
     let changed;
     while (i < dates.length) {
@@ -15,29 +14,42 @@ export function dropOldSheets(mondayString) {
         dates.splice(i, 1);
         localStorage.removeItem(eatenKey(date));
         localStorage.removeItem(dataKey(date));
+        localStorage.removeItem(linkKey(date));
         changed = true;
     }
     if (changed) {
-        sheetInfo.dates = dates;
-        setInfo(sheetInfo);
+        setSheetDates(dates);
     }
 }
 
-export function setSheetData(dateString, data) {
-    const sheetInfo = getInfo() || {};
-    const dates = sheetInfo.dates;
+export function setSheetData(dateString, data, link) {
+    setItem(dataKey(dateString), data);
+    if (!link) {
+        return;
+    }
+
+    let dates = getSheetDates();
+    let datesChanged;
     if (!dates) {
-        sheetInfo.dates = [dateString];
+        dates = [dateString];
+        datesChanged = true;
     } else if (!dates.includes(dateString)) {
         dates.push(dateString);
+        datesChanged = true;
+    }
+    if (datesChanged) {
+        setSheetDates(dates);
     }
     localStorage.removeItem(eatenKey(dateString));
-    setItem(dataKey(dateString), data);
-    setInfo(sheetInfo);
+    localStorage.setItem(linkKey(dateString), link);
 }
 
 export function getEatean(dateString) {
     return getItem(eatenKey(dateString));
+}
+
+export function getLink(dateString) {
+    return localStorage.getItem(linkKey(dateString));
 }
 
 export function setEaten(dateString, data) {
@@ -48,16 +60,20 @@ export function getSheetData(dateString) {
     return getItem(dataKey(dateString));
 }
 
-export function getInfo() {
-    return getItem("sheetInfo");
+export function getSheetDates() {
+    return getItem("sheetDates");
 }
 
-function setInfo(data) {
-    setItem("sheetInfo", data);
+function setSheetDates(data) {
+    setItem("sheetDates", data);
 }
 
 function dataKey(dateString) {
     return `sheetData_${dateString}`;
+}
+
+function linkKey(dateString) {
+    return `sheetLink_${dateString}`;
 }
 
 function eatenKey(dateString) {
