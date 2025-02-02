@@ -5,10 +5,11 @@ let ready;
 let subscribed;
 let onRelease;
 let onSwiping;
+let onSwipeStart;
 let supportsTouch = typeof window !== 'undefined' && 'ontouchstart' in window;
 let maxSwipe = 100;
 
-export function init({ onAction, onNotSupported, onMoving, threshold }) {
+export function init({ onStart, onAction, onNotSupported, onMoving, threshold }) {
     if (supportsTouch) {
         if (!subscribed) {
             document.addEventListener("touchstart", onTouchStart);
@@ -20,6 +21,7 @@ export function init({ onAction, onNotSupported, onMoving, threshold }) {
             maxSwipe = threshold;
         }
         onSwiping = onMoving;
+        onSwipeStart = onStart;
 
     } else {
         onNotSupported && onNotSupported();
@@ -30,6 +32,13 @@ function onTouchStart(e) {
     shouldSwipe = window.scrollY === 0;
     if (!shouldSwipe) {
         return;
+    }
+    if (onSwipeStart) {
+        const e = {};
+        onSwipeStart(e);
+        if (e.cancel) {
+            return;
+        }
     }
     swiping = false;
     ready = false;

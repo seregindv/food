@@ -155,12 +155,7 @@ export function getSelectedDateStatus() {
 }
 
 export function onRefreshMove(e) {
-    if (!refresh) {
-        refresh = document.querySelector('.refresh');
-    }
-    if (!refreshArrow) {
-        refreshArrow = refresh.querySelector('.refresh-arrow');
-    }
+    const refreshArrow = getRefreshArrow();
     if (e.ready !== refreshReady) {
         refreshReady = e.ready;
         refreshArrow.classList.toggle('ready', refreshReady);
@@ -168,6 +163,22 @@ export function onRefreshMove(e) {
     const turn = refreshReady ? 0 : (.5 * (1 - e.swipe / e.threshold));
     refreshArrow.style.transform = `rotate(${turn}turn)`;
     refresh.style.height = e.swipe + 'px';
+}
+
+export function updateRefreshStatus() {
+    const refreshArrow = getRefreshArrow();
+    const status = dates.getSelectedDateStatus();
+    dates.setPriorityClass(refreshArrow, status);
+}
+
+function getRefreshArrow() {
+    if (!refresh) {
+        refresh = document.querySelector('.refresh');
+    }
+    if (!refreshArrow) {
+        refreshArrow = refresh.querySelector('.refresh-arrow');
+    }
+    return refreshArrow;
 }
 
 function setHidden(element, value) {

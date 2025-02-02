@@ -238,7 +238,7 @@ function setupEventListeners() {
 
   page.onDayChanged(() => displaySelectedData(true));
   page.onMealCheckChanged(({ index, checked }) => updateMealState(index, checked));
-  refresh.init({ onAction: onRefresh, onMoving: page.onRefreshMove, threshold: 70 });
+  refresh.init({ onStart: onRefreshStart, onAction: onRefresh, onMoving: page.onRefreshMove, threshold: 70 });
 }
 
 function applyMealState() {
@@ -314,6 +314,14 @@ function onRefresh() {
   const date = page.getSelectedDate();
   const link = storage.getLink(date);
   downloadSheet(link, true);
+}
+
+function onRefreshStart(e) {
+  const date = page.getSelectedDate();
+  e.cancel = !date;
+  if (date) {
+    page.updateRefreshStatus();
+  }
 }
 
 page.onLoaded(() => {

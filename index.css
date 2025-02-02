@@ -71,6 +71,7 @@ h1 {
     border: none;
     border-radius: 5px;
     font-size: 14px;
+    align-self: flex-start;
 }
 
 .sheet-dates {
@@ -207,8 +208,16 @@ select {
     fill: lightgray
 }
 
-.refresh-arrow.ready {
-    fill: gray;
+.refresh-arrow.ready.early {
+    fill: #eeb509;
+}
+
+.refresh-arrow.ready.normal {
+    fill: #28a745;
+}
+
+.refresh-arrow.ready.late {
+    fill: #dc3545;
 }
 
 .hidden {
@@ -225,10 +234,6 @@ select {
 
 .flex-stretch {
     flex: 1 0 auto;
-}
-
-.gap-4 {
-    gap: 4px;
 }
 
 .gap-8 {
