@@ -14,13 +14,13 @@ export function onRefresh(action) {
     if (subscribed) {
         return;
     }
-    document.addEventListener("touchstart", swipeStart, { passive: false });
-    document.addEventListener("touchmove", swipeProgress, { passive: false });
-    document.addEventListener("touchend", swipeEnd, { passive: false });
+    document.addEventListener("touchstart", onTouchStart, { passive: false });
+    document.addEventListener("touchmove", onTouchMove, { passive: false });
+    document.addEventListener("touchend", onTouchEnd, { passive: false });
 }
 
-function swipeStart(e) {
-    shouldSwipe = getScroll() === 0;
+function onTouchStart(e) {
+    shouldSwipe = window.scrollY === 0;
     if (!shouldSwipe) {
         return;
     }
@@ -35,7 +35,7 @@ function swipeStart(e) {
     }
 }
 
-function swipeEnd(e) {
+function onTouchEnd(e) {
     if (!shouldSwipe) {
         return;
     }
@@ -47,18 +47,16 @@ function swipeEnd(e) {
     }
 
     move(0);
-    if (swiping)
-        e.preventDefault();
     if (ready) {
         onRelease();
     }
 }
 
-function swipeProgress(e) {
+function onTouchMove(e) {
     if (!shouldSwipe) {
         return;
     }
-    shouldSwipe = getScroll() === 0;
+    shouldSwipe = window.scrollY === 0;
     if (!shouldSwipe) {
         return;
     }
@@ -70,7 +68,9 @@ function swipeProgress(e) {
     }
 
     pullDown();
-    e.preventDefault();
+    if (e.cancelable) {
+        e.preventDefault();
+    }
 }
 
 function pullDown() {
@@ -99,8 +99,4 @@ function updateStatus() {
 
 function move(swipe) {
     refresh.style.height = swipe + 'px';
-}
-
-function getScroll() {
-    return document.documentElement.scrollTop || document.body.scrollTop || 0;
 }
