@@ -196,17 +196,19 @@ select {
 }
 
 .refresh {
-    background-color: white;
-    position: relative;
     overflow: hidden;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: black;
+    display: flex;
+    align-items: end;
+    justify-content: center;
 }
 
-.refresh>div {
-    position: absolute;
-    bottom: 5px;
-    left: 20px;
+.refresh-arrow {
+    height: 50px;
+    fill: lightgray
+}
+
+.refresh-arrow.ready {
+    fill: gray;
 }
 
 .hidden {

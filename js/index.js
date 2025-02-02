@@ -238,7 +238,7 @@ function setupEventListeners() {
 
   page.onDayChanged(() => displaySelectedData(true));
   page.onMealCheckChanged(({ index, checked }) => updateMealState(index, checked));
-  refresh.init({ onAction: onRefresh, onMoving: page.moveRefresh });
+  refresh.init({ onAction: onRefresh, onMoving: page.onRefreshMove, threshold: 70 });
 }
 
 function applyMealState() {
