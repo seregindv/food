@@ -5,7 +5,6 @@ let shouldSwipe;
 let ready;
 let subscribed;
 let onRelease;
-const swipeTheshold = 20;
 const maxSwipe = 100;
 const refresh = document.querySelector('.refresh');
 const state = refresh.querySelector('div');
@@ -71,16 +70,12 @@ function swipeProgress(e) {
     }
 
     pullDown();
-    if (swiping)
-        e.preventDefault();
+    e.preventDefault();
 }
 
 function pullDown() {
     let swipe = stop - start;
     if (!swiping) {
-        if (swipe <= swipeTheshold) {
-            return;
-        }
         swiping = true;
     }
     if (swipe < 0)
@@ -99,7 +94,7 @@ function pullDown() {
 }
 
 function updateStatus() {
-    state.innerHTML = ready ? 'Release to refresh' : 'Contunue pulling...';
+    state.innerHTML = ready ? 'Release to refresh' : 'Pull to refresh';
 }
 
 function move(swipe) {
