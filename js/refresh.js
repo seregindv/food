@@ -70,6 +70,10 @@ function onTouchMove(e) {
             start = stop;
         }
     }
+    else if (swipe > maxSwipe) {
+        start = stop - maxSwipe;
+    }
+
     pullDown(swipe);
     if (e.cancelable) {
         e.preventDefault();
