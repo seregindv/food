@@ -1,22 +1,29 @@
 let start = 0;
-let stop = 0;
 let swiping;
 let shouldSwipe;
 let ready;
 let subscribed;
 let onRelease;
-const maxSwipe = 100;
-const refresh = document.querySelector('.refresh');
-const state = refresh.querySelector('div');
+let onSwiping;
+let supportsTouch = typeof window !== 'undefined' && 'ontouchstart' in window;
+let maxSwipe = 100;
 
-export function onRefresh(action) {
-    onRelease = action;
-    if (subscribed) {
-        return;
+export function init({ onAction, onNotSupported, onMoving, threshold }) {
+    if (supportsTouch) {
+        if (!subscribed) {
+            document.addEventListener("touchstart", onTouchStart);
+            document.addEventListener("touchmove", onTouchMove, { passive: false });
+            document.addEventListener("touchend", onTouchEnd);
+        }
+        onRelease = onAction;
+        if (threshold) {
+            maxSwipe = threshold;
+        }
+        onSwiping = onMoving;
+
+    } else {
+        onNotSupported && onNotSupported();
     }
-    document.addEventListener("touchstart", onTouchStart, { passive: false });
-    document.addEventListener("touchmove", onTouchMove, { passive: false });
-    document.addEventListener("touchend", onTouchEnd, { passive: false });
 }
 
 function onTouchStart(e) {
@@ -26,29 +33,16 @@ function onTouchStart(e) {
     }
     swiping = false;
     ready = false;
-    updateStatus();
-    if ("targetTouches" in e) {
-        var touch = e.targetTouches[0];
-        start = touch.screenY;
-    } else {
-        start = e.screenY;
-    }
+    start = getScreenY(e);
 }
 
 function onTouchEnd(e) {
-    if (!shouldSwipe) {
+    if (!swiping) {
         return;
     }
-    if ("changedTouches" in e) {
-        var touch = e.changedTouches[0];
-        stop = touch.screenY;
-    } else {
-        stop = e.screenY;
-    }
-
     move(0);
     if (ready) {
-        onRelease();
+        onRelease && onRelease();
     }
 }
 
@@ -56,25 +50,28 @@ function onTouchMove(e) {
     if (!shouldSwipe) {
         return;
     }
-    shouldSwipe = window.scrollY === 0;
-    if (!shouldSwipe) {
-        return;
-    }
-    if ("changedTouches" in e) {
-        var touch = e.changedTouches[0];
-        stop = touch.screenY;
-    } else {
-        stop = e.screenY;
-    }
 
-    pullDown();
+    const stop = getScreenY(e);
+    const swipe = stop - start;
+    if (swipe < 0) {
+        if (!swiping) {
+            shouldSwipe = false;
+            return;
+        } else if (start > stop) {
+            start = stop;
+        }
+    }
+    pullDown(swipe);
     if (e.cancelable) {
         e.preventDefault();
     }
 }
 
-function pullDown() {
-    let swipe = stop - start;
+function getScreenY(e) {
+    return e.touches[0].screenY;
+}
+
+function pullDown(swipe) {
     if (!swiping) {
         swiping = true;
     }
@@ -82,21 +79,13 @@ function pullDown() {
         swipe = 0;
     else if (swipe >= maxSwipe) {
         swipe = maxSwipe;
-        if (!ready) {
-            ready = true;
-            updateStatus();
-        }
-    } else if (ready) {
+        ready = true;
+    } else {
         ready = false;
-        updateStatus();
     }
     move(swipe);
 }
 
-function updateStatus() {
-    state.innerHTML = ready ? 'Release to refresh' : 'Pull to refresh';
-}
-
 function move(swipe) {
-    refresh.style.height = swipe + 'px';
+    onSwiping && onSwiping({ ready, swipe, threshold: maxSwipe });
 }

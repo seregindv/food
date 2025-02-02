@@ -1,5 +1,9 @@
 import * as dates from './dates.js';
 
+let refresh;
+let state;
+let refreshReady;
+
 export function showLoading(show) {
     const loader = document.getElementById('loader');
     loader.classList.toggle('invisible', !show);
@@ -148,6 +152,19 @@ export function getSelectedDate() {
 
 export function getSelectedDateStatus() {
     return dates.getSelectedDateStatus();
+}
+
+export function moveRefresh(e) {
+    if (!refresh) {
+        refresh = document.querySelector('.refresh');
+    }
+    if (e.ready !== refreshReady) {
+        if (!state) {
+            state = refresh.querySelector('div');
+        }
+        state.innerHTML = e.ready ? 'Release to refresh' : 'Pull to refresh';
+    }
+    refresh.style.height = e.swipe + 'px';
 }
 
 function setHidden(element, value) {
