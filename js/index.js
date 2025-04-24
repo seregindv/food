@@ -59,7 +59,10 @@ async function downloadSheet(url, refreshing) {
       if (jsonData.length === 0) {
         continue;
       }
-      const mealIndexes = jsonData[0].reduce((res, curr, i) => { if (curr) res.push(i); return res; }, []);
+      let mealIndexes = jsonData[0].reduce((res, curr, i) => { if (curr) res.push(i); return res; }, []);
+      if (mealIndexes.length < 7) { // when one of meal titles deleted
+        mealIndexes = [1, 3, 4, 6, 8, 10, 11];
+      }
       for (let i = 1; i < jsonData.length; i++) {
         const row = jsonData[i];
         let employeeName = row[0];
