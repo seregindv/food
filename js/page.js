@@ -165,7 +165,7 @@ export function onRefreshMove(e) {
     }
     const turn = refreshReady ? 0 : (.5 * (1 - e.swipe / e.threshold));
     refreshArrow.style.transform = `rotate(${turn}turn)`;
-    refresh.style.height = e.swipe + 'px';
+    refresh.style.height = e.swipe / 3 + 'px';
 }
 
 export function updateRefreshStatus() {

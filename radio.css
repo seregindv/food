@@ -58,7 +58,7 @@
 .meal {
   display: flex;
   align-items: flex-start;
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .meal>input {
@@ -95,19 +95,14 @@ input[type="checkbox"]:checked {
 }
 
 .meal input[type="checkbox"]+label div:last-child {
-  font-size: 0.9rem;
+  font-size: 18px;
   color: #667;
   margin: 0.2rem 0 0;
 }
 
-.meal input[type="checkbox"]:checked+label div:first-child {
+.meal input[type="checkbox"]:checked+label div {
   text-decoration: line-through;
   color: #A2A6A9;
-}
-
-.meal input[type="checkbox"]:checked+label div:last-child {
-  text-decoration: line-through;
-  color: #c2c6c9;
 }
 
 .sheet-date {
