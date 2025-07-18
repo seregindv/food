@@ -64,7 +64,10 @@ export function getMeals() {
             let i = 0;
             for (const listItem of display.querySelectorAll(".meal-name")) {
                 const meal = getName(i);
-                listItem.innerText = meal || null;
+                const meals = meal?.split("/") || [];
+                const divs = listItem.querySelectorAll("div");
+                divs[0].innerText = meals[1] || meals[0] || null;
+                divs[1].innerText = meals[1] && meals[0] || null;
                 setHidden(listItem.closest(".meal"), !meal);
                 ++i;
             }
