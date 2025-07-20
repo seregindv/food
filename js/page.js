@@ -7,6 +7,7 @@ let refreshReady;
 export function showLoading(show) {
     const loader = document.getElementById('loader');
     loader.classList.toggle('invisible', !show);
+    document.getElementById('closeSettings').classList.toggle('hidden', show);
 }
 
 export function displayError(message) {
@@ -46,6 +47,7 @@ export function populateEmployees(employees, selectedEmployee) {
     });
     if (selectedEmployee && employees.includes(selectedEmployee)) {
         employeeSelect.value = selectedEmployee;
+        setEmployeeName(selectedEmployee);
     }
 }
 
@@ -172,6 +174,26 @@ export function updateRefreshStatus() {
     const refreshArrow = getRefreshArrow();
     const status = dates.getSelectedDateStatus();
     dates.setPriorityClass(refreshArrow, status);
+}
+
+export function setEmployeeName(name) {
+    const employeeName = document.getElementById("employeeName");
+    employeeName.innerHTML = name || null;
+}
+
+export function setupSettingsActions() {
+    document.getElementById("employeeName").addEventListener("click", e => {
+        e.preventDefault();
+        showSettings(true);
+    });
+    document.getElementById("closeSettings").addEventListener("click", () => {
+        showSettings(false);
+    });
+}
+
+function showSettings(show) {
+    document.getElementById("settings").classList.toggle("hidden", !show);
+    document.getElementById("info").classList.toggle("hidden", show);
 }
 
 function getRefreshArrow() {

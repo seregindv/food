@@ -236,11 +236,13 @@ function setupEventListeners() {
     } else {
       localStorage.removeItem("selectedEmployee");
     }
+    page.setEmployeeName(employee);
     displaySelectedData();
   });
 
   page.onDayChanged(() => displaySelectedData(true));
   page.onMealCheckChanged(({ index, checked }) => updateMealState(index, checked));
+  page.setupSettingsActions();
   refresh.init({ onStart: onRefreshStart, onAction: onRefresh, onMoving: page.onRefreshMove, threshold: 210 });
 }
 

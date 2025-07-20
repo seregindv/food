@@ -63,15 +63,18 @@ h1 {
     box-sizing: border-box;
 }
 
-#uploadBtn {
+#uploadBtn, #closeSettings {
     padding: 8px 16px;
     cursor: pointer;
-    background-color: #008736;
-    color: white;
     border: none;
     border-radius: 5px;
     font-size: 14px;
     align-self: flex-start;
+}
+
+#uploadBtn {
+    color: white;
+    background-color: #28a745;
 }
 
 .sheet-dates {
