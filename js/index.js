@@ -120,6 +120,7 @@ function onDateChanged(date) {
   const data = date && storage.getSheetData(date);
   if (!data) {
     page.showSelectors(false);
+    page.showSettings(true, false);
     return;
   }
   try {
@@ -147,6 +148,9 @@ function populateEmployeeSelect(data) {
   const employees = Object.keys(data).sort();
   const selectedEmployee = localStorage.getItem("selectedEmployee");
   page.populateEmployees(employees, selectedEmployee);
+  if (!selectedEmployee) {
+    page.showSettings(true, false);
+  }
 }
 
 function setDefaultDaySelect() {
@@ -237,6 +241,7 @@ function setupEventListeners() {
       localStorage.removeItem("selectedEmployee");
     }
     page.setEmployeeName(employee);
+    page.canCloseSettings(!!employee);
     displaySelectedData();
   });
 

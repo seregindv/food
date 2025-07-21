@@ -1,13 +1,14 @@
 import * as dates from './dates.js';
 
-let refresh;
-let refreshArrow;
-let refreshReady;
+let _refresh;
+let _refreshArrow;
+let _refreshReady;
+let _canCloseSettings = true;
 
 export function showLoading(show) {
     const loader = document.getElementById('loader');
     loader.classList.toggle('invisible', !show);
-    document.getElementById('closeSettings').classList.toggle('hidden', show);
+    document.getElementById('closeSettings').classList.toggle('hidden', show || !_canCloseSettings);
 }
 
 export function displayError(message) {
@@ -161,13 +162,13 @@ export function getSelectedDateStatus() {
 
 export function onRefreshMove(e) {
     const refreshArrow = getRefreshArrow();
-    if (e.ready !== refreshReady) {
-        refreshReady = e.ready;
-        refreshArrow.classList.toggle('ready', refreshReady);
+    if (e.ready !== _refreshReady) {
+        _refreshReady = e.ready;
+        refreshArrow.classList.toggle('ready', _refreshReady);
     }
-    const turn = refreshReady ? 0 : (.5 * (1 - e.swipe / e.threshold));
+    const turn = _refreshReady ? 0 : (.5 * (1 - e.swipe / e.threshold));
     refreshArrow.style.transform = `rotate(${turn}turn)`;
-    refresh.style.height = e.swipe / 3 + 'px';
+    _refresh.style.height = e.swipe / 3 + 'px';
 }
 
 export function updateRefreshStatus() {
@@ -191,19 +192,29 @@ export function setupSettingsActions() {
     });
 }
 
-function showSettings(show) {
+export function showSettings(show, canClose = true) {
     document.getElementById("settings").classList.toggle("hidden", !show);
     document.getElementById("info").classList.toggle("hidden", show);
+    _canCloseSettings = canClose;
+    document.getElementById("closeSettings").classList.toggle("hidden", !canClose);
+}
+
+export function canCloseSettings(value) {
+    if (value == _canCloseSettings) {
+        return;
+    }
+    document.getElementById("closeSettings").classList.toggle("hidden", !value);
+    _canCloseSettings = value;
 }
 
 function getRefreshArrow() {
-    if (!refresh) {
-        refresh = document.querySelector('.refresh');
+    if (!_refresh) {
+        _refresh = document.querySelector('.refresh');
     }
-    if (!refreshArrow) {
-        refreshArrow = refresh.querySelector('.refresh-arrow');
+    if (!_refreshArrow) {
+        _refreshArrow = _refresh.querySelector('.refresh-arrow');
     }
-    return refreshArrow;
+    return _refreshArrow;
 }
 
 function setHidden(element, value) {
