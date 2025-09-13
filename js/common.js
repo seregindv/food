@@ -13,3 +13,5 @@ export function getMonthName(date) {
   date = new Date(date);
   return date.toLocaleString('ru-RU', { month: 'long' });
 }
+
+export const mealIcons = ["🥪", "🧋", "🍲", "🥗", "🍗", "🍟", "🍰"];

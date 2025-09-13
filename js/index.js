@@ -1,6 +1,6 @@
 import * as page from './page.js';
 import * as storage from './storage.js';
-import { getDateString, getMonday } from './common.js';
+import { getDateString, getMonday, mealIcons } from './common.js';
 import * as refresh from './refresh.js';
 
 function onDownloadSheet(sheetLink) {
@@ -232,6 +232,7 @@ function displaySelectedData(mealOnly) {
 }
 
 function setupEventListeners() {
+  page.setupMealIcons(mealIcons);
   page.onUpload(sheetLink => onDownloadSheet(sheetLink));
 
   page.onEmployeeChanged(employee => {
@@ -249,6 +250,7 @@ function setupEventListeners() {
   page.onMealCheckChanged(({ index, checked }) => updateMealState(index, checked));
   page.setupSettingsActions();
   refresh.init({ onStart: onRefreshStart, onAction: onRefresh, onMoving: page.onRefreshMove, threshold: 210 });
+  page.onCopyEatIt({ action: copyEatIt});
 }
 
 function applyMealState() {
@@ -333,6 +335,40 @@ function onRefreshStart(e) {
   if (date) {
     page.updateRefreshStatus();
   }
+}
+
+async function copyEatIt() {
+  const selectedEmployee = page.getSelectedEmployee();
+  if (!selectedEmployee) {
+    return;
+  }
+
+  const selectedDate = page.getSelectedDate();
+  const sheetData = storage.getSheetData(selectedDate) || {};
+  let selectedDay = page.getSelectedDay();
+  if (!selectedDay) {
+    return;
+  }
+
+  const employeeData = sheetData[selectedEmployee];
+  if (!employeeData) {
+    return;
+  }
+  
+  const employeeMeals = employeeData[selectedDay];
+  if (!employeeMeals) {
+    return;
+  } 
+
+  let text = "Привет! Съешьте пожалуйста мою еду";
+  for (let i = 0; i < employeeMeals.length; i++) {
+    const meal = employeeMeals[i];
+    if (meal) {
+      text += `\n\n${mealIcons[i]} ${meal}`;
+    }
+  }
+
+  await navigator.clipboard.writeText(text);
 }
 
 page.onLoaded(() => {

@@ -207,6 +207,23 @@ export function canCloseSettings(value) {
     _canCloseSettings = value;
 }
 
+export function onCopyEatIt(e) {
+    document.getElementById("copyEatIt").addEventListener("click", e.action);
+}
+
+export function setupMealIcons(icons) {
+    const loaderIcons = document.querySelector("#loader .loader");
+    for (const icon of icons) {
+        const span = document.createElement("span");
+        span.textContent = icon;
+        loaderIcons.appendChild(span);
+    }
+
+    for (let i = 0; i < icons.length; ++i) {
+        document.getElementById(`meal${i + 1}`).setAttribute("icon", icons[i]);
+    }
+}
+
 function getRefreshArrow() {
     if (!_refresh) {
         _refresh = document.querySelector('.refresh');
