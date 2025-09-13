@@ -320,10 +320,11 @@ function updateMealState(index, checked) {
   storage.setEaten(date, eaten);
 }
 
-function onRefresh() {
+async function onRefresh(e) {
   const date = page.getSelectedDate();
   const link = storage.getLink(date);
-  downloadSheet(link, true);
+  await downloadSheet(link, true);
+  e.hide();
 }
 
 function onRefreshStart(e) {

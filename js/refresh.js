@@ -49,9 +49,8 @@ function onTouchEnd(e) {
     if (!swiping) {
         return;
     }
-    move(0);
     if (ready) {
-        onRelease && onRelease();
+        onRelease && onRelease({ hide: () => move(0) });
     }
 }
 
