@@ -29,6 +29,8 @@ export function init({ onStart, onAction, onNotSupported, onMoving, threshold })
 }
 
 function onTouchStart(e) {
+    swiping = false;
+    ready = false;
     shouldSwipe = window.scrollY === 0;
     if (!shouldSwipe) {
         return;
@@ -40,18 +42,17 @@ function onTouchStart(e) {
             return;
         }
     }
-    swiping = false;
-    ready = false;
     start = getScreenY(e);
 }
 
-function onTouchEnd(e) {
+async function onTouchEnd(e) {
     if (!swiping) {
         return;
     }
-    if (ready) {
-        onRelease && onRelease({ hide: () => move(0) });
+    if (ready && onRelease) {
+        await onRelease();
     }
+    move(0);
 }
 
 function onTouchMove(e) {
