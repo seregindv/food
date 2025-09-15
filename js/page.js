@@ -224,6 +224,14 @@ export function setupMealIcons(icons) {
     }
 }
 
+export function disableCopyEatIt() {
+    const copyEatIt = document.getElementById("copyEatIt")
+    copyEatIt.disabled = true;
+    setTimeout(() => {
+        copyEatIt.disabled = false;
+    }, 2000);
+}
+
 function getRefreshArrow() {
     if (!_refresh) {
         _refresh = document.querySelector('.refresh');

@@ -368,6 +368,7 @@ async function copyEatIt() {
   }
 
   await navigator.clipboard.writeText(text);
+  page.disableCopyEatIt();
 }
 
 page.onLoaded(() => {
