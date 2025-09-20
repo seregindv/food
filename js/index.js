@@ -3,7 +3,7 @@ import * as storage from './storage.js';
 import { getDateString, getMonday, mealIcons } from './common.js';
 import * as refresh from './refresh.js';
 
-function onDownloadSheet(sheetLink) {
+async function onDownloadSheet(sheetLink) {
   if (!sheetLink) {
     page.displayError("Пожалуйста, введите ссылку");
     return;
@@ -15,12 +15,17 @@ function onDownloadSheet(sheetLink) {
   }
 
   const exportUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=xlsx`;
-  downloadSheet(exportUrl, false);
+
+  page.showLoading(true);
+  try {
+    await downloadSheet(exportUrl, false);
+  } finally {
+    page.showLoading(false);
+  }
 }
 
 async function downloadSheet(url, refreshing) {
   try {
-    page.showLoading(true);
     page.clearDisplays(refresh);
     const response = await fetch(url, {
       method: "GET",
@@ -105,8 +110,6 @@ async function downloadSheet(url, refreshing) {
   } catch (error) {
     console.error(error);
     page.displayError(error.message);
-  } finally {
-    page.showLoading(false);
   }
 }
 
@@ -250,7 +253,7 @@ function setupEventListeners() {
   page.onMealCheckChanged(({ index, checked }) => updateMealState(index, checked));
   page.setupSettingsActions();
   refresh.init({ onStart: onRefreshStart, onAction: onRefresh, onMoving: page.onRefreshMove, threshold: 210 });
-  page.onCopyEatIt({ action: copyEatIt});
+  page.onCopyEatIt({ action: copyEatIt });
 }
 
 function applyMealState() {
@@ -323,9 +326,15 @@ function updateMealState(index, checked) {
 }
 
 async function onRefresh() {
-  const date = page.getSelectedDate();
-  const link = storage.getLink(date);
-  await downloadSheet(link, true);
+  try {
+    page.ensureRefreshLoader();
+    page.showRefreshLoading();
+    const date = page.getSelectedDate();
+    const link = storage.getLink(date);
+    await downloadSheet(link, true);
+  } finally {
+    page.showRefreshArrow();
+  }
 }
 
 function onRefreshStart(e) {
@@ -353,11 +362,11 @@ async function copyEatIt() {
   if (!employeeData) {
     return;
   }
-  
+
   const employeeMeals = employeeData[selectedDay];
   if (!employeeMeals) {
     return;
-  } 
+  }
 
   let text = "Привет! Съешьте пожалуйста мою еду";
   for (let i = 0; i < employeeMeals.length; i++) {

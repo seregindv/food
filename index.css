@@ -202,13 +202,16 @@ select {
 .refresh {
     overflow: hidden;
     display: flex;
-    align-items: end;
-    justify-content: center;
+    align-items: center;
+    justify-content: end;
+    flex-flow: column;
+    margin: 0 20px;
 }
 
 .refresh-arrow {
     height: 50px;
-    fill: lightgray
+    fill: lightgray;
+    position: absolute;
 }
 
 .refresh-arrow.ready.early {
@@ -265,4 +268,8 @@ select {
 
 #copyEatIt:disabled {
     fill: lightgray;
+}
+
+.refresh-loader {
+    width: 100%;
 }

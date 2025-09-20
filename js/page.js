@@ -6,7 +6,7 @@ let _refreshReady;
 let _canCloseSettings = true;
 
 export function showLoading(show) {
-    const loader = document.getElementById('loader');
+    const loader = document.querySelector('#uploadContainer .loader-panel');
     loader.classList.toggle('invisible', !show);
     document.getElementById('closeSettings').classList.toggle('hidden', show || !_canCloseSettings);
 }
@@ -212,11 +212,11 @@ export function onCopyEatIt(e) {
 }
 
 export function setupMealIcons(icons) {
-    const loaderIcons = document.querySelector("#loader .loader");
+    const loaderIcons = document.querySelectorAll(".loader-panel .loader");
     for (const icon of icons) {
         const span = document.createElement("span");
         span.textContent = icon;
-        loaderIcons.appendChild(span);
+        loaderIcons.forEach(loaderIcon => loaderIcon.appendChild(span));
     }
 
     for (let i = 0; i < icons.length; ++i) {
@@ -230,6 +230,27 @@ export function disableCopyEatIt() {
     setTimeout(() => {
         copyEatIt.disabled = false;
     }, 2000);
+}
+
+export function ensureRefreshLoader() {
+    const refreshLoader = document.querySelector('.refresh-loader');
+    if(refreshLoader.querySelector('.loader')) {
+        return;
+    }
+    const refresh = document.querySelector('.loader-panel');
+    const cloned = refresh.cloneNode(true);
+    cloned.classList.remove('invisible');
+    refreshLoader.appendChild(cloned);
+}
+
+export function showRefreshLoading() {
+    document.querySelector('.refresh-arrow').classList.add('hidden');
+    document.querySelector('.refresh-loader').classList.remove('hidden');
+}
+
+export function showRefreshArrow() {
+    document.querySelector('.refresh-arrow').classList.remove('hidden');
+    document.querySelector('.refresh-loader').classList.add('hidden');
 }
 
 function getRefreshArrow() {
