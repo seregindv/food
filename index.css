@@ -259,12 +259,24 @@ select {
     cursor: pointer;
 }
 
-#copyEatIt:hover:not(:disabled) {
-    stroke: white;
-    fill: white;
-    background-color: #1B75D0;
-    box-shadow: 0 0 0 5px #1B75D0;
+@media (pointer: fine) {
+    #copyEatIt:hover:not(:disabled) {
+        stroke: white;
+        fill: white;
+        background-color: #1B75D0;
+        box-shadow: 0 0 0 5px #1B75D0;
+    }
 }
+
+@media (pointer: coarse) {
+    #copyEatIt:active:not(:disabled) {
+        stroke: white;
+        fill: white;
+        background-color: #1B75D0;
+        box-shadow: 0 0 0 5px #1B75D0;
+    }
+}
+
 
 #copyEatIt:disabled {
     fill: lightgray;
