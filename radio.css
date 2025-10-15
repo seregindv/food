@@ -1,4 +1,5 @@
-.rect-radios input[type="radio"] {
+.rect-radios input[type="radio"],
+.rect-radios button {
   display: none;
   margin: 0;
 }

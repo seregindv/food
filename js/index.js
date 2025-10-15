@@ -244,7 +244,6 @@ function setupEventListeners() {
     } else {
       localStorage.removeItem("selectedEmployee");
     }
-    page.setEmployeeName(employee);
     page.canCloseSettings(!!employee);
     displaySelectedData();
   });

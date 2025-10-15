@@ -4,6 +4,7 @@ let _refresh;
 let _refreshArrow;
 let _refreshReady;
 let _canCloseSettings = true;
+let _settingsVisible = false;
 
 export function showLoading(show) {
     const loader = document.querySelector('#uploadContainer .loader-panel');
@@ -48,7 +49,6 @@ export function populateEmployees(employees, selectedEmployee) {
     });
     if (selectedEmployee && employees.includes(selectedEmployee)) {
         employeeSelect.value = selectedEmployee;
-        setEmployeeName(selectedEmployee);
     }
 }
 
@@ -177,15 +177,13 @@ export function updateRefreshStatus() {
     dates.setPriorityClass(refreshArrow, status);
 }
 
-export function setEmployeeName(name) {
-    const employeeName = document.getElementById("employeeName");
-    employeeName.innerHTML = name || null;
-}
-
 export function setupSettingsActions() {
-    document.getElementById("employeeName").addEventListener("click", e => {
-        e.preventDefault();
-        showSettings(true);
+    document.getElementById("showSettings").addEventListener("click", e => {
+        if (!_settingsVisible) {
+            showSettings(true);
+        } else if (_canCloseSettings) {
+            showSettings(false);
+        }
     });
     document.getElementById("closeSettings").addEventListener("click", () => {
         showSettings(false);
@@ -193,8 +191,8 @@ export function setupSettingsActions() {
 }
 
 export function showSettings(show, canClose = true) {
+    _settingsVisible = show;
     document.getElementById("settings").classList.toggle("hidden", !show);
-    document.getElementById("info").classList.toggle("hidden", show);
     _canCloseSettings = canClose;
     document.getElementById("closeSettings").classList.toggle("hidden", !canClose);
 }
@@ -234,7 +232,7 @@ export function disableCopyEatIt() {
 
 export function ensureRefreshLoader() {
     const refreshLoader = document.querySelector('.refresh-loader');
-    if(refreshLoader.querySelector('.loader')) {
+    if (refreshLoader.querySelector('.loader')) {
         return;
     }
     const refresh = document.querySelector('.loader-panel');
