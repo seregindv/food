@@ -7,9 +7,8 @@ let _canCloseSettings = true;
 let _settingsVisible = false;
 
 export function showLoading(show) {
-    const loader = document.querySelector('#uploadContainer .loader-panel');
-    loader.classList.toggle('invisible', !show);
-    document.getElementById('closeSettings').classList.toggle('hidden', show || !_canCloseSettings);
+    const loader = document.querySelector("#uploadContainer .loader-panel");
+    loader.classList.toggle("invisible", !show);
 }
 
 export function displayError(message) {
@@ -27,7 +26,7 @@ export function clearDisplays(refreshing) {
 
 export function setToday(day) {
     document.querySelectorAll('input[name="day"]').forEach(
-        (e, i) => e.classList.toggle('today', i == day));
+        (e, i) => e.classList.toggle("today", i == day));
 }
 
 export function showTitle(show) {
@@ -179,29 +178,22 @@ export function updateRefreshStatus() {
 
 export function setupSettingsActions() {
     document.getElementById("showSettings").addEventListener("click", e => {
-        if (!_settingsVisible) {
-            showSettings(true);
-        } else if (_canCloseSettings) {
-            showSettings(false);
-        }
-    });
-    document.getElementById("closeSettings").addEventListener("click", () => {
-        showSettings(false);
+        showSettings(_settingsVisible ? false : true);
     });
 }
 
 export function showSettings(show, canClose = true) {
     _settingsVisible = show;
     document.getElementById("settings").classList.toggle("hidden", !show);
-    _canCloseSettings = canClose;
-    document.getElementById("closeSettings").classList.toggle("hidden", !canClose);
+    document.querySelector("#showSettings div").classList.toggle("rotated", show);
+    canCloseSettings(canClose);
 }
 
 export function canCloseSettings(value) {
     if (value == _canCloseSettings) {
         return;
     }
-    document.getElementById("closeSettings").classList.toggle("hidden", !value);
+    document.getElementById("showSettings").disabled = !value;
     _canCloseSettings = value;
 }
 

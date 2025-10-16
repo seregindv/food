@@ -17,9 +17,17 @@ async function onDownloadSheet(sheetLink) {
   const exportUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=xlsx`;
 
   page.showLoading(true);
+  let success = true;
   try {
     await downloadSheet(exportUrl, false);
+  }
+  catch (error) {
+    success = false;
+    throw error;
   } finally {
+    if (success) {
+      page.canCloseSettings(true);
+    }
     page.showLoading(false);
   }
 }
@@ -151,7 +159,7 @@ function populateEmployeeSelect(data) {
   const employees = Object.keys(data).sort();
   const selectedEmployee = localStorage.getItem("selectedEmployee");
   page.populateEmployees(employees, selectedEmployee);
-  if (!selectedEmployee) {
+  if (!data) {
     page.showSettings(true, false);
   }
 }
@@ -244,7 +252,7 @@ function setupEventListeners() {
     } else {
       localStorage.removeItem("selectedEmployee");
     }
-    page.canCloseSettings(!!employee);
+    // page.canCloseSettings(!!employee);
     displaySelectedData();
   });
 

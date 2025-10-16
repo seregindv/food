@@ -259,7 +259,11 @@ select {
     .transparent-button:hover:not(:disabled) {
         stroke: white;
         fill: white;
+        color: white;
         background-color: #1B75D0;
+    }
+
+    .transparent-button.glow:hover:not(:disabled) {
         box-shadow: 0 0 0 5px #1B75D0;
     }
 }
@@ -268,11 +272,24 @@ select {
     .transparent-button:active:not(:disabled) {
         stroke: white;
         fill: white;
+        color: white;
         background-color: #1B75D0;
+    }
+
+    .transparent-button.glow:active:not(:disabled) {
         box-shadow: 0 0 0 5px #1B75D0;
     }
 }
 
+.transparent-button.bordered {
+    border: 1px solid #ccc;
+}
+
+.transparent-button.texted {
+    font-size: 60px;
+    align-items: center;
+    justify-content: center;
+}
 
 .transparent-button:disabled {
     fill: lightgray;
@@ -280,6 +297,15 @@ select {
 
 .refresh-loader {
     width: 100%;
+}
+
+.animated-rotate {
+    transition: transform 0.125s linear;
+    transform: rotate(0deg);
+}
+
+.rotated {
+    transform: rotate(45deg);
 }
 
 .link-select {
@@ -300,4 +326,12 @@ select {
 
 .link-select option {
     color: #000;
+}
+
+.employee-select {
+    margin-bottom: 8px;
+    font-size: 20px;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
 }
