@@ -156,7 +156,7 @@ function extractSheetId(url) {
 }
 
 function populateEmployeeSelect(data) {
-  const employees = Object.keys(data).sort();
+  const employees = Object.keys(data).map(employee => ({ name: employee, hasMeal: !!Object.keys(data[employee])[0] })).sort();
   const selectedEmployee = localStorage.getItem("selectedEmployee");
   page.populateEmployees(employees, selectedEmployee);
   if (!data) {

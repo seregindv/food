@@ -38,15 +38,18 @@ export function showSelectors(show) {
 }
 
 export function populateEmployees(employees, selectedEmployee) {
-    const employeeSelect = getEmployeeSelect();
+const employeeSelect = getEmployeeSelect();
     employeeSelect.innerHTML = '<option value="">Выберите сотрудника</option>';
-    employees.forEach((employee) => {
+    employees.forEach(employee => {
         const option = document.createElement("option");
-        option.value = employee;
-        option.textContent = employee;
+        if (!employee.hasMeal) {
+            option.classList.add("empty");
+        }
+        option.value = employee.name;
+        option.textContent = employee.name;
         employeeSelect.appendChild(option);
     });
-    if (selectedEmployee && employees.includes(selectedEmployee)) {
+    if (selectedEmployee && employees.some(e => e.name === selectedEmployee)) {
         employeeSelect.value = selectedEmployee;
     }
 }
