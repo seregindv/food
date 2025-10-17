@@ -261,6 +261,7 @@ function setupEventListeners() {
   page.setupSettingsActions();
   refresh.init({ onStart: onRefreshStart, onAction: onRefresh, onMoving: page.onRefreshMove, threshold: 210 });
   page.onCopyEatIt({ action: copyEatIt });
+  page.onShareEatIt({ action: shareEatIt });
 }
 
 function applyMealState() {
@@ -352,7 +353,7 @@ function onRefreshStart(e) {
   }
 }
 
-async function copyEatIt() {
+function getShareData() {
   const selectedEmployee = page.getSelectedEmployee();
   if (!selectedEmployee) {
     return;
@@ -383,8 +384,18 @@ async function copyEatIt() {
     }
   }
 
-  await navigator.clipboard.writeText(text);
+  return { title: `Еда за ${selectedDay.toLowerCase()}`, text };
+}
+
+async function copyEatIt() {
+  const data = getShareData();
+  await navigator.clipboard.writeText(data.text);
   page.disableCopyEatIt();
+}
+
+async function shareEatIt() {
+  const data = getShareData();
+  await navigator.share(data);
 }
 
 page.onLoaded(() => {

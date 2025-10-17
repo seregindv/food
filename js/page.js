@@ -38,7 +38,7 @@ export function showSelectors(show) {
 }
 
 export function populateEmployees(employees, selectedEmployee) {
-const employeeSelect = getEmployeeSelect();
+    const employeeSelect = getEmployeeSelect();
     employeeSelect.innerHTML = '<option value="">Выберите сотрудника</option>';
     employees.forEach(employee => {
         const option = document.createElement("option");
@@ -202,6 +202,15 @@ export function canCloseSettings(value) {
 
 export function onCopyEatIt(e) {
     document.getElementById("copyEatIt").addEventListener("click", e.action);
+}
+
+export function onShareEatIt(e) {
+    const button = document.getElementById("shareEatIt");
+    if (navigator.share) {
+        button.addEventListener("click", e.action);
+    } else {
+        button.classList.add("hidden");
+    }
 }
 
 export function setupMealIcons(icons) {
