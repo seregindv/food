@@ -2,6 +2,7 @@ import * as page from './page.js';
 import * as storage from './storage.js';
 import { getDateString, getMonday, mealIcons } from './common.js';
 import * as refresh from './refresh.js';
+import * as mascot from './mascot.js';
 
 async function onDownloadSheet(sheetLink) {
   if (!sheetLink) {
@@ -262,6 +263,7 @@ function setupEventListeners() {
   refresh.init({ onStart: onRefreshStart, onAction: onRefresh, onMoving: page.onRefreshMove, threshold: 210 });
   page.onCopyEatIt({ action: copyEatIt });
   page.onShareEatIt({ action: shareEatIt });
+  mascot.init();
 }
 
 function applyMealState() {

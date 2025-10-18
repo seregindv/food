@@ -16,15 +16,27 @@ body {
     margin-bottom: 10px;
 }
 
-.title {
-    display: flex;
-    align-items: center;
+.mascot {
     flex: 1 1 auto;
-    overflow: hidden;
+    position: relative;
+    align-self: stretch;
 }
 
-.maskot {
+.mascot img {
+    cursor: pointer;
+    position: absolute;
+}
+
+.mascot.cake img {
+    transform: translateY(-50%);
+    top: 50%;
     width: 70px;
+}
+
+.mascot.donkey img {
+    width: 168px;
+    left: -23px;
+    bottom: -22px;
 }
 
 #sheetLinkInput {
@@ -75,6 +87,11 @@ select {
     border-radius: 5px;
     font-size: medium;
     background: white;
+}
+
+.loader-panel {
+    z-index: 9999;
+    position: relative;
 }
 
 .loader {

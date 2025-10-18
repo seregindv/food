@@ -266,6 +266,24 @@ export function setShareWarning(value) {
     document.getElementById("copyEatIt").classList.toggle("warning", value);
 }
 
+export function changeMascot(oldMascot, newMascot) {
+    const mascotElement = document.querySelector(".mascot");
+    if (oldMascot) {
+        mascotElement.classList.remove(oldMascot);
+    }
+    mascotElement.classList.add(newMascot);
+    mascotElement.querySelector("img").src = newMascot + ".png";
+}
+
+export function onChangeMascot(e) {
+    const mascotImage = document.querySelector(".mascot img");
+    mascotImage.addEventListener("click", () => e.changeMascot());
+}
+
+function getMascot() {
+    return _defaultMascot ? "cake" : "donkey";
+}
+
 function getRefreshArrow() {
     if (!_refresh) {
         _refresh = document.querySelector('.refresh');
