@@ -17,19 +17,11 @@ async function onDownloadSheet(sheetLink) {
   const exportUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=xlsx`;
 
   page.showLoading(true);
-  let success = true;
-  try {
-    await downloadSheet(exportUrl, false);
+  const success = await downloadSheet(exportUrl, false);
+  if (success) {
+    page.canCloseSettings(true);
   }
-  catch (error) {
-    success = false;
-    throw error;
-  } finally {
-    if (success) {
-      page.canCloseSettings(true);
-    }
-    page.showLoading(false);
-  }
+  page.showLoading(false);
 }
 
 async function downloadSheet(url, refreshing) {
@@ -115,9 +107,11 @@ async function downloadSheet(url, refreshing) {
       page.setDates(dates);
     }
     page.selectDate(sheetDateString);
+    return true;
   } catch (error) {
     console.error(error);
     page.displayError(error.message);
+    return false;
   }
 }
 
@@ -135,9 +129,8 @@ function onDateChanged(date) {
     return;
   }
   try {
-    const status = page.getSelectedDateStatus();
-    const day = status === 'normal' ? new Date().getDay() - 1 : -1;
-    page.setToday(day);
+    const today = getToday();
+    page.setToday(today);
 
     populateEmployeeSelect(data);
     setDefaultDaySelect();
@@ -147,6 +140,11 @@ function onDateChanged(date) {
     console.error(error);
     page.displayError("Ошибка при загрузке данных из localStorage");
   }
+}
+
+function getToday() {
+  const status = page.getSelectedDateStatus();
+  return status === "normal" ? new Date().getDay() - 1 : -1;
 }
 
 function extractSheetId(url) {
@@ -190,10 +188,11 @@ function displaySelectedData(mealOnly) {
 
   const selectedDate = page.getSelectedDate();
   const sheetData = storage.getSheetData(selectedDate) || {};
-  let selectedDay = page.getSelectedDay();
-  if (!selectedDay) {
+  const selectedDay = page.getSelectedDay();
+  let selectedDayName = selectedDay.name;
+  if (!selectedDayName) {
     const defaultSelect = getDefaultSelect();
-    selectedDay = defaultSelect.value;
+    selectedDayName = defaultSelect.value;
     defaultSelect.checked = true;
   }
 
@@ -208,11 +207,11 @@ function displaySelectedData(mealOnly) {
       if (uncheckedIndex !== undefined && !disabled) {
         uncheckedIndex = undefined;
         radio.checked = true;
-        selectedDay = radio.value;
+        selectedDayName = radio.value;
       }
       if (disabled && radio.checked) {
         radio.checked = false;
-        selectedDay = undefined;
+        selectedDayName = undefined;
         uncheckedIndex = i;
       }
       ++i;
@@ -222,14 +221,16 @@ function displaySelectedData(mealOnly) {
         const radio = radios[i];
         if (!radio.disabled) {
           radio.checked = true;
-          selectedDay = radio.value;
+          selectedDayName = radio.value;
           break;
         }
       }
     }
   }
   if (employeeData) {
-    const employeeMeals = employeeData[selectedDay];
+    const today = getToday();
+    page.setShareWarning(today !== selectedDay.index);
+    const employeeMeals = employeeData[selectedDayName];
     const hasMeal = employeeMeals && employeeMeals.length > 0;
     meals.show(hasMeal);
     if (hasMeal) {
@@ -252,7 +253,6 @@ function setupEventListeners() {
     } else {
       localStorage.removeItem("selectedEmployee");
     }
-    // page.canCloseSettings(!!employee);
     displaySelectedData();
   });
 
@@ -275,7 +275,7 @@ function applyMealState() {
     return;
   }
 
-  const day = page.getSelectedDay();
+  const day = page.getSelectedDay().name;
   if (!day) {
     return;
   }
@@ -303,7 +303,7 @@ function updateMealState(index, checked) {
     return;
   }
 
-  const day = page.getSelectedDay();
+  const day = page.getSelectedDay().name;
   if (!day) {
     return;
   }
@@ -361,7 +361,7 @@ function getShareData() {
 
   const selectedDate = page.getSelectedDate();
   const sheetData = storage.getSheetData(selectedDate) || {};
-  let selectedDay = page.getSelectedDay();
+  let selectedDay = page.getSelectedDay().name;
   if (!selectedDay) {
     return;
   }

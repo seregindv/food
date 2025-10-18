@@ -91,8 +91,14 @@ export function setStatusVisibility(visible) {
 }
 
 export function getSelectedDay() {
-    const checkedDay = document.querySelector('input[name="day"]:checked');
-    return checkedDay && checkedDay.value;
+    let i = 0;
+    for (const day of document.querySelectorAll('input[name="day"]')) {
+        if (day.checked) {
+            return { index: i, name: day.value };
+        }
+        ++i;
+    }
+    return { index: -1, name: null };
 }
 
 export function checkMeals(indexes) {
@@ -253,6 +259,11 @@ export function showRefreshLoading() {
 export function showRefreshArrow() {
     document.querySelector('.refresh-arrow').classList.remove('hidden');
     document.querySelector('.refresh-loader').classList.add('hidden');
+}
+
+export function setShareWarning(value) {
+    document.getElementById("shareEatIt").classList.toggle("warning", value);
+    document.getElementById("copyEatIt").classList.toggle("warning", value);
 }
 
 function getRefreshArrow() {
