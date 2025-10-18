@@ -19,35 +19,12 @@ body {
 .title {
     display: flex;
     align-items: center;
-    gap: 10px;
     flex: 1 1 auto;
     overflow: hidden;
 }
 
 .maskot {
     width: 70px;
-}
-
-h1 {
-    font-family: "Kablammo", serif;
-    font-size: 40px;
-    background-image: linear-gradient(90deg, red, green);
-    background-size: 200% 100%;
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: colorShift 1s infinite alternate;
-    margin: 0;
-}
-
-@keyframes colorShift {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    100% {
-        background-position: 100% 50%;
-    }
 }
 
 #sheetLinkInput {
@@ -173,7 +150,7 @@ select {
 
 .error {
     color: #dc3545;
-    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 .days {
