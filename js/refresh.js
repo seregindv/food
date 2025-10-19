@@ -29,12 +29,12 @@ export function init({ onStart, onAction, onNotSupported, onMoving, threshold })
 }
 
 function onTouchStart(e) {
+    shouldSwipe = window.scrollY === 0 && e.touches.length === 1;
+    if (!shouldSwipe && swiping) {
+        move(0);
+    }
     swiping = false;
     ready = false;
-    shouldSwipe = window.scrollY === 0;
-    if (!shouldSwipe) {
-        return;
-    }
     if (onSwipeStart) {
         const e = {};
         onSwipeStart(e);

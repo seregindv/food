@@ -79,16 +79,6 @@ body {
     gap: 15px
 }
 
-select {
-    padding: 8px;
-    margin-bottom: 3px;
-    height: 50px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: medium;
-    background: white;
-}
-
 .loader-panel {
     z-index: 9999;
     position: relative;
@@ -316,6 +306,8 @@ select {
     outline: none;
     font-size: inherit;
     width: 100%;
+    margin-bottom: 3px;
+    height: 50px;
 }
 
 .link-select option {
