@@ -269,10 +269,10 @@ export function setShareWarning(value) {
 export function changeMascot(oldMascot, newMascot) {
     const mascotElement = document.querySelector(".mascot");
     if (oldMascot) {
-        mascotElement.classList.remove(oldMascot);
+        mascotElement.classList.remove(oldMascot.name);
     }
-    mascotElement.classList.add(newMascot);
-    mascotElement.querySelector("img").src = newMascot + ".png";
+    mascotElement.classList.add(newMascot.name);
+    mascotElement.querySelector("img").src = newMascot.fileName;
 }
 
 export function onChangeMascot(e) {

@@ -65,11 +65,11 @@ export function getSheetDates() {
 }
 
 export function getMascot() {
-    return getItem("mascot")?.image;
+    return getItem("mascot")?.name;
 }
 
 export function setMascot(mascot) {
-    setItem("mascot", { image: mascot });
+    setItem("mascot", { name: mascot });
 }
 
 function setSheetDates(data) {
