@@ -168,11 +168,18 @@ function setDefaultDaySelect() {
   currentDay.checked = true;
 }
 
-function getDefaultSelect() {
+function getDefaultSelectId() {
   let currentDay = new Date().getDay();
   if (currentDay < 1 || currentDay > 5)
     currentDay = 1;
-  return document.getElementById(currentDay);
+  return currentDay;
+}
+
+function getDefaultSelect(id = -1) {
+  if (id === -1) {
+    id = getDefaultSelectId();
+  }
+  return document.getElementById(id);
 }
 
 function displaySelectedData(mealOnly) {
@@ -190,10 +197,13 @@ function displaySelectedData(mealOnly) {
   const selectedDate = page.getSelectedDate();
   const sheetData = storage.getSheetData(selectedDate) || {};
   const selectedDay = page.getSelectedDay();
+  let selectedDayIndex = selectedDay.index;
   let selectedDayName = selectedDay.name;
   if (!selectedDayName) {
-    const defaultSelect = getDefaultSelect();
+    const defaultSelectId = getDefaultSelectId();
+    const defaultSelect = getDefaultSelect(defaultSelectId);
     selectedDayName = defaultSelect.value;
+    selectedDayIndex = defaultSelectId - 1;
     defaultSelect.checked = true;
   }
 
@@ -209,10 +219,12 @@ function displaySelectedData(mealOnly) {
         uncheckedIndex = undefined;
         radio.checked = true;
         selectedDayName = radio.value;
+        selectedDayIndex = i;
       }
       if (disabled && radio.checked) {
         radio.checked = false;
         selectedDayName = undefined;
+        selectedDayIndex = undefined;
         uncheckedIndex = i;
       }
       ++i;
@@ -223,6 +235,7 @@ function displaySelectedData(mealOnly) {
         if (!radio.disabled) {
           radio.checked = true;
           selectedDayName = radio.value;
+          selectedDayIndex = i;
           break;
         }
       }
@@ -230,7 +243,7 @@ function displaySelectedData(mealOnly) {
   }
   if (employeeData) {
     const today = getToday();
-    page.setShareWarning(today !== selectedDay.index);
+    page.setShareWarning(today !== selectedDayIndex);
     const employeeMeals = employeeData[selectedDayName];
     const hasMeal = employeeMeals && employeeMeals.length > 0;
     meals.show(hasMeal);
