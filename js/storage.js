@@ -40,7 +40,6 @@ export function setSheetData(dateString, data, link) {
     if (datesChanged) {
         setSheetDates(dates);
     }
-    localStorage.removeItem(eatenKey(dateString));
     localStorage.setItem(linkKey(dateString), link);
 }
 
