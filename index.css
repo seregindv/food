@@ -258,14 +258,14 @@ body {
 }
 
 @media (pointer: coarse) {
-    .transparent-button:active:not(:disabled) {
+    .transparent-button:active:not(:disabled):not(.content-updated) {
         stroke: white;
         fill: white;
         color: white;
         background-color: #1B75D0;
     }
 
-    .transparent-button.glow:active:not(:disabled) {
+    .transparent-button.glow:active:not(:disabled):not(.content-updated) {
         box-shadow: 0 0 0 5px #1B75D0;
     }
 }

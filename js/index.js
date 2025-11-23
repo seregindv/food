@@ -65,9 +65,22 @@ async function downloadSheet(url, refreshing) {
       if (jsonData.length === 0) {
         continue;
       }
-      let mealIndexes = jsonData[0].reduce((res, curr, i) => { if (curr) res.push(i); return res; }, []);
-      if (mealIndexes.length < 7) { // when one of meal titles deleted
-        mealIndexes = [1, 3, 4, 6, 8, 10, 11];
+
+      const mealIndexes = new Array(7).fill(null);
+      const mealTitles = jsonData[0];
+      for (let j = 1; j < mealTitles.length; j++) {
+        const title = mealTitles[j]?.toLowerCase();
+        switch (title) {
+          case "завтрак": mealIndexes[0] = j; break;
+          case "сок": mealIndexes[1] = j; break;
+          case "суп": mealIndexes[2] = j; break;
+          case "сaлат": // 1st а latin
+          case "салат": mealIndexes[3] = j; break;
+          case "горячее": mealIndexes[4] = j; break;
+          case "гарниры": mealIndexes[5] = j; break;
+          case "десерт":
+          case "десерты": mealIndexes[6] = j; break;
+        }
       }
       for (let i = 1; i < jsonData.length; i++) {
         const row = jsonData[i];
@@ -80,7 +93,7 @@ async function downloadSheet(url, refreshing) {
           sheetData[employeeName] = mealsByDay = {};
         }
         const meals = new Array(7).fill(null);
-        mealIndexes.forEach((index, i) => meals[i] = row[index]);
+        mealIndexes.forEach((index, i) => { if (index !== null) meals[i] = row[index] });
         let j = meals.length - 1;
         for (; j >= 0 && !meals[j]; j--);
         if (j > 0) {
@@ -375,12 +388,12 @@ function getShareData() {
   }
 
   const selectedDate = page.getSelectedDate();
-  const sheetData = storage.getSheetData(selectedDate) || {};
   let selectedDay = page.getSelectedDay().name;
   if (!selectedDay) {
     return;
   }
 
+  const sheetData = storage.getSheetData(selectedDate) || {};
   const employeeData = sheetData[selectedEmployee];
   if (!employeeData) {
     return;
@@ -391,10 +404,14 @@ function getShareData() {
     return;
   }
 
+  const eatenAll = storage.getEatean(selectedDate) || {};
+  const employeeEaten = eatenAll[selectedEmployee] || {};
+  const eaten = employeeEaten[selectedDay] || [];
+
   let text = "Привет! Съешьте пожалуйста мою еду";
   for (let i = 0; i < employeeMeals.length; i++) {
     const meal = employeeMeals[i];
-    if (meal) {
+    if (meal && !eaten.includes(i)) {
       text += `\n\n${mealIcons[i]} ${meal}`;
     }
   }
