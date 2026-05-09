@@ -258,16 +258,31 @@ function displaySelectedData(mealOnly) {
     const today = getToday();
     page.setShareWarning(today !== selectedDayIndex);
     const employeeMeals = employeeData[selectedDayName];
-    const hasMeal = employeeMeals && employeeMeals.length > 0;
-    meals.show(hasMeal);
-    if (hasMeal) {
-      meals.setNames(i => employeeMeals[i]);
-      applyMealState();
-    }
+    renderMeals(meals, employeeMeals, selectedDayName);
   } else {
     meals.show(false);
     page.setStatus("Нет еды для сотрудника");
   }
+}
+
+function renderMeals(meals, employeeMeals, day) {
+  const hasMeal = employeeMeals && employeeMeals.length > 0;
+  meals.show(hasMeal);
+  if (!hasMeal) {
+    return;
+  }
+
+  meals.setNames(i => employeeMeals[i]);
+  page.checkMeals(getMealState(day), meals.display);
+}
+
+function renderDayPreview({ name, display }) {
+  const selectedDate = page.getSelectedDate();
+  const selectedEmployee = page.getSelectedEmployee();
+  const sheetData = storage.getSheetData(selectedDate) || {};
+  const employeeData = sheetData[selectedEmployee];
+  const employeeMeals = employeeData && employeeData[name];
+  renderMeals(page.getMeals(display), employeeMeals, name);
 }
 
 function setupEventListeners() {
@@ -284,7 +299,7 @@ function setupEventListeners() {
   });
 
   page.onDayChanged(() => displaySelectedData(true));
-  page.setupDaySwipe();
+  page.setupDaySwipe({ onPreview: renderDayPreview });
   page.onMealCheckChanged(({ index, checked }) => updateMealState(index, checked));
   page.setupSettingsActions();
   refresh.init({ onStart: onRefreshStart, onAction: onRefresh, onMoving: page.onRefreshMove, threshold: 210 });
@@ -293,7 +308,7 @@ function setupEventListeners() {
   mascot.init();
 }
 
-function applyMealState() {
+function getMealState(day) {
   const date = page.getSelectedDate();
   if (!date) {
     return;
@@ -304,21 +319,9 @@ function applyMealState() {
     return;
   }
 
-  const day = page.getSelectedDay().name;
-  if (!day) {
-    return;
-  }
-
   const eaten = storage.getEatean(date);
-  let meals;
-  if (eaten) {
-    const employeeData = eaten[employee];
-    if (employeeData) {
-      meals = employeeData[day];
-    }
-  }
-
-  page.checkMeals(meals);
+  const employeeData = eaten && eaten[employee];
+  return employeeData && employeeData[day];
 }
 
 function updateMealState(index, checked) {

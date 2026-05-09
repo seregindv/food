@@ -60,9 +60,9 @@ export function getSelectedEmployee() {
     return employeeSelect && employeeSelect.value;
 }
 
-export function getMeals() {
-    const display = document.getElementById("jsonDisplay");
+export function getMeals(display = document.getElementById("jsonDisplay")) {
     return {
+        display,
         show: function (show) {
             setHidden(display.querySelector(".values-list"), !show);
         },
@@ -102,9 +102,9 @@ export function getSelectedDay() {
     return { index: -1, name: null };
 }
 
-export function checkMeals(indexes) {
+export function checkMeals(indexes, display = document) {
     const indexSet = new Set(indexes);
-    document.querySelectorAll('input[name="meal"]').forEach((e, i) => e.checked = indexSet.has(i));
+    display.querySelectorAll('input[name="meal"]').forEach((e, i) => e.checked = indexSet.has(i));
 }
 
 export function onUpload(action) {
@@ -124,11 +124,17 @@ export function onDayChanged(action) {
     days.forEach(e => e.addEventListener("change", () => action()));
 }
 
-export function setupDaySwipe() {
+export function setupDaySwipe({ onPreview } = {}) {
     const display = document.getElementById("jsonDisplay");
     slider.init({
         element: display,
         canSlide: direction => getEnabledDay(direction) !== null,
+        onPreview: (direction, preview) => {
+            const day = getEnabledDay(direction);
+            if (day) {
+                onPreview && onPreview({ index: getDayIndex(day), name: day.value, display: preview });
+            }
+        },
         onSlide: direction => selectEnabledDay(direction)
     });
 }
@@ -320,6 +326,10 @@ function getEnabledDay(direction) {
     }
 
     return null;
+}
+
+function getDayIndex(day) {
+    return Array.from(document.querySelectorAll('input[name="day"]')).indexOf(day);
 }
 
 function getRefreshArrow() {
