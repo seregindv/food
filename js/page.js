@@ -5,6 +5,11 @@ let _refreshArrow;
 let _refreshReady;
 let _canCloseSettings = true;
 let _settingsVisible = false;
+let _daySwipeStart;
+let _daySwipeTracking = false;
+let _daySwipeHandled = false;
+const daySwipeThreshold = 60;
+const daySwipeVerticalTolerance = 40;
 
 export function showLoading(show) {
     const loader = document.querySelector("#uploadContainer .loader-panel");
@@ -121,6 +126,14 @@ export function onEmployeeChanged(action) {
 export function onDayChanged(action) {
     const days = document.querySelectorAll('input[name="day"]');
     days.forEach(e => e.addEventListener("change", () => action()));
+}
+
+export function setupDaySwipe() {
+    const display = document.getElementById("jsonDisplay");
+    display.addEventListener("touchstart", onDaySwipeStart, { passive: true });
+    display.addEventListener("touchmove", onDaySwipeMove, { passive: false });
+    display.addEventListener("touchend", onDaySwipeEnd);
+    display.addEventListener("touchcancel", resetDaySwipe);
 }
 
 export function onMealCheckChanged(action) {
@@ -282,6 +295,72 @@ export function onChangeMascot(e) {
 
 function getMascot() {
     return _defaultMascot ? "cake" : "donkey";
+}
+
+function onDaySwipeStart(e) {
+    if (e.touches.length !== 1) {
+        resetDaySwipe();
+        return;
+    }
+
+    const touch = e.touches[0];
+    _daySwipeStart = { x: touch.clientX, y: touch.clientY };
+    _daySwipeTracking = true;
+    _daySwipeHandled = false;
+}
+
+function onDaySwipeMove(e) {
+    if (!_daySwipeTracking || _daySwipeHandled || e.touches.length !== 1) {
+        return;
+    }
+
+    const touch = e.touches[0];
+    const x = touch.clientX - _daySwipeStart.x;
+    const y = touch.clientY - _daySwipeStart.y;
+
+    if (Math.abs(y) > Math.abs(x) && Math.abs(y) > daySwipeVerticalTolerance) {
+        resetDaySwipe();
+        return;
+    }
+
+    if (Math.abs(x) < daySwipeThreshold || Math.abs(y) > daySwipeVerticalTolerance) {
+        return;
+    }
+
+    if (e.cancelable) {
+        e.preventDefault();
+    }
+    selectEnabledDay(x < 0 ? 1 : -1);
+    _daySwipeHandled = true;
+}
+
+function onDaySwipeEnd() {
+    resetDaySwipe();
+}
+
+function resetDaySwipe() {
+    _daySwipeStart = undefined;
+    _daySwipeTracking = false;
+    _daySwipeHandled = false;
+}
+
+function selectEnabledDay(direction) {
+    const days = Array.from(document.querySelectorAll('input[name="day"]'));
+    const selectedIndex = days.findIndex(day => day.checked);
+    if (selectedIndex === -1) {
+        return false;
+    }
+
+    for (let i = selectedIndex + direction; i >= 0 && i < days.length; i += direction) {
+        const day = days[i];
+        if (!day.disabled) {
+            day.checked = true;
+            day.dispatchEvent(new Event("change", { bubbles: true }));
+            return true;
+        }
+    }
+
+    return false;
 }
 
 function getRefreshArrow() {
