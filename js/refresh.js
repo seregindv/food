@@ -8,6 +8,7 @@ let onSwiping;
 let onSwipeStart;
 let supportsTouch = typeof window !== 'undefined' && 'ontouchstart' in window;
 let maxSwipe = 100;
+const horizontalThreshold = 10;
 
 export function init({ onStart, onAction, onNotSupported, onMoving, threshold }) {
     if (supportsTouch) {
@@ -42,7 +43,7 @@ function onTouchStart(e) {
             return;
         }
     }
-    start = getScreenY(e);
+    start = getTouchPosition(e);
 }
 
 async function onTouchEnd(e) {
@@ -60,18 +61,23 @@ function onTouchMove(e) {
         return;
     }
 
-    const stop = getScreenY(e);
-    const swipe = stop - start;
+    const stop = getTouchPosition(e);
+    const horizontalSwipe = Math.abs(stop.x - start.x);
+    const swipe = stop.y - start.y;
+    if (!swiping && horizontalSwipe > horizontalThreshold && horizontalSwipe > Math.abs(swipe)) {
+        shouldSwipe = false;
+        return;
+    }
     if (swipe < 0) {
         if (!swiping) {
             shouldSwipe = false;
             return;
-        } else if (start > stop) {
+        } else if (start.y > stop.y) {
             start = stop;
         }
     }
     else if (swipe > maxSwipe) {
-        start = stop - maxSwipe;
+        start.y = stop.y - maxSwipe;
     }
 
     pullDown(swipe);
@@ -80,8 +86,8 @@ function onTouchMove(e) {
     }
 }
 
-function getScreenY(e) {
-    return e.touches[0].screenY;
+function getTouchPosition(e) {
+    return { x: e.touches[0].screenX, y: e.touches[0].screenY };
 }
 
 function pullDown(swipe) {
