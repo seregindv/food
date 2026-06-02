@@ -74,6 +74,7 @@ async function downloadSheet(url, refreshing) {
           case "сaлат": // 1st а latin
           case "салат": mealIndexes[3] = j; break;
           case "горячее": mealIndexes[4] = j; break;
+          case "гарнир":
           case "гарниры": mealIndexes[5] = j; break;
           case "десерт":
           case "десерты": mealIndexes[6] = j; break;
