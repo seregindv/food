@@ -243,8 +243,20 @@ export function setupMealIcons(icons) {
         loaderIcons.forEach(loaderIcon => loaderIcon.appendChild(span));
     }
 
+    const mealTemplate = document.getElementById("meal-template");
+    const meals = document.querySelector(".meals");
     for (let i = 0; i < icons.length; ++i) {
-        document.getElementById(`meal${i + 1}`).setAttribute("icon", icons[i]);
+        const mealId = `meal${i + 1}`;
+        const meal = mealTemplate.content.cloneNode(true);
+        
+        const input = meal.getElementById('meal1');
+        input.id = mealId;
+        input.setAttribute("icon", icons[i]);
+        
+        const label = meal.querySelector('label');
+        label.htmlFor = mealId;
+        
+        meals.appendChild(meal);
     }
 }
 

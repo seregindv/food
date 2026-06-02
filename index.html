@@ -96,54 +96,16 @@
 
     <div id="jsonDisplay">
       <div class="values-list hidden">
-        <div class="meal">
-          <input type="checkbox" id="meal1" name="meal" />
-          <label for="meal1" class="meal-name">
-            <div></div>
-            <div></div>
-          </label>
-        </div>
-        <div class="meal">
-          <input type="checkbox" id="meal2" name="meal" />
-          <label for="meal2" class="meal-name">
-            <div></div>
-            <div></div>
-          </label>
-        </div>
-        <div class="meal">
-          <input type="checkbox" id="meal3" name="meal" />
-          <label for="meal3" class="meal-name">
-            <div></div>
-            <div></div>
-          </label>
-        </div>
-        <div class="meal">
-          <input type="checkbox" id="meal4" name="meal" />
-          <label for="meal4" class="meal-name">
-            <div></div>
-            <div></div>
-          </label>
-        </div>
-        <div class="meal">
-          <input type="checkbox" id="meal5" name="meal" />
-          <label for="meal5" class="meal-name">
-            <div></div>
-            <div></div>
-          </label>
-        </div>
-        <div class="meal">
-          <input type="checkbox" id="meal6" name="meal" />
-          <label for="meal6" class="meal-name">
-            <div></div>
-            <div></div>
-          </label>
-        </div>
-        <div class="meal">
-          <input type="checkbox" id="meal7" name="meal" />
-          <label for="meal7" class="meal-name">
-            <div></div>
-            <div></div>
-          </label>
+        <template id="meal-template">
+          <div class="meal">
+            <input type="checkbox" id="meal1" name="meal" />
+            <label for="meal1" class="meal-name">
+              <div></div>
+              <div></div>
+            </label>
+          </div>
+        </template>
+        <div class="meals">
         </div>
         <div style="text-align: right; margin-top: 20px; display: flex">
           <button id="shareEatIt" class="transparent-button glow" style="margin-left: 50%; transform: translateX(-50%)">
@@ -166,11 +128,10 @@
             </svg>
           </button>
         </div>
+        <div id="noData" class="hidden"></div>
       </div>
-      <div id="noData" class="hidden"></div>
-    </div>
 
-  </div>
+    </div>
 </body>
 
 </html>

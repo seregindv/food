@@ -49,11 +49,7 @@ async function downloadSheet(url, refreshing) {
 
       const worksheet = workbook.Sheets[sheetName];
       if (!sheetDate) {
-        const cell = worksheet["B1"];
-        if (cell?.v) {
-          const date = XLSX.SSF.parse_date_code(cell.v);
-          sheetDate = new Date(date.y, date.m - 1, date.d - i);
-        }
+        sheetDate = parseDate(worksheet["B1"], i);
       }
 
       const jsonData = XLSX.utils.sheet_to_json(worksheet, {
@@ -66,12 +62,13 @@ async function downloadSheet(url, refreshing) {
         continue;
       }
 
-      const mealIndexes = new Array(7).fill(null);
+      const mealIndexes = new Array(mealIcons.length).fill(null);
       const mealTitles = jsonData[0];
       for (let j = 1; j < mealTitles.length; j++) {
         const title = mealTitles[j]?.toLowerCase();
         switch (title) {
           case "завтрак": mealIndexes[0] = j; break;
+          case "напиток":
           case "сок": mealIndexes[1] = j; break;
           case "суп": mealIndexes[2] = j; break;
           case "сaлат": // 1st а latin
@@ -80,6 +77,7 @@ async function downloadSheet(url, refreshing) {
           case "гарниры": mealIndexes[5] = j; break;
           case "десерт":
           case "десерты": mealIndexes[6] = j; break;
+          case "соусы и топпинги": mealIndexes[7] = j; break;
         }
       }
       for (let i = 1; i < jsonData.length; i++) {
@@ -106,6 +104,9 @@ async function downloadSheet(url, refreshing) {
       throw new Error("Не удалось ничего прочитать");
     }
     if (!sheetDate) {
+      sheetDate = parseDate(workbook.Sheets["WD"]?.["H3"]);
+    }
+    if (!sheetDate) {
       throw new Error("Не удалось найти дату");
     }
 
@@ -127,6 +128,15 @@ async function downloadSheet(url, refreshing) {
     page.displayError(error.message);
     return false;
   }
+}
+
+function parseDate(cell, dateOffset = 0) {
+  const value = cell?.v;
+  if (!value) {
+    return null;
+  }
+  const date = XLSX.SSF.parse_date_code(value);
+  return new Date(date.y, date.m - 1, date.d - dateOffset);
 }
 
 function loadMapFromLocalStorage() {
@@ -435,6 +445,6 @@ async function shareEatIt() {
 }
 
 page.onLoaded(() => {
-  loadMapFromLocalStorage();
   setupEventListeners();
+  loadMapFromLocalStorage();
 });
