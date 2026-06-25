@@ -42,8 +42,9 @@ async function downloadSheet(url, refreshing) {
     const sheetData = {};
     let sheetDate;
     let i = 0;
-    for (const sheetName of ["Пн", "Вт", "Ср", "Чт", "Пт"]) {
-      if (!workbook.SheetNames.includes(sheetName)) {
+    for (const dayName of ["пн", "вт", "ср", "чт", "пт"]) {
+      const sheetName = workbook.SheetNames.find(name => name.toLowerCase() == dayName);
+      if (!sheetName) {
         continue;
       }
 
@@ -54,7 +55,7 @@ async function downloadSheet(url, refreshing) {
 
       const jsonData = XLSX.utils.sheet_to_json(worksheet, {
         defval: null,
-        range: "B4:M100",
+        range: "B3:M100",
         header: 1,
         blankrows: false,
       });
@@ -63,25 +64,32 @@ async function downloadSheet(url, refreshing) {
       }
 
       const mealIndexes = new Array(mealIcons.length).fill(null);
-      const mealTitles = jsonData[0];
-      for (let j = 1; j < mealTitles.length; j++) {
-        const title = mealTitles[j]?.toLowerCase();
-        switch (title) {
-          case "завтрак": mealIndexes[0] = j; break;
-          case "напиток":
-          case "сок": mealIndexes[1] = j; break;
-          case "суп": mealIndexes[2] = j; break;
-          case "сaлат": // 1st а latin
-          case "салат": mealIndexes[3] = j; break;
-          case "горячее": mealIndexes[4] = j; break;
-          case "гарнир":
-          case "гарниры": mealIndexes[5] = j; break;
-          case "десерт":
-          case "десерты": mealIndexes[6] = j; break;
-          case "соусы и топпинги": mealIndexes[7] = j; break;
+      let mealTitleRow = 0;
+      for (; mealTitleRow < 2; mealTitleRow++) {
+        const mealTitles = jsonData[mealTitleRow];
+        for (let j = 1; j < mealTitles.length; j++) {
+          const title = mealTitles[j]?.toLowerCase && mealTitles[j].toLowerCase();
+          switch (title) {
+            case "завтрак": mealIndexes[0] = j; break;
+            case "напиток":
+            case "сок": mealIndexes[1] = j; break;
+            case "суп": mealIndexes[2] = j; break;
+            case "сaлат": // 1st а latin
+            case "салат": mealIndexes[3] = j; break;
+            case "горячее": mealIndexes[4] = j; break;
+            case "гарнир":
+            case "гарниры": mealIndexes[5] = j; break;
+            case "десерт":
+            case "десерты": mealIndexes[6] = j; break;
+            case "соусы и топпинги": mealIndexes[7] = j; break;
+            case "сендвичи": mealIndexes[8] = j; break;
+          }
+        }
+        if (mealIndexes.some(index => index !== null)) {
+          break;
         }
       }
-      for (let i = 1; i < jsonData.length; i++) {
+      for (let i = mealTitleRow + 1; i < jsonData.length; i++) {
         const row = jsonData[i];
         let employeeName = row[0];
         if (employeeName == null || !(employeeName = employeeName.toString().trim()) || !employeeName.includes(" ")) {
@@ -96,7 +104,7 @@ async function downloadSheet(url, refreshing) {
         let j = meals.length - 1;
         for (; j >= 0 && !meals[j]; j--);
         if (j > 0) {
-          mealsByDay[sheetName] = meals.slice(0, j + 1);
+          mealsByDay[dayName] = meals.slice(0, j + 1);
         }
       }
       ++i;

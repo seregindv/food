@@ -70,7 +70,7 @@ export function getMeals(display = document.getElementById("jsonDisplay")) {
             let i = 0;
             for (const listItem of display.querySelectorAll(".meal-name")) {
                 const meal = getName(i);
-                const meals = meal?.split("/") || [];
+                const meals = meal?.split(/(?<=[\s+\p{Script=Cyrillic}])[\/\\](?=[\s+\p{Script=Latin}])/u) || [];
                 const divs = listItem.querySelectorAll("div");
                 divs[0].innerText = meals[1] || meals[0] || null;
                 divs[1].innerText = meals[1] && meals[0] || null;
