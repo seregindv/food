@@ -1,6 +1,6 @@
 import * as page from './page.js';
 import * as storage from './storage.js';
-import { getDateString, getMonday, mealIcons } from './common.js';
+import { getDateString, getDownloadSheetUrl, getMonday, mealIcons } from './common.js';
 import * as refresh from './refresh.js';
 import * as mascot from './mascot.js';
 
@@ -15,20 +15,20 @@ async function onDownloadSheet(sheetLink) {
     return;
   }
 
-  const exportUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=xlsx`;
-
   page.showLoading(true);
-  const success = await downloadSheet(exportUrl, false);
+  const success = await downloadSheet(sheetId, false);
   if (success) {
     page.canCloseSettings(true);
   }
   page.showLoading(false);
 }
 
-async function downloadSheet(url, refreshing) {
+async function downloadSheet(sheetId, refreshing) {
   try {
     page.clearDisplays(refresh);
-    const response = await fetch(url, {
+    const sheetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}`;
+    const downloadUrl = getDownloadSheetUrl(sheetUrl);
+    const response = await fetch(downloadUrl, {
       method: "GET",
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -125,7 +125,7 @@ async function downloadSheet(url, refreshing) {
     }
 
     const sheetDateString = getDateString(sheetDate);
-    storage.setSheetData(sheetDateString, sheetData, url);
+    storage.setSheetData(sheetDateString, sheetData, sheetUrl);
     const dates = storage.getSheetDates();
     if (!refreshing) {
       page.setDates(dates);
@@ -390,7 +390,8 @@ async function onRefresh() {
     page.showRefreshLoading();
     const date = page.getSelectedDate();
     const link = storage.getLink(date);
-    await downloadSheet(link, true);
+    const downloadUrl = getDownloadSheetUrl(link);
+    await downloadSheet(downloadUrl, true);
   } finally {
     page.showRefreshArrow();
   }

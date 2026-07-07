@@ -14,4 +14,8 @@ export function getMonthName(date) {
   return date.toLocaleString('ru-RU', { month: 'long' });
 }
 
+export function getDownloadSheetUrl(sheetUrl) {
+  return `${sheetUrl}/export?format=xlsx`;
+}
+
 export const mealIcons = ["🍳", "🧋", "🍲", "🥗", "🍗", "🍟", "🍰", "🧂", "🥪"];
