@@ -43,6 +43,23 @@ export function setSheetData(dateString, data, link) {
     localStorage.setItem(linkKey(dateString), link);
 }
 
+export function getSheets() {
+    const dates = getSheetDates() || [];
+    return dates.sort().map(date => ({ date, link: getLink(date) }));
+}
+
+export function deleteSheet(dateString) {
+    const dates = getSheetDates() || [];
+    const index = dates.indexOf(dateString);
+    if (index !== -1) {
+        dates.splice(index, 1);
+        setSheetDates(dates);
+    }
+    localStorage.removeItem(eatenKey(dateString));
+    localStorage.removeItem(dataKey(dateString));
+    localStorage.removeItem(linkKey(dateString));
+}
+
 export function getEatean(dateString) {
     return getItem(eatenKey(dateString));
 }

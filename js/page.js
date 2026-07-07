@@ -108,9 +108,47 @@ export function checkMeals(indexes, display = document) {
 }
 
 export function onUpload(action) {
-    document.getElementById("uploadBtn").addEventListener("click", () => {
+    document.getElementById("uploadForm").addEventListener("submit", e => {
+        e.preventDefault();
         const sheetLink = document.getElementById("sheetLinkInput").value.trim();
         action(sheetLink);
+    });
+}
+
+export function renderLoadedSheets(sheets) {
+    const loadedSheets = document.getElementById("loadedSheets");
+    loadedSheets.innerHTML = "";
+    for (const sheet of sheets) {
+        const row = document.createElement("div");
+
+        const link = document.createElement("a");
+        link.href = sheet.link;
+        link.textContent = formatSheetDate(sheet.date);
+        link.target = "_blank";
+        link.rel = "noopener";
+        link.className = dates.getPriorityClass(sheet.date);
+        row.appendChild(link);
+
+        const deleteCell = document.createElement("div");
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "sheet-delete";
+        button.dataset.date = sheet.date;
+        button.textContent = "+";
+        button.setAttribute("aria-label", `Удалить ${link.textContent}`);
+        deleteCell.appendChild(button);
+        row.appendChild(deleteCell);
+
+        loadedSheets.appendChild(row);
+    }
+}
+
+export function onDeleteSheet(action) {
+    document.getElementById("loadedSheets").addEventListener("click", e => {
+        const button = e.target.closest(".sheet-delete");
+        if (button) {
+            action(button.dataset.date);
+        }
     });
 }
 
@@ -342,6 +380,14 @@ function getEnabledDay(direction) {
 
 function getDayIndex(day) {
     return Array.from(document.querySelectorAll('input[name="day"]')).indexOf(day);
+}
+
+function formatSheetDate(date) {
+    const [year, month, day] = date.split("-").map(Number);
+    return new Date(year, month - 1, day).toLocaleDateString('ru-RU', {
+        day: 'numeric',
+        month: 'long'
+    });
 }
 
 function getRefreshArrow() {

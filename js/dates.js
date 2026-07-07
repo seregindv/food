@@ -62,14 +62,7 @@ export function setDates(dates) {
             header.innerHTML = getMonthName(date);
             content.innerHTML = new Date(date).getDate();
 
-            let monday = getMonday();
-            let nextMonday = new Date(monday);
-            nextMonday = new Date(nextMonday.setDate(nextMonday.getDate() + 7));
-            monday = getDateString(monday);
-            nextMonday = getDateString(nextMonday);
-
-            const priority = date < monday ? sheetPriority.late
-                : date >= nextMonday ? sheetPriority.early : sheetPriority.normal;
+            const priority = getPriority(date);
             setPriorityClass(element, priorityToClass(priority), append);
 
             _dates.push({ date, priority });
@@ -113,6 +106,10 @@ export function getSelectedDateStatus() {
     return priorityToClass(priority);
 }
 
+export function getPriorityClass(date) {
+    return priorityToClass(getPriority(date));
+}
+
 export function setPriorityClass(element, priority, newElement) {
     if (!newElement) {
         element.classList.remove(priorityToClass(1));
@@ -120,6 +117,17 @@ export function setPriorityClass(element, priority, newElement) {
         element.classList.remove(priorityToClass(3));
     }
     element.classList.add(priority);
+}
+
+function getPriority(date) {
+    let monday = getMonday();
+    let nextMonday = new Date(monday);
+    nextMonday = new Date(nextMonday.setDate(nextMonday.getDate() + 7));
+    monday = getDateString(monday);
+    nextMonday = getDateString(nextMonday);
+
+    return date < monday ? sheetPriority.late
+        : date >= nextMonday ? sheetPriority.early : sheetPriority.normal;
 }
 
 function priorityToClass(priority) {

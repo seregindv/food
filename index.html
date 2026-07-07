@@ -41,16 +41,19 @@
 
     <div id="settings" class="hidden">
       <div id="uploadContainer">
-        <input type="search" id="sheetLinkInput" autocomplete="off" placeholder="Ссылка на Google-таблицу">
-        <div class="flex gap-8">
-          <button id="uploadBtn">Загрузить</button>
-          <div class="loader-panel flex flex-stretch invisible">
-            <img src="excel.svg" height="32">
-            <div class="loader">
+        <div class="loaded-sheets" id="loadedSheets"></div>
+        <form id="uploadForm">
+          <input type="search" id="sheetLinkInput" autocomplete="off" placeholder="Ссылка на Google-таблицу">
+          <div class="flex gap-8">
+            <button type="submit" id="uploadBtn">Загрузить</button>
+            <div class="loader-panel flex flex-stretch invisible">
+              <img src="excel.svg" height="32">
+              <div class="loader">
+              </div>
+              <img src="fridge.svg" height="62">
             </div>
-            <img src="fridge.svg" height="62">
           </div>
-        </div>
+        </form>
       </div>
     </div>
 

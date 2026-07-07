@@ -126,6 +126,7 @@ async function downloadSheet(sheetId, refreshing) {
 
     const sheetDateString = getDateString(sheetDate);
     storage.setSheetData(sheetDateString, sheetData, sheetUrl);
+    page.renderLoadedSheets(storage.getSheets());
     const dates = storage.getSheetDates();
     if (!refreshing) {
       page.setDates(dates);
@@ -151,12 +152,14 @@ function parseDate(cell, dateOffset = 0) {
 function loadMapFromLocalStorage() {
   const sheetDates = storage.getSheetDates();
   page.initDates(sheetDates, date => onDateChanged(date));
+  page.renderLoadedSheets(storage.getSheets());
   page.selectDefaultDate();
 }
 
 function onDateChanged(date) {
   const data = date && storage.getSheetData(date);
   if (!data) {
+    page.clearDisplays(false);
     page.showSelectors(false);
     page.showSettings(true, false);
     return;
@@ -307,6 +310,7 @@ function renderDayPreview({ name, display }) {
 function setupEventListeners() {
   page.setupMealIcons(mealIcons);
   page.onUpload(sheetLink => onDownloadSheet(sheetLink));
+  page.onDeleteSheet(date => deleteSheet(date));
 
   page.onEmployeeChanged(employee => {
     if (employee) {
@@ -325,6 +329,19 @@ function setupEventListeners() {
   page.onCopyEatIt({ action: copyEatIt });
   page.onShareEatIt({ action: shareEatIt });
   mascot.init();
+}
+
+function deleteSheet(date) {
+  const selectedDate = page.getSelectedDate();
+  storage.deleteSheet(date);
+  const dates = storage.getSheetDates();
+  page.setDates(dates);
+  page.renderLoadedSheets(storage.getSheets());
+  if (selectedDate && dates?.includes(selectedDate)) {
+    page.selectDate(selectedDate);
+  } else {
+    page.selectDefaultDate();
+  }
 }
 
 function getMealState(day) {
@@ -390,8 +407,7 @@ async function onRefresh() {
     page.showRefreshLoading();
     const date = page.getSelectedDate();
     const link = storage.getLink(date);
-    const downloadUrl = getDownloadSheetUrl(link);
-    await downloadSheet(downloadUrl, true);
+    await downloadSheet(extractSheetId(link), true);
   } finally {
     page.showRefreshArrow();
   }

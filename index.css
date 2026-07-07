@@ -48,6 +48,54 @@ body {
     box-sizing: border-box;
 }
 
+.loaded-sheets {
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+.loaded-sheets>div {
+    display: inline-flex;
+    align-items: start;
+    margin-right: 10px;
+}
+
+.loaded-sheets a {
+    text-decoration: none;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    display: block;
+}
+
+.loaded-sheets a:hover {
+    text-decoration: underline;
+}
+
+.loaded-sheets .early {
+    background-color: #eeb509;
+}
+
+.loaded-sheets .normal {
+    background-color: #28a745;
+}
+
+.loaded-sheets .late {
+    background-color: #dc3545;
+}
+
+.sheet-delete {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: #231F20;
+    font-size: 34px;
+    line-height: 28px;
+    transform: rotate(45deg);
+}
+
 #uploadBtn,
 #closeSettings {
     padding: 8px 16px;
