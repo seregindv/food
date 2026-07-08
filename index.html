@@ -28,8 +28,9 @@
         <img />
       </div>
       <div class="sheet-dates rect-radios" id="sheetDates"></div>
-      <button id="showSettings" style="margin-left: 6px" class="transparent-button bordered texted content-updated">
-        <div class="animated-rotate">+</div>
+      <button id="showSettings" style="margin-left: 6px"
+        class="transparent-button bordered texted emoji content-updated">
+        <div class="animated-rotate">⚙️</div>
       </button>
     </div>
 
@@ -45,7 +46,10 @@
         <form id="uploadForm">
           <input type="search" id="sheetLinkInput" autocomplete="off" placeholder="Ссылка на Google-таблицу">
           <div class="flex gap-8">
-            <button type="submit" id="uploadBtn">Загрузить</button>
+            <div>
+              <button type="submit" id="uploadBtn" class="button"">Загрузить</button>
+              <button type=" button" id="addBtn" class="button">Добавить...</button>
+            </div>
             <div class="loader-panel flex flex-stretch invisible">
               <img src="excel.svg" height="32">
               <div class="loader">
@@ -56,6 +60,17 @@
         </form>
       </div>
     </div>
+
+    <dialog id="addDaysDialog">
+      <form method="dialog">
+        <h3>Добавить дни</h3>
+        <div id="addDaysChoices" class="add-days-choices"></div>
+        <div class="dialog-actions">
+          <button value="cancel" class="button">Отмена</button>
+          <button value="confirm" id="confirmAddDays" class="button">ОК</button>
+        </div>
+      </form>
+    </dialog>
 
     <template id="sheetDate">
       <div class="sheet-date">

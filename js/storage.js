@@ -72,6 +72,17 @@ export function setEaten(dateString, data) {
     return setItem(eatenKey(dateString), data);
 }
 
+export function clearEatenDays(dateString, dayNames) {
+    const eaten = getEatean(dateString);
+    if (!eaten) {
+        return;
+    }
+    for (const employeeData of Object.values(eaten)) {
+        dayNames.forEach(dayName => delete employeeData[dayName]);
+    }
+    setEaten(dateString, eaten);
+}
+
 export function getSheetData(dateString) {
     return getItem(dataKey(dateString));
 }

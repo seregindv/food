@@ -115,6 +115,36 @@ export function onUpload(action) {
     });
 }
 
+export function onAddSheet(action) {
+    const button = document.getElementById("addBtn");
+    button.addEventListener("click", () => {
+        const sheetLink = document.getElementById("sheetLinkInput").value.trim();
+        action(sheetLink);
+    });
+}
+
+export function chooseDays(dayNames) {
+    const dialog = document.getElementById("addDaysDialog");
+    const choices = document.getElementById("addDaysChoices");
+    choices.innerHTML = "";
+    for (const dayName of dayNames) {
+        const label = document.createElement("label");
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.value = dayName;
+        label.append(checkbox, ` ${dayName}`);
+        choices.appendChild(label);
+    }
+
+    return new Promise(resolve => {
+        dialog.addEventListener("close", () => {
+            const selectedDays = Array.from(choices.querySelectorAll("input:checked"), input => input.value);
+            resolve(dialog.returnValue === "confirm" ? selectedDays : null);
+        }, { once: true });
+        dialog.showModal();
+    });
+}
+
 export function renderLoadedSheets(sheets) {
     const loadedSheets = document.getElementById("loadedSheets");
     loadedSheets.innerHTML = "";

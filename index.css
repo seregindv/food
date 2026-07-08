@@ -96,8 +96,7 @@ body {
     transform: rotate(45deg);
 }
 
-#uploadBtn,
-#closeSettings {
+.button {
     padding: 8px 16px;
     cursor: pointer;
     border: none;
@@ -107,6 +106,52 @@ body {
 }
 
 #uploadBtn {
+    display: block;
+    color: white;
+    background-color: #28a745;
+    width: 100%;
+}
+
+#addBtn {
+    display: block;
+    margin-top: 8px;
+    background: transparent;
+    border: 1px solid #ccc;
+    width: 100%;
+}
+
+#addDaysDialog {
+    border: none;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+#addDaysDialog::backdrop {
+    background: rgb(0 0 0 / 35%);
+}
+
+#addDaysDialog h3 {
+    margin-top: 0;
+}
+
+.add-days-choices {
+    display: flex;
+    gap: 12px;
+    margin: 16px 0 20px;
+}
+
+.add-days-choices label {
+    cursor: pointer;
+    text-transform: capitalize;
+}
+
+.dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+#confirmAddDays {
     color: white;
     background-color: #28a745;
 }
@@ -303,10 +348,15 @@ body {
 }
 
 @media (pointer: fine) {
-    .transparent-button:hover:not(:disabled) {
+    .transparent-button:not(.emoji):hover:not(:disabled) {
         stroke: white;
         fill: white;
         color: white;
+        background-color: #1B75D0;
+    }
+
+    .transparent-button.emoji:hover:not(:disabled) {
+        text-shadow: 0 0 0 #fff;
         background-color: #1B75D0;
     }
 
@@ -316,10 +366,15 @@ body {
 }
 
 @media (pointer: coarse) {
-    .transparent-button:active:not(:disabled):not(.content-updated) {
+    .transparent-button:not(.emoji):active:not(:disabled):not(.content-updated) {
         stroke: white;
         fill: white;
         color: white;
+        background-color: #1B75D0;
+    }
+
+    .transparent-button.emoji:active:not(:disabled):not(.content-updated) {
+        text-shadow: 0 0 0 #fff;
         background-color: #1B75D0;
     }
 
@@ -333,9 +388,15 @@ body {
 }
 
 .transparent-button.texted {
-    font-size: 60px;
+    font-size: 38px;
     align-items: center;
     justify-content: center;
+}
+
+.transparent-button.texted.emoji {
+    color: transparent;
+    text-shadow: 0 0 0 #000;
+    line-height: 0;
 }
 
 .transparent-button:disabled {

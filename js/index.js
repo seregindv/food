@@ -39,6 +39,30 @@ async function downloadSheet(sheetId, refreshing) {
     }
     const arrayBuffer = await response.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer, { type: "array" });
+    const { sheetData, sheetDate } = parseWorkbook(workbook);
+
+    if (!refreshing) {
+      const monday = getMonday();
+      storage.dropOldSheets(getDateString(monday));
+    }
+
+    const sheetDateString = getDateString(sheetDate);
+    storage.setSheetData(sheetDateString, sheetData, sheetUrl);
+    page.renderLoadedSheets(storage.getSheets());
+    const dates = storage.getSheetDates();
+    if (!refreshing) {
+      page.setDates(dates);
+    }
+    page.selectDate(sheetDateString);
+    return true;
+  } catch (error) {
+    console.error(error);
+    page.displayError(error.message);
+    return false;
+  }
+}
+
+function parseWorkbook(workbook, requireDate = true) {
     const sheetData = {};
     let sheetDate;
     let i = 0;
@@ -109,31 +133,73 @@ async function downloadSheet(sheetId, refreshing) {
     if (Object.keys(sheetData).length === 0) {
       throw new Error("Не удалось ничего прочитать");
     }
-    if (!sheetDate) {
+    if (requireDate && !sheetDate) {
       sheetDate = parseDate(workbook.Sheets["WD"]?.["H3"]);
     }
-    if (!sheetDate) {
+    if (requireDate && !sheetDate) {
       throw new Error("Не удалось найти дату");
     }
 
-    if (!refreshing) {
-      const monday = getMonday();
-      storage.dropOldSheets(getDateString(monday));
+    return { sheetData, sheetDate };
+}
+
+async function onAddSheet(sheetLink) {
+  const selectedDate = page.getSelectedDate();
+  if (!selectedDate) {
+    page.displayError("Сначала выберите неделю");
+    return;
+  }
+  if (!sheetLink) {
+    page.displayError("Пожалуйста, введите ссылку");
+    return;
+  }
+  const sheetId = extractSheetId(sheetLink);
+  if (!sheetId) {
+    page.displayError("Неверная ссылка на Google-таблицу");
+    return;
+  }
+
+  try {
+    page.displayError("");
+    page.showLoading(true);
+    const downloadUrl = getDownloadSheetUrl(`https://docs.google.com/spreadsheets/d/${sheetId}`);
+    const response = await fetch(downloadUrl);
+    if (!response.ok) {
+      throw new Error(`Ошибка загрузки таблицы: ${response.statusText}`);
+    }
+    const workbook = XLSX.read(await response.arrayBuffer(), { type: "array" });
+    const { sheetData } = parseWorkbook(workbook, false);
+    page.showLoading(false);
+    const availableDays = ["пн", "вт", "ср", "чт", "пт"].filter(dayName =>
+      Object.values(sheetData).some(employeeData => employeeData[dayName]?.some(meal => meal)));
+    if (availableDays.length === 0) {
+      throw new Error("Не удалось найти дни с едой");
+    }
+    const selectedDays = await page.chooseDays(availableDays);
+    if (!selectedDays || selectedDays.length === 0) {
+      return;
     }
 
-    const sheetDateString = getDateString(sheetDate);
-    storage.setSheetData(sheetDateString, sheetData, sheetUrl);
-    page.renderLoadedSheets(storage.getSheets());
-    const dates = storage.getSheetDates();
-    if (!refreshing) {
-      page.setDates(dates);
+    const currentData = storage.getSheetData(selectedDate) || {};
+    for (const employeeData of Object.values(currentData)) {
+      selectedDays.forEach(dayName => delete employeeData[dayName]);
     }
-    page.selectDate(sheetDateString);
-    return true;
+    for (const [employee, importedData] of Object.entries(sheetData)) {
+      for (const dayName of selectedDays) {
+        if (importedData[dayName]) {
+          (currentData[employee] ||= {})[dayName] = importedData[dayName];
+        }
+      }
+    }
+
+    storage.setSheetData(selectedDate, currentData);
+    storage.clearEatenDays(selectedDate, selectedDays);
+    onDateChanged(selectedDate);
   } catch (error) {
     console.error(error);
     page.displayError(error.message);
-    return false;
+  } finally {
+    page.showLoading(false);
   }
 }
 
@@ -307,6 +373,7 @@ function renderDayPreview({ name, display }) {
 function setupEventListeners() {
   page.setupMealIcons(mealIcons);
   page.onUpload(sheetLink => onDownloadSheet(sheetLink));
+  page.onAddSheet(sheetLink => onAddSheet(sheetLink));
   page.onDeleteSheet(date => deleteSheet(date));
 
   page.onEmployeeChanged(employee => {
