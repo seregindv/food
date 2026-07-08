@@ -40,12 +40,36 @@ export function setSheetData(dateString, data, link) {
     if (datesChanged) {
         setSheetDates(dates);
     }
-    localStorage.setItem(linkKey(dateString), link);
+    setItem(linkKey(dateString), { main: link });
+}
+
+export function setAddedSheetLink(dateString, link, dayNames) {
+    const links = getSheetLinks(dateString);
+    const selectedDays = new Set(dayNames);
+    for (const key of Object.keys(links)) {
+        if (key === "main") {
+            continue;
+        }
+        const existingLink = links[key];
+        const remainingDays = key.split("-").filter(dayName => !selectedDays.has(dayName));
+        delete links[key];
+        if (remainingDays.length > 0) {
+            links[remainingDays.join("-")] = existingLink;
+        }
+    }
+    links[dayNames.join("-")] = link;
+    setItem(linkKey(dateString), links);
 }
 
 export function getSheets() {
     const dates = getSheetDates() || [];
-    return dates.sort().map(date => ({ date, link: getLink(date) }));
+    return dates.sort().map(date => {
+        const links = getSheetLinks(date);
+        const additions = Object.entries(links)
+            .filter(([key]) => key !== "main")
+            .map(([days, link]) => ({ days, link }));
+        return { date, link: links.main, additions };
+    });
 }
 
 export function deleteSheet(dateString) {
@@ -65,7 +89,11 @@ export function getEatean(dateString) {
 }
 
 export function getLink(dateString) {
-    return localStorage.getItem(linkKey(dateString));
+    return getSheetLinks(dateString).main;
+}
+
+export function getSheetLinks(dateString) {
+    return getItem(linkKey(dateString)) || { main: null };
 }
 
 export function setEaten(dateString, data) {

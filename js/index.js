@@ -47,7 +47,7 @@ async function downloadSheet(sheetId, refreshing) {
     }
 
     const sheetDateString = getDateString(sheetDate);
-    storage.setSheetData(sheetDateString, sheetData, sheetUrl);
+    storage.setSheetData(sheetDateString, sheetData, refreshing ? null : sheetUrl);
     page.renderLoadedSheets(storage.getSheets());
     const dates = storage.getSheetDates();
     if (!refreshing) {
@@ -193,7 +193,12 @@ async function onAddSheet(sheetLink) {
     }
 
     storage.setSheetData(selectedDate, currentData);
+    storage.setAddedSheetLink(
+      selectedDate,
+      `https://docs.google.com/spreadsheets/d/${sheetId}`,
+      selectedDays);
     storage.clearEatenDays(selectedDate, selectedDays);
+    page.renderLoadedSheets(storage.getSheets());
     onDateChanged(selectedDate);
   } catch (error) {
     console.error(error);

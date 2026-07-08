@@ -117,7 +117,8 @@ export function onUpload(action) {
 
 export function onAddSheet(action) {
     const button = document.getElementById("addBtn");
-    button.addEventListener("click", () => {
+    button.addEventListener("click", e => {
+        e.preventDefault();
         const sheetLink = document.getElementById("sheetLinkInput").value.trim();
         action(sheetLink);
     });
@@ -151,13 +152,12 @@ export function renderLoadedSheets(sheets) {
     for (const sheet of sheets) {
         const row = document.createElement("div");
 
-        const link = document.createElement("a");
-        link.href = sheet.link;
-        link.textContent = formatSheetDate(sheet.date);
-        link.target = "_blank";
-        link.rel = "noopener";
-        link.className = dates.getPriorityClass(sheet.date);
-        row.appendChild(link);
+        const priorityClass = dates.getPriorityClass(sheet.date);
+        const mainLink = createSheetLink(sheet.link, formatSheetDate(sheet.date), priorityClass);
+        row.appendChild(mainLink);
+        for (const addition of sheet.additions) {
+            row.appendChild(createSheetLink(addition.link, addition.days, priorityClass));
+        }
 
         const deleteCell = document.createElement("div");
         const button = document.createElement("button");
@@ -165,12 +165,22 @@ export function renderLoadedSheets(sheets) {
         button.className = "sheet-delete";
         button.dataset.date = sheet.date;
         button.textContent = "+";
-        button.setAttribute("aria-label", `Удалить ${link.textContent}`);
+        button.setAttribute("aria-label", `Удалить ${mainLink.textContent}`);
         deleteCell.appendChild(button);
         row.appendChild(deleteCell);
 
         loadedSheets.appendChild(row);
     }
+}
+
+function createSheetLink(href, text, className) {
+    const link = document.createElement("a");
+    link.href = href;
+    link.textContent = text;
+    link.target = "_blank";
+    link.rel = "noopener";
+    link.className = className;
+    return link;
 }
 
 export function onDeleteSheet(action) {
