@@ -65,28 +65,25 @@ async function downloadSheet(sheetId, refreshing) {
 
       const mealIndexes = new Array(mealIcons.length).fill(null);
       let mealTitleRow = 0;
-      for (; mealTitleRow < 2; mealTitleRow++) {
-        const mealTitles = jsonData[mealTitleRow];
+      for (let i = 0; i < 2; i++) {
+        const mealTitles = jsonData[i];
         for (let j = 1; j < mealTitles.length; j++) {
           const title = mealTitles[j]?.toLowerCase && mealTitles[j].toLowerCase();
           switch (title) {
-            case "завтрак": mealIndexes[0] = j; break;
+            case "завтрак": mealIndexes[0] = j; mealTitleRow = i; break;
             case "напиток":
-            case "сок": mealIndexes[1] = j; break;
-            case "суп": mealIndexes[2] = j; break;
+            case "сок": mealIndexes[1] = j; mealTitleRow = i; break;
+            case "суп": mealIndexes[2] = j; mealTitleRow = i; break;
             case "сaлат": // 1st а latin
-            case "салат": mealIndexes[3] = j; break;
-            case "горячее": mealIndexes[4] = j; break;
+            case "салат": mealIndexes[3] = j; mealTitleRow = i; break;
+            case "горячее": mealIndexes[4] = j; mealTitleRow = i; break;
             case "гарнир":
-            case "гарниры": mealIndexes[5] = j; break;
+            case "гарниры": mealIndexes[5] = j; mealTitleRow = i; break;
             case "десерт":
-            case "десерты": mealIndexes[6] = j; break;
-            case "соусы и топпинги": mealIndexes[7] = j; break;
-            case "сендвичи": mealIndexes[8] = j; break;
+            case "десерты": mealIndexes[6] = j; mealTitleRow = i; break;
+            case "соусы и топпинги": mealIndexes[7] = j; mealTitleRow = i; break;
+            case "сендвичи": mealIndexes[8] = j; mealTitleRow = i; break;
           }
-        }
-        if (mealIndexes.some(index => index !== null)) {
-          break;
         }
       }
       for (let i = mealTitleRow + 1; i < jsonData.length; i++) {
@@ -190,7 +187,7 @@ function extractSheetId(url) {
 }
 
 function populateEmployeeSelect(data) {
-  const employees = Object.keys(data).map(employee => ({ name: employee, hasMeal: !!Object.keys(data[employee])[0] })).sort();
+  const employees = Object.keys(data).sort().map(employee => ({ name: employee, hasMeal: !!Object.keys(data[employee])[0] }));
   const selectedEmployee = localStorage.getItem("selectedEmployee");
   page.populateEmployees(employees, selectedEmployee);
   if (!data) {
