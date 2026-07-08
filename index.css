@@ -57,7 +57,8 @@ body {
     display: inline-flex;
     align-items: start;
     gap: 1px;
-    margin-right: 10px;
+    margin-right: 6px;
+    margin-bottom: 4px;
 }
 
 .loaded-sheets a {
