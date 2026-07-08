@@ -56,7 +56,7 @@ body {
 .loaded-sheets>div {
     display: inline-flex;
     align-items: start;
-    gap: 2px;
+    gap: 1px;
     margin-right: 10px;
 }
 
@@ -64,8 +64,17 @@ body {
     text-decoration: none;
     color: white;
     padding: 5px 10px;
-    border-radius: 5px;
     display: block;
+}
+
+.loaded-sheets a:first-of-type {
+    border-start-start-radius: 5px;
+    border-end-start-radius: 5px;
+}
+
+.loaded-sheets a:last-of-type {
+    border-start-end-radius: 5px;
+    border-end-end-radius: 5px;
 }
 
 .loaded-sheets a:hover {
@@ -85,7 +94,7 @@ body {
 }
 
 .sheet-delete {
-    width: 32px;
+    width: 26px;
     height: 32px;
     padding: 0;
     cursor: pointer;
