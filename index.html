@@ -11,6 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kablammo&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="index.css">
+  <link rel="stylesheet" href="dropdown-button.css">
   <link rel="stylesheet" href="radio.css">
 </head>
 
@@ -46,15 +47,15 @@
         <form id="uploadForm">
           <input type="search" id="sheetLinkInput" autocomplete="off" placeholder="Ссылка на Google-таблицу">
           <div class="flex gap-8">
-            <div class="dropdown-button" data-dropdown-button>
+            <div id="uploadDropdown" class="dropdown-button">
               <div class="dropdown-button-main">
                 <button type="submit" id="uploadBtn" class="button">Загрузить</button>
                 <button type="button" class="button dropdown-button-toggle" data-dropdown-toggle aria-haspopup="menu"
                   aria-expanded="false" aria-label="Показать другие действия"></button>
-              </div>
-              <div class="dropdown-button-menu" data-dropdown-menu role="menu" hidden>
-                <button type="submit" class="dropdown-button-item default" role="menuitem">Загрузить</button>
-                <button type="button" id="addBtn" class="dropdown-button-item" role="menuitem">Добавить...</button>
+                <div class="dropdown-button-menu" data-dropdown-menu role="menu" hidden>
+                  <button type="submit" class="dropdown-button-item default" role="menuitem">Загрузить</button>
+                  <button type="button" id="addBtn" class="dropdown-button-item" role="menuitem">Добавить...</button>
+                </div>
               </div>
             </div>
             <div class="loader-panel flex flex-stretch invisible">

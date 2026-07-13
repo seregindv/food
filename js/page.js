@@ -1,5 +1,6 @@
 import * as dates from './dates.js';
 import * as slider from './slider.js';
+import * as dropdownButton from './dropdown-button.js';
 
 let _refresh;
 let _refreshArrow;
@@ -125,55 +126,7 @@ export function onAddSheet(action) {
 }
 
 export function setupDropdownButtons() {
-    document.querySelectorAll("[data-dropdown-button]").forEach(dropdown => {
-        const toggle = dropdown.querySelector("[data-dropdown-toggle]");
-        const menu = dropdown.querySelector("[data-dropdown-menu]");
-        const defaultButton = dropdown.querySelector(".dropdown-button-main .button");
-        let longTapTimer;
-        let suppressClick = false;
-
-        toggle.addEventListener("click", e => {
-            e.preventDefault();
-            e.stopPropagation();
-            setDropdownOpen(dropdown, menu, toggle, !dropdown.classList.contains("open"));
-        });
-
-        menu.addEventListener("click", e => {
-            if (e.target.closest(".dropdown-button-item")) {
-                closeDropdown(dropdown);
-            }
-        });
-
-        defaultButton.addEventListener("pointerdown", e => {
-            if (e.pointerType !== "touch") {
-                return;
-            }
-            longTapTimer = setTimeout(() => {
-                suppressClick = true;
-                setDropdownOpen(dropdown, menu, toggle, true);
-            }, 500);
-        });
-
-        defaultButton.addEventListener("pointerup", () => clearTimeout(longTapTimer));
-        defaultButton.addEventListener("pointercancel", () => clearTimeout(longTapTimer));
-        defaultButton.addEventListener("pointerleave", () => clearTimeout(longTapTimer));
-        defaultButton.addEventListener("click", e => {
-            if (!suppressClick) {
-                return;
-            }
-            e.preventDefault();
-            e.stopPropagation();
-            suppressClick = false;
-        });
-    });
-
-    document.addEventListener("click", e => {
-        document.querySelectorAll("[data-dropdown-button].open").forEach(dropdown => {
-            if (!dropdown.contains(e.target)) {
-                closeDropdown(dropdown);
-            }
-        });
-    });
+    dropdownButton.init(document.getElementById("uploadDropdown"));
 }
 
 export function chooseDays(dayNames) {
@@ -514,18 +467,4 @@ function getShareButton(id, display) {
     return !display
         ? document.getElementById(id)
         : display.querySelector(`[data-source-id="${id}"]`);
-}
-
-function setDropdownOpen(dropdown, menu, toggle, open) {
-    dropdown.classList.toggle("open", open);
-    toggle.setAttribute("aria-expanded", open.toString());
-    menu.hidden = !open;
-}
-
-function closeDropdown(dropdown) {
-    setDropdownOpen(
-        dropdown,
-        dropdown.querySelector("[data-dropdown-menu]"),
-        dropdown.querySelector("[data-dropdown-toggle]"),
-        false);
 }
