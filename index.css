@@ -406,8 +406,12 @@ body {
 
 .transparent-button.texted.emoji {
     color: transparent;
-    text-shadow: 0 0 0 #000;
+    text-shadow: 0 0 0 #444;
     line-height: 0;
+}
+
+.transparent-button.texted.emoji:disabled {
+    text-shadow: 0 0 0 #ccc;
 }
 
 .transparent-button:disabled {
