@@ -1,150 +1,35 @@
 import * as page from './page.js';
 import * as storage from './storage.js';
-import { getDateString, getDownloadSheetUrl, getMonday, mealIcons } from './common.js';
+import { getDateString, mealIcons } from './common.js';
 import * as refresh from './refresh.js';
 import * as mascot from './mascot.js';
+import * as sheet from './sheet.js';
 
 async function onDownloadSheet(sheetLink) {
   if (!sheetLink) {
     page.displayError("Пожалуйста, введите ссылку");
     return;
   }
-  const sheetId = extractSheetId(sheetLink);
+  const sheetId = sheet.extractId(sheetLink);
   if (!sheetId) {
     page.displayError("Неверная ссылка на Google-таблицу");
     return;
   }
 
-  page.showLoading(true);
-  const success = await downloadSheet(sheetId, false);
-  if (success) {
-    page.canCloseSettings(true);
-  }
-  page.showLoading(false);
-}
-
-async function downloadSheet(sheetId, refreshing) {
   try {
-    page.clearDisplays(refreshing);
-    const sheetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}`;
-    const { sheetData, sheetDate } = await downloadSheetData(sheetUrl);
-
-    if (!refreshing) {
-      const monday = getMonday();
-      storage.dropOldSheets(getDateString(monday));
-    }
-
-    const sheetDateString = getDateString(sheetDate);
-    storage.setSheetData(sheetDateString, sheetData, refreshing ? null : sheetUrl);
+    page.showLoading(true);
+    page.clearDisplays(false);
+    const sheetDate = await sheet.download(sheetId, false);
     page.renderLoadedSheets(storage.getSheets());
-    const dates = storage.getSheetDates();
-    if (!refreshing) {
-      page.setDates(dates);
-    }
-    page.selectDate(sheetDateString);
-    return true;
+    page.setDates(storage.getSheetDates());
+    page.selectDate(sheetDate);
+    page.canCloseSettings(true);
   } catch (error) {
     console.error(error);
     page.displayError(error.message);
-    return false;
+  } finally {
+    page.showLoading(false);
   }
-}
-
-async function downloadSheetData(sheetUrl, requireDate = true) {
-  const downloadUrl = getDownloadSheetUrl(sheetUrl);
-  const response = await fetch(downloadUrl, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    },
-  });
-  if (!response.ok) {
-    throw new Error(`Ошибка загрузки таблицы: ${response.statusText}`);
-  }
-  const arrayBuffer = await response.arrayBuffer();
-  const workbook = XLSX.read(arrayBuffer, { type: "array" });
-  return parseWorkbook(workbook, requireDate);
-}
-
-function parseWorkbook(workbook, requireDate = true) {
-    const sheetData = {};
-    let sheetDate;
-    let i = 0;
-    for (const dayName of ["пн", "вт", "ср", "чт", "пт"]) {
-      const sheetName = workbook.SheetNames.find(name => name.toLowerCase() == dayName);
-      if (!sheetName) {
-        continue;
-      }
-
-      const worksheet = workbook.Sheets[sheetName];
-      if (!sheetDate) {
-        sheetDate = parseDate(worksheet["B1"], i);
-      }
-
-      const jsonData = XLSX.utils.sheet_to_json(worksheet, {
-        defval: null,
-        range: "B3:M100",
-        header: 1,
-        blankrows: false,
-      });
-      if (jsonData.length === 0) {
-        continue;
-      }
-
-      const mealIndexes = new Array(mealIcons.length).fill(null);
-      let mealTitleRow = 0;
-      for (let i = 0; i < 2; i++) {
-        const mealTitles = jsonData[i];
-        for (let j = 1; j < mealTitles.length; j++) {
-          const title = mealTitles[j]?.toLowerCase && mealTitles[j].toLowerCase();
-          switch (title) {
-            case "завтрак": mealIndexes[0] = j; mealTitleRow = i; break;
-            case "напиток":
-            case "сок": mealIndexes[1] = j; mealTitleRow = i; break;
-            case "суп": mealIndexes[2] = j; mealTitleRow = i; break;
-            case "сaлат": // 1st а latin
-            case "салат": mealIndexes[3] = j; mealTitleRow = i; break;
-            case "горячее": mealIndexes[4] = j; mealTitleRow = i; break;
-            case "гарнир":
-            case "гарниры": mealIndexes[5] = j; mealTitleRow = i; break;
-            case "десерт":
-            case "десерты": mealIndexes[6] = j; mealTitleRow = i; break;
-            case "соусы и топпинги": mealIndexes[7] = j; mealTitleRow = i; break;
-            case "сендвичи": mealIndexes[8] = j; mealTitleRow = i; break;
-          }
-        }
-      }
-      for (let i = mealTitleRow + 1; i < jsonData.length; i++) {
-        const row = jsonData[i];
-        let employeeName = row[0];
-        if (employeeName == null || !(employeeName = employeeName.toString().trim()) || !employeeName.includes(" ")) {
-          continue;
-        }
-        let mealsByDay = sheetData[employeeName];
-        if (!mealsByDay) {
-          sheetData[employeeName] = mealsByDay = {};
-        }
-        const meals = new Array(7).fill(null);
-        mealIndexes.forEach((index, i) => { if (index !== null) meals[i] = row[index] });
-        let j = meals.length - 1;
-        for (; j >= 0 && !meals[j]; j--);
-        if (j > 0) {
-          mealsByDay[dayName] = meals.slice(0, j + 1);
-        }
-      }
-      ++i;
-    }
-    if (Object.keys(sheetData).length === 0) {
-      throw new Error("Не удалось ничего прочитать");
-    }
-    if (requireDate && !sheetDate) {
-      sheetDate = parseDate(workbook.Sheets["WD"]?.["H3"]);
-    }
-    if (requireDate && !sheetDate) {
-      throw new Error("Не удалось найти дату");
-    }
-
-    return { sheetData, sheetDate };
 }
 
 async function onAddSheet(sheetLink) {
@@ -157,7 +42,7 @@ async function onAddSheet(sheetLink) {
     page.displayError("Пожалуйста, введите ссылку");
     return;
   }
-  const sheetId = extractSheetId(sheetLink);
+  const sheetId = sheet.extractId(sheetLink);
   if (!sheetId) {
     page.displayError("Неверная ссылка на Google-таблицу");
     return;
@@ -166,10 +51,10 @@ async function onAddSheet(sheetLink) {
   try {
     page.displayError("");
     page.showLoading(true);
-    const { sheetData } = await downloadSheetData(`https://docs.google.com/spreadsheets/d/${sheetId}`, false);
+    const sheetUrl = sheet.getSheetUrl(sheetId);
+    const { sheetData } = await sheet.downloadData(sheetUrl, false);
     page.showLoading(false);
-    const availableDays = ["пн", "вт", "ср", "чт", "пт"].filter(dayName =>
-      Object.values(sheetData).some(employeeData => employeeData[dayName]?.some(meal => meal)));
+    const availableDays = sheet.getAvailableDays(sheetData);
     if (availableDays.length === 0) {
       throw new Error("Не удалось найти дни с едой");
     }
@@ -178,24 +63,7 @@ async function onAddSheet(sheetLink) {
       return;
     }
 
-    const currentData = storage.getSheetData(selectedDate) || {};
-    for (const employeeData of Object.values(currentData)) {
-      selectedDays.forEach(dayName => delete employeeData[dayName]);
-    }
-    for (const [employee, importedData] of Object.entries(sheetData)) {
-      for (const dayName of selectedDays) {
-        if (importedData[dayName]) {
-          (currentData[employee] ||= {})[dayName] = importedData[dayName];
-        }
-      }
-    }
-
-    storage.setSheetData(selectedDate, currentData);
-    storage.setAddedSheetLink(
-      selectedDate,
-      `https://docs.google.com/spreadsheets/d/${sheetId}`,
-      selectedDays);
-    storage.clearEatenDays(selectedDate, selectedDays);
+    sheet.addSheetDays(selectedDate, sheetUrl, sheetData, selectedDays);
     page.renderLoadedSheets(storage.getSheets());
     onDateChanged(selectedDate);
   } catch (error) {
@@ -204,15 +72,6 @@ async function onAddSheet(sheetLink) {
   } finally {
     page.showLoading(false);
   }
-}
-
-function parseDate(cell, dateOffset = 0) {
-  const value = cell?.v;
-  if (!value) {
-    return null;
-  }
-  const date = XLSX.SSF.parse_date_code(value);
-  return new Date(date.y, date.m - 1, date.d - dateOffset);
 }
 
 function loadMapFromLocalStorage() {
@@ -247,12 +106,6 @@ function onDateChanged(date) {
 function getToday() {
   const status = page.getSelectedDateStatus();
   return status === "normal" ? new Date().getDay() - 1 : -1;
-}
-
-function extractSheetId(url) {
-  const regex = /\/d\/([a-zA-Z0-9-_]+)/;
-  const match = url.match(regex);
-  return match ? match[1] : null;
 }
 
 function populateEmployeeSelect(data) {
@@ -495,42 +348,12 @@ async function onRefresh() {
     page.ensureRefreshLoader();
     page.showRefreshLoading();
     const date = page.getSelectedDate();
-    const links = storage.getSheetLinks(date);
-    await refreshSheets(date, links);
+    if (await sheet.refresh(date)) {
+      page.renderLoadedSheets(storage.getSheets());
+      onDateChanged(date);
+    }
   } finally {
     page.showRefreshArrow();
-  }
-}
-
-async function refreshSheets(date, links) {
-  if (!date || !links.main) {
-    return;
-  }
-
-  const { sheetData } = await downloadSheetData(links.main);
-  for (const [days, link] of Object.entries(links)) {
-    if (days === "main") {
-      continue;
-    }
-    const { sheetData: addedData } = await downloadSheetData(link, false);
-    mergeSheetDays(sheetData, addedData, days.split("-"));
-  }
-
-  storage.setSheetData(date, sheetData);
-  page.renderLoadedSheets(storage.getSheets());
-  onDateChanged(date);
-}
-
-function mergeSheetDays(targetData, sourceData, dayNames) {
-  for (const employeeData of Object.values(targetData)) {
-    dayNames.forEach(dayName => delete employeeData[dayName]);
-  }
-  for (const [employee, employeeData] of Object.entries(sourceData)) {
-    for (const dayName of dayNames) {
-      if (employeeData[dayName]) {
-        (targetData[employee] ||= {})[dayName] = employeeData[dayName];
-      }
-    }
   }
 }
 
