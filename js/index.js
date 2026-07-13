@@ -396,6 +396,7 @@ function getDayDate(mondayDateString, dayIndex) {
 
 function setupEventListeners() {
   page.setupMealIcons(mealIcons);
+  page.setupDropdownButtons();
   page.onUpload(sheetLink => onDownloadSheet(sheetLink));
   page.onAddSheet(sheetLink => onAddSheet(sheetLink));
   page.onDeleteSheet(date => deleteSheet(date));
