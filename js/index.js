@@ -25,21 +25,9 @@ async function onDownloadSheet(sheetLink) {
 
 async function downloadSheet(sheetId, refreshing) {
   try {
-    page.clearDisplays(refresh);
+    page.clearDisplays(refreshing);
     const sheetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}`;
-    const downloadUrl = getDownloadSheetUrl(sheetUrl);
-    const response = await fetch(downloadUrl, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      },
-    });
-    if (!response.ok) {
-      throw new Error(`Ошибка загрузки таблицы: ${response.statusText}`);
-    }
-    const arrayBuffer = await response.arrayBuffer();
-    const workbook = XLSX.read(arrayBuffer, { type: "array" });
-    const { sheetData, sheetDate } = parseWorkbook(workbook);
+    const { sheetData, sheetDate } = await downloadSheetData(sheetUrl);
 
     if (!refreshing) {
       const monday = getMonday();
@@ -60,6 +48,22 @@ async function downloadSheet(sheetId, refreshing) {
     page.displayError(error.message);
     return false;
   }
+}
+
+async function downloadSheetData(sheetUrl, requireDate = true) {
+  const downloadUrl = getDownloadSheetUrl(sheetUrl);
+  const response = await fetch(downloadUrl, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Ошибка загрузки таблицы: ${response.statusText}`);
+  }
+  const arrayBuffer = await response.arrayBuffer();
+  const workbook = XLSX.read(arrayBuffer, { type: "array" });
+  return parseWorkbook(workbook, requireDate);
 }
 
 function parseWorkbook(workbook, requireDate = true) {
@@ -162,13 +166,7 @@ async function onAddSheet(sheetLink) {
   try {
     page.displayError("");
     page.showLoading(true);
-    const downloadUrl = getDownloadSheetUrl(`https://docs.google.com/spreadsheets/d/${sheetId}`);
-    const response = await fetch(downloadUrl);
-    if (!response.ok) {
-      throw new Error(`Ошибка загрузки таблицы: ${response.statusText}`);
-    }
-    const workbook = XLSX.read(await response.arrayBuffer(), { type: "array" });
-    const { sheetData } = parseWorkbook(workbook, false);
+    const { sheetData } = await downloadSheetData(`https://docs.google.com/spreadsheets/d/${sheetId}`, false);
     page.showLoading(false);
     const availableDays = ["пн", "вт", "ср", "чт", "пт"].filter(dayName =>
       Object.values(sheetData).some(employeeData => employeeData[dayName]?.some(meal => meal)));
@@ -496,10 +494,42 @@ async function onRefresh() {
     page.ensureRefreshLoader();
     page.showRefreshLoading();
     const date = page.getSelectedDate();
-    const link = storage.getLink(date);
-    await downloadSheet(extractSheetId(link), true);
+    const links = storage.getSheetLinks(date);
+    await refreshSheets(date, links);
   } finally {
     page.showRefreshArrow();
+  }
+}
+
+async function refreshSheets(date, links) {
+  if (!date || !links.main) {
+    return;
+  }
+
+  const { sheetData } = await downloadSheetData(links.main);
+  for (const [days, link] of Object.entries(links)) {
+    if (days === "main") {
+      continue;
+    }
+    const { sheetData: addedData } = await downloadSheetData(link, false);
+    mergeSheetDays(sheetData, addedData, days.split("-"));
+  }
+
+  storage.setSheetData(date, sheetData);
+  page.renderLoadedSheets(storage.getSheets());
+  onDateChanged(date);
+}
+
+function mergeSheetDays(targetData, sourceData, dayNames) {
+  for (const employeeData of Object.values(targetData)) {
+    dayNames.forEach(dayName => delete employeeData[dayName]);
+  }
+  for (const [employee, employeeData] of Object.entries(sourceData)) {
+    for (const dayName of dayNames) {
+      if (employeeData[dayName]) {
+        (targetData[employee] ||= {})[dayName] = employeeData[dayName];
+      }
+    }
   }
 }
 
