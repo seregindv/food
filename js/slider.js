@@ -2,7 +2,7 @@ const defaultThreshold = 60;
 const defaultVerticalTolerance = 40;
 const transitionMs = 180;
 
-export function init({ element, canSlide, onPreview, onSlide, threshold = defaultThreshold, verticalTolerance = defaultVerticalTolerance }) {
+export function init({ element, canSlide, onPreview, onSlideStart, onSlide, threshold = defaultThreshold, verticalTolerance = defaultVerticalTolerance }) {
     const viewport = wrap(element);
     let start;
     let tracking = false;
@@ -79,6 +79,7 @@ export function init({ element, canSlide, onPreview, onSlide, threshold = defaul
         sliding = true;
         tracking = false;
         setPreview(direction, true);
+        onSlideStart && onSlideStart(direction);
         setTransition(true);
         setTranslate(-direction * element.offsetWidth);
 
@@ -182,6 +183,9 @@ function wrap(element) {
 }
 
 function stripIds(element) {
-    element.querySelectorAll("[id]").forEach(e => e.removeAttribute("id"));
+    element.querySelectorAll("[id]").forEach(e => {
+        e.dataset.sourceId = e.id;
+        e.removeAttribute("id");
+    });
     element.querySelectorAll("label[for]").forEach(e => e.removeAttribute("for"));
 }

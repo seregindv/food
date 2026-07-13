@@ -345,8 +345,7 @@ function displaySelectedData(mealOnly) {
     }
   }
   if (employeeData) {
-    const today = getToday();
-    page.setShareWarning(today !== selectedDayIndex);
+    setShareWarningForDay(selectedDayIndex);
     const employeeMeals = employeeData[selectedDayName];
     renderMeals(meals, employeeMeals, selectedDayName);
   } else {
@@ -366,13 +365,35 @@ function renderMeals(meals, employeeMeals, day) {
   page.checkMeals(getMealState(day), meals.display);
 }
 
-function renderDayPreview({ name, display }) {
+function renderDayPreview({ index, name, display }) {
   const selectedDate = page.getSelectedDate();
   const selectedEmployee = page.getSelectedEmployee();
   const sheetData = storage.getSheetData(selectedDate) || {};
   const employeeData = sheetData[selectedEmployee];
   const employeeMeals = employeeData && employeeData[name];
   renderMeals(page.getMeals(display), employeeMeals, name);
+  page.setShareWarning(isShareWarningDay(index), display);
+}
+
+function setShareWarningForDay(dayIndex) {
+  page.setShareWarning(isShareWarningDay(dayIndex));
+}
+
+function isShareWarningDay(dayIndex) {
+  const selectedDate = page.getSelectedDate();
+  const dayDate = getDayDate(selectedDate, dayIndex);
+  return !dayDate || getDateString(dayDate) !== getDateString(new Date());
+}
+
+function getDayDate(mondayDateString, dayIndex) {
+  if (!mondayDateString || dayIndex === undefined || dayIndex === null || dayIndex < 0) {
+    return null;
+  }
+
+  const [year, month, day] = mondayDateString.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  date.setDate(date.getDate() + dayIndex);
+  return date;
 }
 
 function setupEventListeners() {
@@ -391,7 +412,7 @@ function setupEventListeners() {
   });
 
   page.onDayChanged(() => displaySelectedData(true));
-  page.setupDaySwipe({ onPreview: renderDayPreview });
+  page.setupDaySwipe({ onPreview: renderDayPreview, onSlideStart: ({ index }) => setShareWarningForDay(index) });
   page.onMealCheckChanged(({ index, checked }) => updateMealState(index, checked));
   page.setupSettingsActions();
   refresh.init({ onStart: onRefreshStart, onAction: onRefresh, onMoving: page.onRefreshMove, threshold: 210 });

@@ -202,7 +202,7 @@ export function onDayChanged(action) {
     days.forEach(e => e.addEventListener("change", () => action()));
 }
 
-export function setupDaySwipe({ onPreview } = {}) {
+export function setupDaySwipe({ onPreview, onSlideStart } = {}) {
     const display = document.getElementById("jsonDisplay");
     slider.init({
         element: display,
@@ -211,6 +211,12 @@ export function setupDaySwipe({ onPreview } = {}) {
             const day = getEnabledDay(direction);
             if (day) {
                 onPreview && onPreview({ index: getDayIndex(day), name: day.value, display: preview });
+            }
+        },
+        onSlideStart: direction => {
+            const day = getEnabledDay(direction);
+            if (day) {
+                onSlideStart && onSlideStart({ index: getDayIndex(day), name: day.value });
             }
         },
         onSlide: direction => selectEnabledDay(direction)
@@ -326,14 +332,14 @@ export function setupMealIcons(icons) {
     for (let i = 0; i < icons.length; ++i) {
         const mealId = `meal${i + 1}`;
         const meal = mealTemplate.content.cloneNode(true);
-        
+
         const input = meal.getElementById('meal1');
         input.id = mealId;
         input.setAttribute("icon", icons[i]);
-        
+
         const label = meal.querySelector('label');
         label.htmlFor = mealId;
-        
+
         meals.appendChild(meal);
     }
 }
@@ -367,9 +373,9 @@ export function showRefreshArrow() {
     document.querySelector('.refresh-loader').classList.add('hidden');
 }
 
-export function setShareWarning(value) {
-    document.getElementById("shareEatIt").classList.toggle("warning", value);
-    document.getElementById("copyEatIt").classList.toggle("warning", value);
+export function setShareWarning(value, display) {
+    getShareButton("shareEatIt", display).classList.toggle("warning", value);
+    getShareButton("copyEatIt", display).classList.toggle("warning", value);
 }
 
 export function changeMascot(oldMascot, newMascot) {
@@ -450,4 +456,10 @@ function getStatusElement() {
 
 function getEmployeeSelect() {
     return document.getElementById("employeeSelect");
+}
+
+function getShareButton(id, display) {
+    return !display
+        ? document.getElementById(id)
+        : display.querySelector(`[data-source-id="${id}"]`);
 }
