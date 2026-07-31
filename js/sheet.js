@@ -107,12 +107,17 @@ function parseWorkbook(workbook, requireDate = true) {
         for (let j = 1; j < mealTitles.length; j++) {
           const title = mealTitles[j]?.toLowerCase && mealTitles[j].toLowerCase();
           switch (title) {
+            case "завтраки":
             case "завтрак": mealIndexes[0] = j; mealTitleRow = i; break;
             case "напиток":
+            case "напитки и десерты":
             case "сок": mealIndexes[1] = j; mealTitleRow = i; break;
+            case "супы":
             case "суп": mealIndexes[2] = j; mealTitleRow = i; break;
             case "сaлат": // 1st а latin
+            case "сaлаты и закуски":
             case "салат": mealIndexes[3] = j; mealTitleRow = i; break;
+            case "горячие блюда":
             case "горячее": mealIndexes[4] = j; mealTitleRow = i; break;
             case "гарнир":
             case "гарниры": mealIndexes[5] = j; mealTitleRow = i; break;
