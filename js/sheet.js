@@ -17,7 +17,7 @@ export async function download(sheetId, refreshing) {
   return sheetDateString;
 }
 
-export async function downloadData(sheetUrl, requireDate = true, sheetName = null) {
+export async function downloadData(sheetUrl, requireDate = true) {
   const downloadUrl = getDownloadSheetUrl(sheetUrl);
   const response = await fetch(downloadUrl, {
     method: "GET",
@@ -30,7 +30,7 @@ export async function downloadData(sheetUrl, requireDate = true, sheetName = nul
   }
   const arrayBuffer = await response.arrayBuffer();
   const workbook = XLSX.read(arrayBuffer, { type: "array" });
-  return parseWorkbook(workbook, requireDate, sheetName);
+  return parseWorkbook(workbook, requireDate);
 }
 
 export function getAvailableDays(sheetData) {
@@ -67,7 +67,7 @@ export async function refresh(date) {
     mergeSheetDays(sheetData, addedData, days.split("-"));
   }
   for (const [day, link] of additions.filter(([days]) => days.startsWith("+"))) {
-    const { sheetData: addedData } = await downloadData(link, false, "Заказ");
+    const { sheetData: addedData } = await downloadData(link, false);
     mergeFoodIntoDay(sheetData, addedData, day.slice(1));
   }
 
@@ -85,23 +85,20 @@ export function getSheetUrl(sheetId) {
   return `https://docs.google.com/spreadsheets/d/${sheetId}`;
 }
 
-function parseWorkbook(workbook, requireDate = true, requestedSheetName = null) {
-  const sheetData = {};
-  let sheetDate;
-  let i = 0;
-  const sheetsToParse = requestedSheetName ? [requestedSheetName] : dayNames;
-  for (const requestedName of sheetsToParse) {
-    const sheetName = workbook.SheetNames.find(name => name.toLowerCase() === requestedName.toLowerCase());
-    if (!sheetName) {
-      if (requestedSheetName) {
-        throw new Error(`Не удалось найти лист «${requestedSheetName}»`);
-      }
-      continue;
-    }
-
-    const dayName = requestedSheetName || requestedName;
-
-    const worksheet = workbook.Sheets[sheetName];
+function parseWorkbook(workbook, requireDate = true) {
+    const sheetData = {};
+    let sheetDate;
+    let i = 0;
+    const daySheets = dayNames.map(dayName => ({
+      dayName,
+      sheetName: workbook.SheetNames.find(name => name.toLowerCase() === dayName)
+    })).filter(sheet => sheet.sheetName);
+    const useFirstDataSheet = daySheets.length === 0;
+    const sheetsToParse = useFirstDataSheet
+      ? workbook.SheetNames.map(sheetName => ({ dayName: sheetName, sheetName }))
+      : daySheets;
+    for (const { dayName, sheetName } of sheetsToParse) {
+      const worksheet = workbook.Sheets[sheetName];
     if (!sheetDate) {
       sheetDate = parseDate(worksheet["B1"], i);
     }
@@ -113,6 +110,7 @@ function parseWorkbook(workbook, requireDate = true, requestedSheetName = null) 
       blankrows: false,
     });
     if (jsonData.length === 0) {
+      ++i;
       continue;
     }
 
@@ -151,19 +149,21 @@ function parseWorkbook(workbook, requireDate = true, requestedSheetName = null) 
       if (employeeName == null || !(employeeName = employeeName.toString().trim()) || !employeeName.includes(" ")) {
         continue;
       }
-      let mealsByDay = sheetData[employeeName];
-      if (!mealsByDay) {
-        sheetData[employeeName] = mealsByDay = {};
-      }
       const meals = new Array(mealIcons.length).fill(null);
       mealIndexes.forEach((index, i) => { if (index !== null) meals[i] = row[index] });
       let j = meals.length - 1;
       for (; j >= 0 && !meals[j]; j--);
       if (j >= 0) {
+        const mealsByDay = (sheetData[employeeName] ||= {});
         mealsByDay[dayName] = meals.slice(0, j + 1);
       }
-    }
-    ++i;
+      }
+      const sheetHasFood = Object.values(sheetData).some(employeeData =>
+        employeeData[dayName]?.some(meal => meal));
+      if (useFirstDataSheet && sheetHasFood) {
+        break;
+      }
+      ++i;
   }
   if (Object.keys(sheetData).length === 0) {
     throw new Error("Не удалось ничего прочитать");
@@ -202,11 +202,14 @@ function mergeSheetDays(targetData, sourceData, dayNames) {
 
 function mergeFoodIntoDay(targetData, sourceData, dayName) {
   for (const [employee, employeeData] of Object.entries(sourceData)) {
-    const addedMeals = employeeData["Заказ"];
+    const addedMeals = Object.values(employeeData).find(meals => meals?.some(meal => meal));
     if (!addedMeals) {
       continue;
     }
-    const meals = ((targetData[employee] ||= {})[dayName] ||= []);
+    const meals = (targetData[employee] ||= {})[dayName] ||= [];
+    while (meals.length < addedMeals.length) {
+      meals.push(null);
+    }
     addedMeals.forEach((meal, index) => {
       if (!meal) {
         return;

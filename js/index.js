@@ -97,7 +97,7 @@ async function onAddToDay(sheetLink) {
     page.displayError("");
     page.showLoading(true);
     const sheetUrl = sheet.getSheetUrl(sheetId);
-    const { sheetData } = await sheet.downloadData(sheetUrl, false, "Заказ");
+    const { sheetData } = await sheet.downloadData(sheetUrl, false);
     page.showLoading(false);
     const selectedDays = await page.chooseDays(sheet.dayNames, {
       multiple: false,
