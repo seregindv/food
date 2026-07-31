@@ -125,18 +125,31 @@ export function onAddSheet(action) {
     });
 }
 
+export function onAddToDay(action) {
+    const button = document.getElementById("addToDayBtn");
+    button.addEventListener("click", e => {
+        e.preventDefault();
+        const sheetLink = document.getElementById("sheetLinkInput").value.trim();
+        action(sheetLink);
+    });
+}
+
 export function setupDropdownButtons() {
     dropdownButton.init(document.getElementById("uploadDropdown"));
 }
 
-export function chooseDays(dayNames) {
+export function chooseDays(dayNames, { multiple = true, title = "Добавить дни" } = {}) {
     const dialog = document.getElementById("addDaysDialog");
     const choices = document.getElementById("addDaysChoices");
+    dialog.querySelector("h3").textContent = title;
     choices.innerHTML = "";
     for (const dayName of dayNames) {
         const label = document.createElement("label");
         const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
+        checkbox.type = multiple ? "checkbox" : "radio";
+        if (!multiple) {
+            checkbox.name = "add-day";
+        }
         checkbox.value = dayName;
         label.append(checkbox, ` ${dayName}`);
         choices.appendChild(label);

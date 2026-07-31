@@ -47,7 +47,7 @@ export function setAddedSheetLink(dateString, link, dayNames) {
     const links = getSheetLinks(dateString);
     const selectedDays = new Set(dayNames);
     for (const key of Object.keys(links)) {
-        if (key === "main") {
+        if (key === "main" || key.startsWith("+")) {
             continue;
         }
         const existingLink = links[key];
@@ -58,6 +58,12 @@ export function setAddedSheetLink(dateString, link, dayNames) {
         }
     }
     links[dayNames.join("-")] = link;
+    setItem(linkKey(dateString), links);
+}
+
+export function setAddedFoodLink(dateString, link, dayName) {
+    const links = getSheetLinks(dateString);
+    links[`+${dayName}`] = link;
     setItem(linkKey(dateString), links);
 }
 

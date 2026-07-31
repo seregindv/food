@@ -77,6 +77,47 @@ async function onAddSheet(sheetLink) {
   }
 }
 
+async function onAddToDay(sheetLink) {
+  const selectedDate = page.getSelectedDate();
+  if (!selectedDate) {
+    page.displayError("Сначала выберите неделю");
+    return;
+  }
+  if (!sheetLink) {
+    page.displayError("Пожалуйста, введите ссылку");
+    return;
+  }
+  const sheetId = sheet.extractId(sheetLink);
+  if (!sheetId) {
+    page.displayError("Неверная ссылка на Google-таблицу");
+    return;
+  }
+
+  try {
+    page.displayError("");
+    page.showLoading(true);
+    const sheetUrl = sheet.getSheetUrl(sheetId);
+    const { sheetData } = await sheet.downloadData(sheetUrl, false, "Заказ");
+    page.showLoading(false);
+    const selectedDays = await page.chooseDays(sheet.dayNames, {
+      multiple: false,
+      title: "Добавить в день"
+    });
+    if (!selectedDays?.length) {
+      return;
+    }
+
+    sheet.addFoodToDay(selectedDate, sheetUrl, sheetData, selectedDays[0]);
+    page.renderLoadedSheets(storage.getSheets());
+    onDateChanged(selectedDate);
+  } catch (error) {
+    console.error(error);
+    page.displayError(error.message);
+  } finally {
+    page.showLoading(false);
+  }
+}
+
 function loadMapFromLocalStorage() {
   const sheetDates = storage.getSheetDates();
   page.initDates(sheetDates, date => onDateChanged(date));
@@ -116,6 +157,7 @@ function setupEventListeners() {
   page.setupDropdownButtons();
   page.onUpload(sheetLink => onDownloadSheet(sheetLink));
   page.onAddSheet(sheetLink => onAddSheet(sheetLink));
+  page.onAddToDay(sheetLink => onAddToDay(sheetLink));
   page.onDeleteSheet(date => deleteSheet(date));
 
   page.onEmployeeChanged(employee => {

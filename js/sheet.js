@@ -17,7 +17,7 @@ export async function download(sheetId, refreshing) {
   return sheetDateString;
 }
 
-export async function downloadData(sheetUrl, requireDate = true) {
+export async function downloadData(sheetUrl, requireDate = true, sheetName = null) {
   const downloadUrl = getDownloadSheetUrl(sheetUrl);
   const response = await fetch(downloadUrl, {
     method: "GET",
@@ -30,7 +30,7 @@ export async function downloadData(sheetUrl, requireDate = true) {
   }
   const arrayBuffer = await response.arrayBuffer();
   const workbook = XLSX.read(arrayBuffer, { type: "array" });
-  return parseWorkbook(workbook, requireDate);
+  return parseWorkbook(workbook, requireDate, sheetName);
 }
 
 export function getAvailableDays(sheetData) {
@@ -46,6 +46,14 @@ export function addSheetDays(date, sheetUrl, sheetData, selectedDays) {
   storage.clearEatenDays(date, selectedDays);
 }
 
+export function addFoodToDay(date, sheetUrl, sheetData, dayName) {
+  const currentData = storage.getSheetData(date) || {};
+  mergeFoodIntoDay(currentData, sheetData, dayName);
+  storage.setSheetData(date, currentData);
+  storage.setAddedFoodLink(date, sheetUrl, dayName);
+  storage.clearEatenDays(date, [dayName]);
+}
+
 export async function refresh(date) {
   const links = storage.getSheetLinks(date);
   if (!date || !links.main) {
@@ -53,12 +61,14 @@ export async function refresh(date) {
   }
 
   const { sheetData } = await downloadData(links.main);
-  for (const [days, link] of Object.entries(links)) {
-    if (days === "main") {
-      continue;
-    }
+  const additions = Object.entries(links).filter(([days]) => days !== "main");
+  for (const [days, link] of additions.filter(([days]) => !days.startsWith("+"))) {
     const { sheetData: addedData } = await downloadData(link, false);
     mergeSheetDays(sheetData, addedData, days.split("-"));
+  }
+  for (const [day, link] of additions.filter(([days]) => days.startsWith("+"))) {
+    const { sheetData: addedData } = await downloadData(link, false, "Заказ");
+    mergeFoodIntoDay(sheetData, addedData, day.slice(1));
   }
 
   storage.setSheetData(date, sheetData);
@@ -75,90 +85,97 @@ export function getSheetUrl(sheetId) {
   return `https://docs.google.com/spreadsheets/d/${sheetId}`;
 }
 
-function parseWorkbook(workbook, requireDate = true) {
-    const sheetData = {};
-    let sheetDate;
-    let i = 0;
-    for (const dayName of dayNames) {
-      const sheetName = workbook.SheetNames.find(name => name.toLowerCase() == dayName);
-      if (!sheetName) {
+function parseWorkbook(workbook, requireDate = true, requestedSheetName = null) {
+  const sheetData = {};
+  let sheetDate;
+  let i = 0;
+  const sheetsToParse = requestedSheetName ? [requestedSheetName] : dayNames;
+  for (const requestedName of sheetsToParse) {
+    const sheetName = workbook.SheetNames.find(name => name.toLowerCase() === requestedName.toLowerCase());
+    if (!sheetName) {
+      if (requestedSheetName) {
+        throw new Error(`Не удалось найти лист «${requestedSheetName}»`);
+      }
+      continue;
+    }
+
+    const dayName = requestedSheetName || requestedName;
+
+    const worksheet = workbook.Sheets[sheetName];
+    if (!sheetDate) {
+      sheetDate = parseDate(worksheet["B1"], i);
+    }
+
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+      defval: null,
+      range: "B3:M100",
+      header: 1,
+      blankrows: false,
+    });
+    if (jsonData.length === 0) {
+      continue;
+    }
+
+    const mealIndexes = new Array(mealIcons.length).fill(null);
+    let mealTitleRow = 0;
+    for (let i = 0; i < 2; i++) {
+      const mealTitles = jsonData[i];
+      for (let j = 1; j < mealTitles.length; j++) {
+        const title = mealTitles[j]?.toLowerCase && mealTitles[j].toLowerCase();
+        switch (title) {
+          case "завтраки":
+          case "завтрак": mealIndexes[0] = j; mealTitleRow = i; break;
+          case "напиток":
+          case "напитки и десерты":
+          case "сок": mealIndexes[1] = j; mealTitleRow = i; break;
+          case "супы":
+          case "суп": mealIndexes[2] = j; mealTitleRow = i; break;
+          case "сaлат": // 1st а latin
+          case "сaлаты и закуски":
+          case "салат": mealIndexes[3] = j; mealTitleRow = i; break;
+          case "горячие блюда":
+          case "бургер":
+          case "горячее": mealIndexes[4] = j; mealTitleRow = i; break;
+          case "гарнир":
+          case "гарниры": mealIndexes[5] = j; mealTitleRow = i; break;
+          case "десерт":
+          case "десерты": mealIndexes[6] = j; mealTitleRow = i; break;
+          case "соусы и топпинги": mealIndexes[7] = j; mealTitleRow = i; break;
+          case "сендвичи": mealIndexes[8] = j; mealTitleRow = i; break;
+        }
+      }
+    }
+    for (let i = mealTitleRow + 1; i < jsonData.length; i++) {
+      const row = jsonData[i];
+      let employeeName = row[0];
+      if (employeeName == null || !(employeeName = employeeName.toString().trim()) || !employeeName.includes(" ")) {
         continue;
       }
-
-      const worksheet = workbook.Sheets[sheetName];
-      if (!sheetDate) {
-        sheetDate = parseDate(worksheet["B1"], i);
+      let mealsByDay = sheetData[employeeName];
+      if (!mealsByDay) {
+        sheetData[employeeName] = mealsByDay = {};
       }
-
-      const jsonData = XLSX.utils.sheet_to_json(worksheet, {
-        defval: null,
-        range: "B3:M100",
-        header: 1,
-        blankrows: false,
-      });
-      if (jsonData.length === 0) {
-        continue;
+      const meals = new Array(mealIcons.length).fill(null);
+      mealIndexes.forEach((index, i) => { if (index !== null) meals[i] = row[index] });
+      let j = meals.length - 1;
+      for (; j >= 0 && !meals[j]; j--);
+      if (j >= 0) {
+        mealsByDay[dayName] = meals.slice(0, j + 1);
       }
+    }
+    ++i;
+  }
+  if (Object.keys(sheetData).length === 0) {
+    throw new Error("Не удалось ничего прочитать");
+  }
+  if (requireDate && !sheetDate) {
+    sheetDate = parseDate(workbook.Sheets["WD"]?.["H3"]);
+  }
+  if (requireDate && !sheetDate) {
+    throw new Error("Не удалось найти дату");
+  }
 
-      const mealIndexes = new Array(mealIcons.length).fill(null);
-      let mealTitleRow = 0;
-      for (let i = 0; i < 2; i++) {
-        const mealTitles = jsonData[i];
-        for (let j = 1; j < mealTitles.length; j++) {
-          const title = mealTitles[j]?.toLowerCase && mealTitles[j].toLowerCase();
-          switch (title) {
-            case "завтраки":
-            case "завтрак": mealIndexes[0] = j; mealTitleRow = i; break;
-            case "напиток":
-            case "напитки и десерты":
-            case "сок": mealIndexes[1] = j; mealTitleRow = i; break;
-            case "супы":
-            case "суп": mealIndexes[2] = j; mealTitleRow = i; break;
-            case "сaлат": // 1st а latin
-            case "сaлаты и закуски":
-            case "салат": mealIndexes[3] = j; mealTitleRow = i; break;
-            case "горячие блюда":
-            case "горячее": mealIndexes[4] = j; mealTitleRow = i; break;
-            case "гарнир":
-            case "гарниры": mealIndexes[5] = j; mealTitleRow = i; break;
-            case "десерт":
-            case "десерты": mealIndexes[6] = j; mealTitleRow = i; break;
-            case "соусы и топпинги": mealIndexes[7] = j; mealTitleRow = i; break;
-            case "сендвичи": mealIndexes[8] = j; mealTitleRow = i; break;
-          }
-        }
-      }
-      for (let i = mealTitleRow + 1; i < jsonData.length; i++) {
-        const row = jsonData[i];
-        let employeeName = row[0];
-        if (employeeName == null || !(employeeName = employeeName.toString().trim()) || !employeeName.includes(" ")) {
-          continue;
-        }
-        let mealsByDay = sheetData[employeeName];
-        if (!mealsByDay) {
-          sheetData[employeeName] = mealsByDay = {};
-        }
-        const meals = new Array(7).fill(null);
-        mealIndexes.forEach((index, i) => { if (index !== null) meals[i] = row[index] });
-        let j = meals.length - 1;
-        for (; j >= 0 && !meals[j]; j--);
-        if (j > 0) {
-          mealsByDay[dayName] = meals.slice(0, j + 1);
-        }
-      }
-      ++i;
-    }
-    if (Object.keys(sheetData).length === 0) {
-      throw new Error("Не удалось ничего прочитать");
-    }
-    if (requireDate && !sheetDate) {
-      sheetDate = parseDate(workbook.Sheets["WD"]?.["H3"]);
-    }
-    if (requireDate && !sheetDate) {
-      throw new Error("Не удалось найти дату");
-    }
-
-    return { sheetData, sheetDate };
+  return { sheetData, sheetDate };
 }
 
 function parseDate(cell, dateOffset = 0) {
@@ -180,5 +197,21 @@ function mergeSheetDays(targetData, sourceData, dayNames) {
         (targetData[employee] ||= {})[dayName] = employeeData[dayName];
       }
     }
+  }
+}
+
+function mergeFoodIntoDay(targetData, sourceData, dayName) {
+  for (const [employee, employeeData] of Object.entries(sourceData)) {
+    const addedMeals = employeeData["Заказ"];
+    if (!addedMeals) {
+      continue;
+    }
+    const meals = ((targetData[employee] ||= {})[dayName] ||= []);
+    addedMeals.forEach((meal, index) => {
+      if (!meal) {
+        return;
+      }
+      meals[index] = meal;
+    });
   }
 }
