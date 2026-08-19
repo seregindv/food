@@ -126,20 +126,22 @@ function parseWorkbook(workbook, requireDate = true) {
           case "напиток":
           case "напитки и десерты":
           case "сок": mealIndexes[1] = j; mealTitleRow = i; break;
+          case "выпечка": mealIndexes[2] = j; mealTitleRow = i; break;
+          case "закуски": mealIndexes[3] = j; mealTitleRow = i; break;
           case "супы":
-          case "суп": mealIndexes[2] = j; mealTitleRow = i; break;
+          case "суп": mealIndexes[4] = j; mealTitleRow = i; break;
           case "сaлат": // 1st а latin
           case "сaлаты и закуски":
-          case "салат": mealIndexes[3] = j; mealTitleRow = i; break;
+          case "салат": mealIndexes[5] = j; mealTitleRow = i; break;
           case "горячие блюда":
           case "бургер":
-          case "горячее": mealIndexes[4] = j; mealTitleRow = i; break;
+          case "горячее": mealIndexes[6] = j; mealTitleRow = i; break;
           case "гарнир":
-          case "гарниры": mealIndexes[5] = j; mealTitleRow = i; break;
+          case "гарниры": mealIndexes[7] = j; mealTitleRow = i; break;
           case "десерт":
-          case "десерты": mealIndexes[6] = j; mealTitleRow = i; break;
-          case "соусы и топпинги": mealIndexes[7] = j; mealTitleRow = i; break;
-          case "сендвичи": mealIndexes[8] = j; mealTitleRow = i; break;
+          case "десерты": mealIndexes[8] = j; mealTitleRow = i; break;
+          case "соусы и топпинги": mealIndexes[9] = j; mealTitleRow = i; break;
+          case "сендвичи": mealIndexes[10] = j; mealTitleRow = i; break;
         }
       }
     }
