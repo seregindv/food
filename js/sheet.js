@@ -86,19 +86,19 @@ export function getSheetUrl(sheetId) {
 }
 
 function parseWorkbook(workbook, requireDate = true) {
-    const sheetData = {};
-    let sheetDate;
-    let i = 0;
-    const daySheets = dayNames.map(dayName => ({
-      dayName,
-      sheetName: workbook.SheetNames.find(name => name.toLowerCase() === dayName)
-    })).filter(sheet => sheet.sheetName);
-    const useFirstDataSheet = daySheets.length === 0;
-    const sheetsToParse = useFirstDataSheet
-      ? workbook.SheetNames.map(sheetName => ({ dayName: sheetName, sheetName }))
-      : daySheets;
-    for (const { dayName, sheetName } of sheetsToParse) {
-      const worksheet = workbook.Sheets[sheetName];
+  const sheetData = {};
+  let sheetDate;
+  let i = 0;
+  const daySheets = dayNames.map(dayName => ({
+    dayName,
+    sheetName: workbook.SheetNames.find(name => name.toLowerCase() === dayName)
+  })).filter(sheet => sheet.sheetName);
+  const useFirstDataSheet = daySheets.length === 0;
+  const sheetsToParse = useFirstDataSheet
+    ? workbook.SheetNames.map(sheetName => ({ dayName: sheetName, sheetName }))
+    : daySheets;
+  for (const { dayName, sheetName } of sheetsToParse) {
+    const worksheet = workbook.Sheets[sheetName];
     if (!sheetDate) {
       sheetDate = parseDate(worksheet["B1"], i);
     }
@@ -155,17 +155,17 @@ function parseWorkbook(workbook, requireDate = true) {
       mealIndexes.forEach((index, i) => { if (index !== null) meals[i] = row[index] });
       let j = meals.length - 1;
       for (; j >= 0 && !meals[j]; j--);
+      const mealsByDay = (sheetData[employeeName] ||= {});
       if (j >= 0) {
-        const mealsByDay = (sheetData[employeeName] ||= {});
         mealsByDay[dayName] = meals.slice(0, j + 1);
       }
-      }
-      const sheetHasFood = Object.values(sheetData).some(employeeData =>
-        employeeData[dayName]?.some(meal => meal));
-      if (useFirstDataSheet && sheetHasFood) {
-        break;
-      }
-      ++i;
+    }
+    const sheetHasFood = Object.values(sheetData).some(employeeData =>
+      employeeData[dayName]?.some(meal => meal));
+    if (useFirstDataSheet && sheetHasFood) {
+      break;
+    }
+    ++i;
   }
   if (Object.keys(sheetData).length === 0) {
     throw new Error("Не удалось ничего прочитать");
