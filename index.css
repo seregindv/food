@@ -457,3 +457,12 @@ body {
 option.empty {
     color: #ccc;
 }
+
+#employeeSelect,
+#employeeSelect::picker(select) {
+  appearance: base-select;
+}
+
+#employeeSelect {
+  align-items: center;
+}
