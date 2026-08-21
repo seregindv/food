@@ -28,6 +28,20 @@ node --check js\slider.js
 
 These validate syntax only. Run them for any changed module. If tooling is added later, document it here and keep normal static usage simple.
 
+For testing on an Android device, serve the repository with the npm `http-server`
+package and forward the port over USB with ADB. This avoids Wi-Fi routing and
+Windows Firewall configuration:
+
+```powershell
+http-server -p 8080
+adb devices
+adb reverse tcp:8080 tcp:8080
+```
+
+Open `http://localhost:8080` in Chrome on the connected device. After testing,
+remove the forwarding rule with `adb reverse --remove tcp:8080`. USB debugging
+must be enabled and the development computer authorized on the device.
+
 ## Coding Style & Naming Conventions
 
 Use ES modules and keep functions small and module-local. Existing code uses 2-space indentation in `js/index.js` and 4-space indentation in several helper modules; match the file you edit. Prefer `const` unless reassignment is required.
@@ -42,6 +56,8 @@ No automated tests are configured. Combine syntax checks with manual browser ver
 
 - Loading stored sheet data from localStorage.
 - Selecting employees and enabled/disabled day radios.
+- Opening and scrolling the employee picker on Android Chrome, including
+  `appearance: base-select` option styling and interaction with pull-to-refresh.
 - Swiping `#jsonDisplay` left/right, including disabled-day skips.
 - Meal checkbox state, copy/share buttons, and refresh gestures.
 
