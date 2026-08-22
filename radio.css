@@ -186,10 +186,7 @@ input[type="checkbox"]:checked {
   border-radius: 50%;
   color: #ccc;
   background: transparent;
+  outline: none;
   font: 700 18px/24px Georgia, serif;
   cursor: pointer;
-}
-
-.meal-info:hover {
-  background: #CEE6FF;
 }
