@@ -80,21 +80,26 @@ export function getMeals(display = document.getElementById("jsonDisplay")) {
         },
         setNames: function (getName, getInfo) {
             let i = 0;
-            let hasNutrition = false;
+            let hasFoodInfo = false;
             for (const mealElement of display.querySelectorAll(".meal")) {
                 const meal = getName(i);
                 setMealName(mealElement.querySelector(".meal-name"), meal);
-                const infoButton = mealElement.querySelector(".meal-info");
-                infoButton.foodInfo = meal && getInfo ? getInfo(meal) : null;
-                infoButton.foodName = meal;
-                setHidden(infoButton, !infoButton.foodInfo);
+                mealElement.foodInfo = meal && getInfo ? getInfo(meal) : null;
+                mealElement.foodName = meal;
+                hasFoodInfo ||= !!mealElement.foodInfo;
+
+                const weight = mealElement.querySelector(".meal-weight");
+                weight.textContent = mealElement.foodInfo?.weight == null
+                    ? ""
+                    : `${mealElement.foodInfo.weight} г`;
+                setHidden(weight, !weight.textContent);
 
                 const nutrition = mealElement.querySelector(".meal-nutrition");
-                const nutritionValues = infoButton.foodInfo && [
-                    [infoButton.foodInfo.calories, "ккал"],
-                    [infoButton.foodInfo.protein, "г"],
-                    [infoButton.foodInfo.fat, "г"],
-                    [infoButton.foodInfo.carbs, "г"],
+                const nutritionValues = mealElement.foodInfo && [
+                    [mealElement.foodInfo.calories, "ккал"],
+                    [mealElement.foodInfo.protein, "г"],
+                    [mealElement.foodInfo.fat, "г"],
+                    [mealElement.foodInfo.carbs, "г"],
                 ];
                 const hasMealNutrition = nutritionValues
                     && nutritionValues.some(([value]) => value != null);
@@ -103,12 +108,12 @@ export function getMeals(display = document.getElementById("jsonDisplay")) {
                         const [value, unit] = nutritionValues[index];
                         cell.textContent = value == null ? "" : `${value} ${unit}`;
                     });
-                    hasNutrition = true;
                 }
                 setHidden(nutrition, !hasMealNutrition);
                 setHidden(mealElement, !meal);
                 ++i;
             }
+            setHidden(getFoodInfoButton(display), !hasFoodInfo);
         }
     }
 }
@@ -403,18 +408,13 @@ export function setupMealIcons(icons) {
 }
 
 export function setupFoodInfo() {
-    document.querySelector(".meals").addEventListener("click", event => {
-        const button = event.target.closest(".meal-info");
-        if (!button?.foodInfo) {
-            return;
-        }
-        const meals = Array.from(document.querySelectorAll(".meals .meal"), meal => {
-            const infoButton = meal.querySelector(".meal-info");
+    const button = document.getElementById("foodInfoButton");
+    button.addEventListener("click", () => {
+        const meals = Array.from(document.querySelectorAll("#jsonDisplay .meals .meal"), meal => {
             return {
-                name: infoButton.foodName,
-                info: infoButton.foodInfo,
+                name: meal.foodName,
+                info: meal.foodInfo,
                 icon: meal.querySelector('input[name="meal"]').getAttribute("icon"),
-                selected: infoButton === button
             };
         }).filter(meal => meal.info);
         showFoodInfo(meals);
@@ -438,7 +438,6 @@ function showFoodInfo(meals) {
     nav.replaceChildren();
     details.replaceChildren();
 
-    let selectedSection;
     for (const meal of meals) {
         const id = `foodInfo${meal.icon}`;
         const navButton = document.createElement("button");
@@ -458,18 +457,19 @@ function showFoodInfo(meals) {
         icon.textContent = meal.icon;
         const title = document.createElement("div");
         title.className = "meal-name food-info-meal-name";
-        title.append(document.createElement("div"), document.createElement("div"));
+        const primaryName = document.createElement("div");
+        primaryName.className = "meal-name-primary";
+        const secondaryName = document.createElement("div");
+        secondaryName.className = "meal-name-secondary";
+        title.append(primaryName, secondaryName);
         setMealName(title, meal.name);
         heading.append(icon, title);
         section.appendChild(heading);
         appendFoodInfo(section, meal.info);
         details.appendChild(section);
-        if (meal.selected) {
-            selectedSection = section;
-        }
     }
     dialog.showModal();
-    details.scrollTop = selectedSection?.offsetTop || 0;
+    details.scrollTop = 0;
 }
 
 function appendFoodInfo(details, info) {
@@ -538,9 +538,8 @@ function scrollToFoodInfo(id, smooth) {
 
 function setMealName(element, meal) {
     const names = meal?.split(/(?<=[\s+\p{Script=Cyrillic}])[\/\\](?=[\s+\p{Script=Latin}])/u) || [];
-    const divs = element.querySelectorAll("div");
-    divs[0].innerText = names[1] || names[0] || null;
-    divs[1].innerText = names[1] && names[0] || null;
+    element.querySelector(".meal-name-primary").innerText = names[1] || names[0] || null;
+    element.querySelector(".meal-name-secondary").innerText = names[1] && names[0] || null;
 }
 
 export function disableCopyEatIt() {
@@ -661,4 +660,8 @@ function getShareButton(id, display) {
     return !display
         ? document.getElementById(id)
         : display.querySelector(`[data-source-id="${id}"]`);
+}
+
+function getFoodInfoButton(display) {
+    return display.querySelector('#foodInfoButton, [data-source-id="foodInfoButton"]');
 }
