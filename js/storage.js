@@ -41,30 +41,32 @@ export function setSheetData(dateString, data, link) {
     if (datesChanged) {
         setSheetDates(dates);
     }
-    setItem(linkKey(dateString), { main: link });
+    setItem(linkKey(dateString), { main: link, days: [], menu: [] });
 }
 
 export function setAddedSheetLink(dateString, link, dayNames) {
     const links = getSheetLinks(dateString);
     const selectedDays = new Set(dayNames);
-    for (const key of Object.keys(links)) {
-        if (key === "main" || key.startsWith("+")) {
-            continue;
-        }
-        const existingLink = links[key];
-        const remainingDays = key.split("-").filter(dayName => !selectedDays.has(dayName));
-        delete links[key];
-        if (remainingDays.length > 0) {
-            links[remainingDays.join("-")] = existingLink;
-        }
-    }
-    links[dayNames.join("-")] = link;
+    links.days = links.days
+        .map(entry => entry.mode === "replace"
+            ? { ...entry, days: entry.days.filter(day => !selectedDays.has(day)) }
+            : entry)
+        .filter(entry => entry.days.length > 0);
+    links.days.push({ link, days: dayNames, mode: "replace" });
     setItem(linkKey(dateString), links);
 }
 
 export function setAddedFoodLink(dateString, link, dayName) {
     const links = getSheetLinks(dateString);
-    links[`+${dayName}`] = link;
+    links.days = links.days.filter(entry =>
+        entry.mode !== "add" || !entry.days.includes(dayName));
+    links.days.push({ link, days: [dayName], mode: "add" });
+    setItem(linkKey(dateString), links);
+}
+
+export function addMenuLink(dateString, link) {
+    const links = getSheetLinks(dateString);
+    links.menu.push(link);
     setItem(linkKey(dateString), links);
 }
 
@@ -72,9 +74,11 @@ export function getSheets() {
     const dates = getSheetDates() || [];
     return dates.sort().map(date => {
         const links = getSheetLinks(date);
-        const additions = Object.entries(links)
-            .filter(([key]) => key !== "main")
-            .map(([days, link]) => ({ days, link }));
+        const additions = links.days.map(entry => ({
+            days: `${entry.mode === "add" ? "+" : ""}${entry.days.join("-")}`,
+            link: entry.link
+        }));
+        additions.push(...links.menu.map(link => ({ days: "меню", link })));
         return { date, link: links.main, additions };
     });
 }
@@ -101,7 +105,7 @@ export function getLink(dateString) {
 }
 
 export function getSheetLinks(dateString) {
-    return getItem(linkKey(dateString)) || { main: null };
+    return getItem(linkKey(dateString)) || { main: null, days: [], menu: [] };
 }
 
 export function setEaten(dateString, data) {

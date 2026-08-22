@@ -97,6 +97,7 @@ async function onAddMenu(sheetLink) {
     page.displayError("");
     page.showLoading(true);
     await sheet.addFoodInfo(selectedDate, sheet.getSheetUrl(sheetId));
+    page.renderLoadedSheets(storage.getSheets());
     onDateChanged(selectedDate);
   } catch (error) {
     console.error(error);

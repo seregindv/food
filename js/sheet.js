@@ -37,26 +37,26 @@ export async function downloadWorkbook(sheetUrl) {
 }
 
 export async function addFoodInfo(date, sheetUrl) {
+  const infoImported = await downloadFoodInfo(sheetUrl);
+  const currentInfo = storage.getFoodInfo(date) || {};
+  Object.assign(currentInfo, infoImported);
+  storage.setFoodInfo(date, currentInfo);
+  storage.addMenuLink(date, sheetUrl);
+}
+
+async function downloadFoodInfo(sheetUrl) {
   const workbook = await downloadWorkbook(sheetUrl);
   const menuSheetName = workbook.SheetNames.find(name => name.toLowerCase() === "menu");
   const sheetNames = menuSheetName
     ? [menuSheetName, ...workbook.SheetNames.filter(name => name !== menuSheetName)]
     : workbook.SheetNames;
-  let infoImported;
   for (const sheetName of sheetNames) {
     const foodInfo = parseFoodInfo(workbook.Sheets[sheetName]);
     if (Object.keys(foodInfo).length > 0) {
-      infoImported = foodInfo;
-      break;
+      return foodInfo;
     }
   }
-  if (!infoImported) {
-    throw new Error("Не удалось найти меню");
-  }
-
-  const currentInfo = storage.getFoodInfo(date) || {};
-  Object.assign(currentInfo, infoImported);
-  storage.setFoodInfo(date, currentInfo);
+  throw new Error("Не удалось найти меню");
 }
 
 export function getAvailableDays(sheetData) {
@@ -87,14 +87,16 @@ export async function refresh(date) {
   }
 
   const { sheetData, foodInfo } = await downloadData(links.main);
-  const additions = Object.entries(links).filter(([days]) => days !== "main");
-  for (const [days, link] of additions.filter(([days]) => !days.startsWith("+"))) {
-    const { sheetData: addedData } = await downloadData(link, false);
-    mergeSheetDays(sheetData, addedData, days.split("-"));
+  for (const addition of links.days) {
+    const { sheetData: addedData } = await downloadData(addition.link, false);
+    if (addition.mode === "add") {
+      mergeFoodIntoDay(sheetData, addedData, addition.days[0]);
+    } else {
+      mergeSheetDays(sheetData, addedData, addition.days);
+    }
   }
-  for (const [day, link] of additions.filter(([days]) => days.startsWith("+"))) {
-    const { sheetData: addedData } = await downloadData(link, false);
-    mergeFoodIntoDay(sheetData, addedData, day.slice(1));
+  for (const menuLink of links.menu) {
+    Object.assign(foodInfo, await downloadFoodInfo(menuLink));
   }
 
   storage.setSheetData(date, sheetData);
