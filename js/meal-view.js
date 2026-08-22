@@ -102,7 +102,8 @@ function renderMeals(meals, employeeMeals, day) {
     return;
   }
 
-  meals.setNames(i => employeeMeals[i]);
+  const foodInfo = storage.getFoodInfo(page.getSelectedDate()) || {};
+  meals.setNames(i => employeeMeals[i], meal => foodInfo[meal.toString().trim()]);
   page.checkMeals(mealState.get(day), meals.display);
 }
 

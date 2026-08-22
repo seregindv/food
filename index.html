@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="index.css">
   <link rel="stylesheet" href="dropdown-button.css">
   <link rel="stylesheet" href="radio.css">
+  <link rel="stylesheet" href="food-info.css">
 </head>
 
 <body>
@@ -81,6 +82,14 @@
       </form>
     </dialog>
 
+    <dialog id="foodInfoDialog" class="food-info-dialog">
+      <form method="dialog">
+        <button class="food-info-close" aria-label="Закрыть">×</button>
+        <h3 id="foodInfoTitle"></h3>
+        <dl id="foodInfoDetails"></dl>
+      </form>
+    </dialog>
+
     <template id="sheetDate">
       <div class="sheet-date">
         <input type="radio">
@@ -130,6 +139,7 @@
               <div></div>
               <div></div>
             </label>
+            <button type="button" class="meal-info hidden">i</button>
           </div>
         </template>
         <div class="meals">

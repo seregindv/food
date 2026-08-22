@@ -78,15 +78,19 @@ export function getMeals(display = document.getElementById("jsonDisplay")) {
         show: function (show) {
             setHidden(display.querySelector(".values-list"), !show);
         },
-        setNames: function (getName) {
+        setNames: function (getName, getInfo) {
             let i = 0;
-            for (const listItem of display.querySelectorAll(".meal-name")) {
+            for (const mealElement of display.querySelectorAll(".meal")) {
                 const meal = getName(i);
                 const meals = meal?.split(/(?<=[\s+\p{Script=Cyrillic}])[\/\\](?=[\s+\p{Script=Latin}])/u) || [];
-                const divs = listItem.querySelectorAll("div");
+                const divs = mealElement.querySelectorAll(".meal-name div");
                 divs[0].innerText = meals[1] || meals[0] || null;
                 divs[1].innerText = meals[1] && meals[0] || null;
-                setHidden(listItem.closest(".meal"), !meal);
+                const infoButton = mealElement.querySelector(".meal-info");
+                infoButton.foodInfo = meal && getInfo ? getInfo(meal) : null;
+                infoButton.foodName = meal;
+                setHidden(infoButton, !infoButton.foodInfo);
+                setHidden(mealElement, !meal);
                 ++i;
             }
         }
@@ -371,6 +375,57 @@ export function setupMealIcons(icons) {
 
         meals.appendChild(meal);
     }
+}
+
+export function setupFoodInfo() {
+    document.querySelector(".meals").addEventListener("click", event => {
+        const button = event.target.closest(".meal-info");
+        if (!button?.foodInfo) {
+            return;
+        }
+        showFoodInfo(button.foodName, button.foodInfo);
+    });
+
+    const dialog = document.getElementById("foodInfoDialog");
+    dialog.addEventListener("click", event => {
+        const bounds = dialog.getBoundingClientRect();
+        const outside = event.clientX < bounds.left || event.clientX > bounds.right
+            || event.clientY < bounds.top || event.clientY > bounds.bottom;
+        if (outside) {
+            dialog.close();
+        }
+    });
+}
+
+function showFoodInfo(name, info) {
+    const dialog = document.getElementById("foodInfoDialog");
+    document.getElementById("foodInfoTitle").textContent = name;
+    const details = document.getElementById("foodInfoDetails");
+    details.replaceChildren();
+
+    const fields = [
+        ["Тип", info.vegeterian ? "Вегетарианское" : null],
+        ["Вес", info.weight, " г"],
+        ["Цена", info.price],
+        ["Состав", info.infoRU],
+        ["Sastojci", info.infoRS],
+        ["Калории", info.calories, " ккал"],
+        ["Белки", info.protein, " г"],
+        ["Жиры", info.fat, " г"],
+        ["Углеводы", info.carbs, " г"],
+        ["Аллергены", info.allergens],
+    ];
+    for (const [label, value, suffix = ""] of fields) {
+        if (value == null || value === "") {
+            continue;
+        }
+        const term = document.createElement("dt");
+        term.textContent = label;
+        const description = document.createElement("dd");
+        description.textContent = `${value}${suffix}`;
+        details.append(term, description);
+    }
+    dialog.showModal();
 }
 
 export function disableCopyEatIt() {

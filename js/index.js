@@ -154,6 +154,7 @@ function getToday() {
 
 function setupEventListeners() {
   page.setupMealIcons(mealIcons);
+  page.setupFoodInfo();
   page.setupDropdownButtons();
   page.onUpload(sheetLink => onDownloadSheet(sheetLink));
   page.onAddSheet(sheetLink => onAddSheet(sheetLink));

@@ -175,3 +175,21 @@ input[type="checkbox"]:checked {
   background-color: #dc3545;
   color: white;
 }
+
+.meal-info {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  margin: 8px 0 8px 8px;
+  padding: 0;
+  border: 2px solid #1B75D0;
+  border-radius: 50%;
+  color: #1B75D0;
+  background: transparent;
+  font: 700 18px/24px Georgia, serif;
+  cursor: pointer;
+}
+
+.meal-info:hover {
+  background: #CEE6FF;
+}

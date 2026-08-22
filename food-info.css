@@ -1,0 +1,58 @@
+.food-info-dialog {
+  width: min(520px, calc(100% - 32px));
+  max-height: calc(100% - 32px);
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .25);
+}
+
+.food-info-dialog::backdrop {
+  background: rgba(0, 0, 0, .4);
+}
+
+.food-info-dialog form {
+  padding: 20px;
+}
+
+.food-info-dialog h3 {
+  margin: 0 32px 18px 0;
+}
+
+.food-info-dialog dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 14px;
+  margin: 0;
+}
+
+.food-info-dialog dt {
+  font-weight: 600;
+}
+
+.food-info-dialog dd {
+  margin: 0;
+  white-space: pre-line;
+}
+
+.food-info-close {
+  float: right;
+  padding: 0;
+  border: 0;
+  color: #667;
+  background: transparent;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  .food-info-dialog dl {
+    grid-template-columns: 1fr;
+    gap: 3px;
+  }
+
+  .food-info-dialog dd {
+    margin-bottom: 8px;
+  }
+}
