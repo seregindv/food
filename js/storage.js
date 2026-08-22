@@ -15,6 +15,7 @@ export function dropOldSheets(mondayString) {
         localStorage.removeItem(eatenKey(date));
         localStorage.removeItem(dataKey(date));
         localStorage.removeItem(linkKey(date));
+        localStorage.removeItem(foodInfoKey(date));
         changed = true;
     }
     if (changed) {
@@ -88,6 +89,7 @@ export function deleteSheet(dateString) {
     localStorage.removeItem(eatenKey(dateString));
     localStorage.removeItem(dataKey(dateString));
     localStorage.removeItem(linkKey(dateString));
+    localStorage.removeItem(foodInfoKey(dateString));
 }
 
 export function getEatean(dateString) {
@@ -121,6 +123,14 @@ export function getSheetData(dateString) {
     return getItem(dataKey(dateString));
 }
 
+export function setFoodInfo(dateString, data) {
+    setItem(foodInfoKey(dateString), data);
+}
+
+export function getFoodInfo(dateString) {
+    return getItem(foodInfoKey(dateString));
+}
+
 export function getSheetDates() {
     return getItem("sheetDates");
 }
@@ -147,6 +157,10 @@ function linkKey(dateString) {
 
 function eatenKey(dateString) {
     return `eaten_${dateString}`;
+}
+
+function foodInfoKey(dateString) {
+    return `foodInfo_${dateString}`;
 }
 
 function setItem(key, data) {

@@ -3,7 +3,7 @@ import { getDateString, getDownloadSheetUrl, getMonday, mealIcons, dayNames } fr
 
 export async function download(sheetId, refreshing) {
   const sheetUrl = getSheetUrl(sheetId);
-  const { sheetData, sheetDate } = await downloadData(sheetUrl);
+  const { sheetData, sheetDate, foodInfo } = await downloadData(sheetUrl);
 
   if (!refreshing) {
     const monday = getMonday();
@@ -12,6 +12,7 @@ export async function download(sheetId, refreshing) {
 
   const sheetDateString = getDateString(sheetDate);
   storage.setSheetData(sheetDateString, sheetData, refreshing ? null : sheetUrl);
+  storage.setFoodInfo(sheetDateString, foodInfo);
   return sheetDateString;
 }
 
@@ -58,7 +59,7 @@ export async function refresh(date) {
     return false;
   }
 
-  const { sheetData } = await downloadData(links.main);
+  const { sheetData, foodInfo } = await downloadData(links.main);
   const additions = Object.entries(links).filter(([days]) => days !== "main");
   for (const [days, link] of additions.filter(([days]) => !days.startsWith("+"))) {
     const { sheetData: addedData } = await downloadData(link, false);
@@ -70,6 +71,7 @@ export async function refresh(date) {
   }
 
   storage.setSheetData(date, sheetData);
+  storage.setFoodInfo(date, foodInfo);
   return true;
 }
 
@@ -175,7 +177,105 @@ function parseWorkbook(workbook, requireDate = true) {
     throw new Error("Не удалось найти дату");
   }
 
-  return { sheetData, sheetDate };
+  return { sheetData, sheetDate, foodInfo: parseFoodInfo(workbook.Sheets["Menu"]) };
+}
+
+export function parseFoodInfo(worksheet) {
+  if (!worksheet) {
+    return {};
+  }
+
+  const rows = XLSX.utils.sheet_to_json(worksheet, {
+    defval: null,
+    range: "A1:I100",
+    header: 1,
+    blankrows: false,
+  });
+  if (rows.length === 0) {
+    return {};
+  }
+
+  let nameIndex;
+  const headerRowIndex = rows.findIndex(row => {
+    nameIndex = findHeaderIndex(row, "naziv", "наименование");
+    return nameIndex !== -1;
+  });
+  if (headerRowIndex === -1) {
+    return {};
+  }
+  const headers = rows[headerRowIndex];
+  const indexes = {
+    name: nameIndex,
+    weight: findHeaderIndex(headers, "вес", "гр/мл"),
+    infoRU: findHeaderIndex(headers, "состав"),
+    infoRS: findHeaderIndex(headers, "sastojci"),
+    nutrition: findHeaderIndex(headers, "кбжу"),
+    allergens: findHeaderIndex(headers, "аллергены"),
+  };
+  const vegetarianIndex = indexes.name > 0 ? indexes.name - 1 : -1;
+  const priceIndex = indexes.weight >= 0 ? indexes.weight + 1 : -1;
+
+  const foodInfo = {};
+  for (const row of rows.slice(headerRowIndex + 1)) {
+    const name = row[indexes.name]?.toString().trim();
+    const hasDetails = row.some((value, index) =>
+      index !== indexes.name && value != null);
+    if (!name || !hasDetails) {
+      continue;
+    }
+
+    const weight = parseNumber(row[indexes.weight]);
+    const item = {
+      weight,
+      price: parseNumber(row[priceIndex]),
+      infoRU: row[indexes.infoRU]?.toString().trim(),
+      infoRS: row[indexes.infoRS]?.toString().trim(),
+      ...parseNutrition(row[indexes.nutrition], weight),
+      allergens: row[indexes.allergens]?.toString().trim(),
+    };
+    if (vegetarianIndex >= 0 && row[vegetarianIndex]) {
+      item.vegeterian = true;
+    }
+    foodInfo[name] = item;
+  }
+  return foodInfo;
+}
+
+function findHeaderIndex(headers, ...expectedTexts) {
+  return headers.findIndex(header =>
+    expectedTexts.some(expectedText =>
+      header?.toString().toLowerCase().includes(expectedText)));
+}
+
+function parseNutrition(value, weight) {
+  const text = value?.toString();
+  if (!text || weight === null) {
+    return { calories: null, protein: null, fat: null, carbs: null };
+  }
+
+  const patterns = {
+    calories: /[КK]\s*<?\s*(\d+(?:[.,]\d+)?)/i,
+    protein: /Б\s*<?\s*(\d+(?:[.,]\d+)?)/i,
+    fat: /Ж\s*<?\s*(\d+(?:[.,]\d+)?)/i,
+    carbs: /У\s*<?\s*(\d+(?:[.,]\d+)?)/i,
+  };
+  return Object.fromEntries(Object.entries(patterns).map(([key, pattern]) => {
+    const match = text.match(pattern);
+    const perHundredGrams = match ? Number(match[1].replace(",", ".")) : null;
+    return [key, perHundredGrams === null ? null : roundNutrition(perHundredGrams * weight / 100)];
+  }));
+}
+
+function parseNumber(value) {
+  if (typeof value === "number") {
+    return value;
+  }
+  const match = value?.toString().match(/\d+(?:[.,]\d+)?/);
+  return match ? Number(match[0].replace(",", ".")) : null;
+}
+
+function roundNutrition(value) {
+  return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 
 function parseDate(cell, dateOffset = 0) {
