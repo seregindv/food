@@ -431,27 +431,58 @@ function showFoodInfo(name, info) {
     const details = document.getElementById("foodInfoDetails");
     details.replaceChildren();
 
+    if (info.allergens || info.vegeterian) {
+        const flags = document.createElement("div");
+        flags.className = "food-info-flags";
+        const allergens = document.createElement("p");
+        allergens.textContent = info.allergens ? `❗${info.allergens}` : "";
+        const vegetarian = document.createElement("p");
+        vegetarian.textContent = info.vegeterian ? "🌱 вегетарианское" : "";
+        flags.append(allergens, vegetarian);
+        details.appendChild(flags);
+    }
+    if (info.infoRS || info.infoRU) {
+        const composition = document.createElement("section");
+        composition.className = "food-info-composition";
+        for (const text of [info.infoRS, info.infoRU]) {
+            if (text) {
+                const paragraph = document.createElement("p");
+                paragraph.textContent = text;
+                composition.appendChild(paragraph);
+            }
+        }
+        details.appendChild(composition);
+    }
+
+    const grid = document.createElement("div");
+    grid.className = "food-info-grid";
     const fields = [
-        ["Тип", info.vegeterian ? "Вегетарианское" : null],
         ["Вес", info.weight, " г"],
-        ["Цена", info.price],
-        ["Состав", info.infoRU],
-        ["Sastojci", info.infoRS],
+        ["Цена", info.price, " дин"],
         ["Калории", info.calories, " ккал"],
         ["Белки", info.protein, " г"],
         ["Жиры", info.fat, " г"],
         ["Углеводы", info.carbs, " г"],
-        ["Аллергены", info.allergens],
     ];
+    let hasFields = false;
     for (const [label, value, suffix = ""] of fields) {
-        if (value == null || value === "") {
-            continue;
+        const field = document.createElement("div");
+        field.className = "food-info-field";
+        const fieldLabel = document.createElement("div");
+        fieldLabel.className = "food-info-label";
+        fieldLabel.textContent = label;
+        const fieldValue = document.createElement("div");
+        fieldValue.textContent = value == null || value === "" ? "" : `${value}${suffix}`;
+        if (!fieldValue.textContent) {
+            field.classList.add("missing");
+        } else {
+            hasFields = true;
         }
-        const term = document.createElement("dt");
-        term.textContent = label;
-        const description = document.createElement("dd");
-        description.textContent = `${value}${suffix}`;
-        details.append(term, description);
+        field.append(fieldLabel, fieldValue);
+        grid.appendChild(field);
+    }
+    if (hasFields) {
+        details.appendChild(grid);
     }
     dialog.showModal();
 }

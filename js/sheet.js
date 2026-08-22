@@ -297,9 +297,7 @@ function parseNutrition(value, weight) {
     if (perHundredGrams === null) {
       return;
     }
-    let total = (perHundredGrams * weight) / 100;
-    total = roundNutrition(total, round);
-    result[key] = total;
+    result[key] = roundNutrition(perHundredGrams * weight / 100, round);
   }
 }
 
