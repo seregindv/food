@@ -98,7 +98,7 @@ input[type="checkbox"]:checked {
   opacity: .5;
 }
 
-.meal input[type="checkbox"]+label div:last-child {
+.meal-name>div:last-child {
   font-size: 18px;
   color: #667;
   margin: 0.2rem 0 0;

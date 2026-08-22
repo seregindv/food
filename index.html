@@ -85,9 +85,11 @@
 
     <dialog id="foodInfoDialog" class="food-info-dialog">
       <form method="dialog">
-        <button class="food-info-close" aria-label="Закрыть">×</button>
-        <h3 id="foodInfoTitle"></h3>
-        <div id="foodInfoDetails"></div>
+        <div class="food-info-header">
+          <div id="foodInfoNav" class="food-info-nav"></div>
+          <button class="food-info-close" aria-label="Закрыть">×</button>
+        </div>
+        <div id="foodInfoDetails" class="food-info-content"></div>
       </form>
     </dialog>
 

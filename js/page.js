@@ -83,10 +83,7 @@ export function getMeals(display = document.getElementById("jsonDisplay")) {
             let hasNutrition = false;
             for (const mealElement of display.querySelectorAll(".meal")) {
                 const meal = getName(i);
-                const meals = meal?.split(/(?<=[\s+\p{Script=Cyrillic}])[\/\\](?=[\s+\p{Script=Latin}])/u) || [];
-                const divs = mealElement.querySelectorAll(".meal-name div");
-                divs[0].innerText = meals[1] || meals[0] || null;
-                divs[1].innerText = meals[1] && meals[0] || null;
+                setMealName(mealElement.querySelector(".meal-name"), meal);
                 const infoButton = mealElement.querySelector(".meal-info");
                 infoButton.foodInfo = meal && getInfo ? getInfo(meal) : null;
                 infoButton.foodName = meal;
@@ -411,7 +408,16 @@ export function setupFoodInfo() {
         if (!button?.foodInfo) {
             return;
         }
-        showFoodInfo(button.foodName, button.foodInfo);
+        const meals = Array.from(document.querySelectorAll(".meals .meal"), meal => {
+            const infoButton = meal.querySelector(".meal-info");
+            return {
+                name: infoButton.foodName,
+                info: infoButton.foodInfo,
+                icon: meal.querySelector('input[name="meal"]').getAttribute("icon"),
+                selected: infoButton === button
+            };
+        }).filter(meal => meal.info);
+        showFoodInfo(meals);
     });
 
     const dialog = document.getElementById("foodInfoDialog");
@@ -425,12 +431,48 @@ export function setupFoodInfo() {
     });
 }
 
-function showFoodInfo(name, info) {
+function showFoodInfo(meals) {
     const dialog = document.getElementById("foodInfoDialog");
-    document.getElementById("foodInfoTitle").textContent = name;
+    const nav = document.getElementById("foodInfoNav");
     const details = document.getElementById("foodInfoDetails");
+    nav.replaceChildren();
     details.replaceChildren();
 
+    let selectedSection;
+    for (const meal of meals) {
+        const id = `foodInfo${meal.icon}`;
+        const navButton = document.createElement("button");
+        navButton.type = "button";
+        navButton.textContent = meal.icon;
+        navButton.setAttribute("aria-label", meal.name);
+        navButton.addEventListener("click", () => scrollToFoodInfo(id, true));
+        nav.appendChild(navButton);
+
+        const section = document.createElement("section");
+        section.id = id;
+        section.className = "food-info-meal";
+        const heading = document.createElement("div");
+        heading.className = "food-info-meal-heading";
+        const icon = document.createElement("span");
+        icon.className = "food-info-meal-icon";
+        icon.textContent = meal.icon;
+        const title = document.createElement("div");
+        title.className = "meal-name food-info-meal-name";
+        title.append(document.createElement("div"), document.createElement("div"));
+        setMealName(title, meal.name);
+        heading.append(icon, title);
+        section.appendChild(heading);
+        appendFoodInfo(section, meal.info);
+        details.appendChild(section);
+        if (meal.selected) {
+            selectedSection = section;
+        }
+    }
+    dialog.showModal();
+    details.scrollTop = selectedSection?.offsetTop || 0;
+}
+
+function appendFoodInfo(details, info) {
     if (info.allergens || info.vegeterian) {
         const flags = document.createElement("div");
         flags.className = "food-info-flags";
@@ -484,7 +526,21 @@ function showFoodInfo(name, info) {
     if (hasFields) {
         details.appendChild(grid);
     }
-    dialog.showModal();
+}
+
+function scrollToFoodInfo(id, smooth) {
+    const content = document.getElementById("foodInfoDetails");
+    const section = document.getElementById(id);
+    if (section) {
+        content.scrollTo({ top: section.offsetTop, behavior: smooth ? "smooth" : "auto" });
+    }
+}
+
+function setMealName(element, meal) {
+    const names = meal?.split(/(?<=[\s+\p{Script=Cyrillic}])[\/\\](?=[\s+\p{Script=Latin}])/u) || [];
+    const divs = element.querySelectorAll("div");
+    divs[0].innerText = names[1] || names[0] || null;
+    divs[1].innerText = names[1] && names[0] || null;
 }
 
 export function disableCopyEatIt() {
