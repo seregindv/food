@@ -80,6 +80,7 @@ export function getMeals(display = document.getElementById("jsonDisplay")) {
         },
         setNames: function (getName, getInfo) {
             let i = 0;
+            let hasNutrition = false;
             for (const mealElement of display.querySelectorAll(".meal")) {
                 const meal = getName(i);
                 const meals = meal?.split(/(?<=[\s+\p{Script=Cyrillic}])[\/\\](?=[\s+\p{Script=Latin}])/u) || [];
@@ -90,9 +91,28 @@ export function getMeals(display = document.getElementById("jsonDisplay")) {
                 infoButton.foodInfo = meal && getInfo ? getInfo(meal) : null;
                 infoButton.foodName = meal;
                 setHidden(infoButton, !infoButton.foodInfo);
+
+                const nutrition = mealElement.querySelector(".meal-nutrition");
+                const nutritionValues = infoButton.foodInfo && [
+                    [infoButton.foodInfo.calories, "ккал"],
+                    [infoButton.foodInfo.protein, "г"],
+                    [infoButton.foodInfo.fat, "г"],
+                    [infoButton.foodInfo.carbs, "г"],
+                ];
+                const hasMealNutrition = nutritionValues
+                    && nutritionValues.some(([value]) => value != null);
+                if (hasMealNutrition) {
+                    nutrition.querySelectorAll("div").forEach((cell, index) => {
+                        const [value, unit] = nutritionValues[index];
+                        cell.textContent = value == null ? "" : `${value} ${unit}`;
+                    });
+                    hasNutrition = true;
+                }
+                setHidden(nutrition, !hasMealNutrition);
                 setHidden(mealElement, !meal);
                 ++i;
             }
+            setHidden(display.querySelector(".nutrition-header"), !hasNutrition);
         }
     }
 }
