@@ -260,7 +260,8 @@ export function parseFoodInfo(worksheet) {
       ...parseNutrition(row[indexes.nutrition], weight),
       allergens: row[indexes.allergens]?.toString().trim(),
     };
-    if (vegetarianIndex >= 0 && row[vegetarianIndex]) {
+    if (vegetarianIndex >= 0
+      && row[vegetarianIndex]?.toString().toLowerCase().includes("вегета")) {
       item.vegeterian = true;
     }
     foodInfo[name] = item;
