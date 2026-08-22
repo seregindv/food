@@ -280,20 +280,27 @@ function findHeaderIndex(headers, ...expectedTexts) {
 function parseNutrition(value, weight) {
   const text = value?.toString();
   if (!text || weight === null) {
-    return { calories: null, protein: null, fat: null, carbs: null };
+    return {};
   }
 
-  const patterns = {
-    calories: /[КK]\s*<?\s*(\d+(?:[.,]\d+)?)/i,
-    protein: /Б\s*<?\s*(\d+(?:[.,]\d+)?)/i,
-    fat: /Ж\s*<?\s*(\d+(?:[.,]\d+)?)/i,
-    carbs: /У\s*<?\s*(\d+(?:[.,]\d+)?)/i,
-  };
-  return Object.fromEntries(Object.entries(patterns).map(([key, pattern]) => {
+  const result = {};
+  add(result, "calories", /[КK]\s*<?\s*(\d+(?:[.,]\d+)?)/i, 1);
+  add(result, "protein", /Б\s*<?\s*(\d+(?:[.,]\d+)?)/i, 10);
+  add(result, "fat", /Ж\s*<?\s*(\d+(?:[.,]\d+)?)/i, 10);
+  add(result, "carbs", /У\s*<?\s*(\d+(?:[.,]\d+)?)/i, 10);
+
+  return result;
+
+  function add(result, key, pattern, round) {
     const match = text.match(pattern);
     const perHundredGrams = match ? Number(match[1].replace(",", ".")) : null;
-    return [key, perHundredGrams === null ? null : roundNutrition(perHundredGrams * weight / 100)];
-  }));
+    if (perHundredGrams === null) {
+      return;
+    }
+    let total = (perHundredGrams * weight) / 100;
+    total = roundNutrition(total, round);
+    result[key] = total;
+  }
 }
 
 function parseNumber(value) {
@@ -304,8 +311,8 @@ function parseNumber(value) {
   return match ? Number(match[0].replace(",", ".")) : null;
 }
 
-function roundNutrition(value) {
-  return Math.round((value + Number.EPSILON) * 100) / 100;
+function roundNutrition(value, round) {
+  return Math.round((value + Number.EPSILON) * round) / round;
 }
 
 function parseDate(cell, dateOffset = 0) {
