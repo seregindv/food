@@ -72,7 +72,7 @@
 .meal>label {
   flex: 1 1 auto;
   cursor: pointer;
-  padding: 10px 0 10px 10px;
+  padding: 12px 0 2px 10px;
 }
 
 .meal input[type="checkbox"] {
@@ -205,7 +205,7 @@ input[type="checkbox"]:checked {
 .nutrition-grid>div {
   box-sizing: border-box;
   min-width: 0;
-  padding: 5px 2px;
+  padding: 8px 2px;
   border-radius: 4px;
 }
 
@@ -223,12 +223,6 @@ input[type="checkbox"]:checked {
 
 .nutrition-grid>div:nth-child(4) {
   background: #fff4cc;
-}
-
-.nutrition-header {
-  margin-bottom: 5px;
-  padding-left: 32px;
-  font-weight: 600;
 }
 
 .meal-nutrition {

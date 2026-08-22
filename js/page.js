@@ -112,7 +112,6 @@ export function getMeals(display = document.getElementById("jsonDisplay")) {
                 setHidden(mealElement, !meal);
                 ++i;
             }
-            setHidden(display.querySelector(".nutrition-header"), !hasNutrition);
         }
     }
 }
