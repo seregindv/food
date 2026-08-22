@@ -1,6 +1,6 @@
 import * as page from './page.js';
 import * as storage from './storage.js';
-import { mealIcons } from './common.js';
+import { mealIcons, dayNames } from './common.js';
 import * as refresh from './refresh.js';
 import * as mascot from './mascot.js';
 import * as sheet from './sheet.js';
@@ -99,7 +99,7 @@ async function onAddToDay(sheetLink) {
     const sheetUrl = sheet.getSheetUrl(sheetId);
     const { sheetData } = await sheet.downloadData(sheetUrl, false);
     page.showLoading(false);
-    const selectedDays = await page.chooseDays(sheet.dayNames, {
+    const selectedDays = await page.chooseDays(dayNames, {
       multiple: false,
       title: "Добавить в день"
     });

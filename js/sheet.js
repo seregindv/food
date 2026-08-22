@@ -1,7 +1,5 @@
 import * as storage from './storage.js';
-import { getDateString, getDownloadSheetUrl, getMonday, mealIcons } from './common.js';
-
-export const dayNames = ["пн", "вт", "ср", "чт", "пт"];
+import { getDateString, getDownloadSheetUrl, getMonday, mealIcons, dayNames } from './common.js';
 
 export async function download(sheetId, refreshing) {
   const sheetUrl = getSheetUrl(sheetId);

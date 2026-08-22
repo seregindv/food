@@ -1,461 +1,461 @@
 body {
-    margin: 0;
-    background-color: aliceblue;
-    -webkit-tap-highlight-color: transparent;
+  margin: 0;
+  background-color: aliceblue;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .main {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-    color: #231F20;
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  color: #231F20;
 }
 
 .title-container {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
 .mascot {
-    flex: 1 1 auto;
-    position: relative;
-    align-self: stretch;
+  flex: 1 1 auto;
+  position: relative;
+  align-self: stretch;
 }
 
 .mascot img {
-    cursor: pointer;
-    position: absolute;
+  cursor: pointer;
+  position: absolute;
 }
 
 .mascot.cake img {
-    transform: translateY(-50%);
-    top: 50%;
-    width: 70px;
+  transform: translateY(-50%);
+  top: 50%;
+  width: 70px;
 }
 
 .mascot.donkey img {
-    width: 168px;
-    left: -23px;
-    bottom: -22px;
+  width: 168px;
+  left: -23px;
+  bottom: -22px;
 }
 
 #sheetLinkInput {
-    padding: 8px;
-    margin-bottom: 10px;
-    width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box;
+  padding: 8px;
+  margin-bottom: 10px;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
 }
 
 .loaded-sheets {
-    margin-bottom: 10px;
-    font-size: 18px;
+  margin-bottom: 10px;
+  font-size: 18px;
 }
 
 .loaded-sheets>div {
-    display: inline-flex;
-    align-items: start;
-    gap: 1px;
-    margin-right: 6px;
-    margin-bottom: 4px;
+  display: inline-flex;
+  align-items: start;
+  gap: 1px;
+  margin-right: 6px;
+  margin-bottom: 4px;
 }
 
 .loaded-sheets a {
-    text-decoration: none;
-    color: white;
-    padding: 5px 10px;
-    display: block;
+  text-decoration: none;
+  color: white;
+  padding: 5px 10px;
+  display: block;
 }
 
 .loaded-sheets a:first-of-type {
-    border-start-start-radius: 5px;
-    border-end-start-radius: 5px;
+  border-start-start-radius: 5px;
+  border-end-start-radius: 5px;
 }
 
 .loaded-sheets a:last-of-type {
-    border-start-end-radius: 5px;
-    border-end-end-radius: 5px;
+  border-start-end-radius: 5px;
+  border-end-end-radius: 5px;
 }
 
 .loaded-sheets a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .loaded-sheets .early {
-    background-color: #eeb509;
+  background-color: #eeb509;
 }
 
 .loaded-sheets .normal {
-    background-color: #28a745;
+  background-color: #28a745;
 }
 
 .loaded-sheets .late {
-    background-color: #dc3545;
+  background-color: #dc3545;
 }
 
 .sheet-delete {
-    width: 26px;
-    height: 32px;
-    padding: 0;
-    cursor: pointer;
-    border: none;
-    background: transparent;
-    color: #231F20;
-    font-size: 34px;
-    line-height: 28px;
-    transform: rotate(45deg);
+  width: 26px;
+  height: 32px;
+  padding: 0;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: #231F20;
+  font-size: 34px;
+  line-height: 28px;
+  transform: rotate(45deg);
 }
 
 .button {
-    padding: 8px 16px;
-    cursor: pointer;
-    border: none;
-    border-radius: 5px;
-    font-size: 14px;
-    align-self: flex-start;
+  padding: 8px 16px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  align-self: flex-start;
 }
 
 #uploadBtn {
-    color: white;
-    background-color: #28a745;
+  color: white;
+  background-color: #28a745;
 }
 
 #addDaysDialog {
-    border: none;
-    border-radius: 8px;
-    padding: 20px;
+  border: none;
+  border-radius: 8px;
+  padding: 20px;
 }
 
 #addDaysDialog::backdrop {
-    background: rgb(0 0 0 / 35%);
+  background: rgb(0 0 0 / 35%);
 }
 
 #addDaysDialog h3 {
-    margin-top: 0;
+  margin-top: 0;
 }
 
 .add-days-choices {
-    display: flex;
-    gap: 12px;
-    margin: 16px 0 20px;
+  display: flex;
+  gap: 12px;
+  margin: 16px 0 20px;
 }
 
 .add-days-choices label {
-    cursor: pointer;
-    text-transform: capitalize;
+  cursor: pointer;
+  text-transform: capitalize;
 }
 
 .dialog-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 #confirmAddDays {
-    color: white;
-    background-color: #28a745;
+  color: white;
+  background-color: #28a745;
 }
 
 .sheet-dates {
-    display: flex;
-    gap: 6px;
+  display: flex;
+  gap: 6px;
 }
 
 #selectContainer {
-    margin-bottom: 10px;
-    display: none;
+  margin-bottom: 10px;
+  display: none;
 }
 
 .select-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 15px
+  display: flex;
+  flex-direction: column;
+  gap: 15px
 }
 
 .loader-panel {
-    z-index: 9999;
-    position: relative;
+  z-index: 9999;
+  position: relative;
 }
 
 .loader {
-    flex: 1 0 auto;
-    display: flex;
-    position: relative;
-    overflow: hidden;
+  flex: 1 0 auto;
+  display: flex;
+  position: relative;
+  overflow: hidden;
 }
 
 .loader>span {
-    font-size: 24px;
-    position: absolute;
-    left: -120px;
-    top: 0;
-    animation: fly 4s ease infinite;
+  font-size: 24px;
+  position: absolute;
+  left: -120px;
+  top: 0;
+  animation: fly 4s ease infinite;
 }
 
 @keyframes fly {
-    0% {
-        top: 0;
-        left: -120px;
-    }
+  0% {
+    top: 0;
+    left: -120px;
+  }
 
-    44% {
-        left: 59%;
-    }
+  44% {
+    left: 59%;
+  }
 
-    55% {
-        top: 0;
-        left: 60%;
-    }
+  55% {
+    top: 0;
+    left: 60%;
+  }
 
-    100% {
-        top: 24px;
-        left: calc(100% + 210px);
-    }
+  100% {
+    top: 24px;
+    left: calc(100% + 210px);
+  }
 }
 
 .loader>span:nth-child(1) {
-    animation-delay: 2s;
-    transform: translateX(-210px);
+  animation-delay: 2s;
+  transform: translateX(-210px);
 }
 
 .loader>span:nth-child(2) {
-    animation-delay: 1.8s;
-    transform: translateX(-180px);
+  animation-delay: 1.8s;
+  transform: translateX(-180px);
 }
 
 .loader>span:nth-child(3) {
-    animation-delay: 1.6s;
-    transform: translateX(-150px);
+  animation-delay: 1.6s;
+  transform: translateX(-150px);
 }
 
 .loader>span:nth-child(4) {
-    animation-delay: 1.4s;
-    transform: translateX(-120px);
+  animation-delay: 1.4s;
+  transform: translateX(-120px);
 }
 
 .loader>span:nth-child(5) {
-    animation-delay: 1.2s;
-    transform: translateX(-90px);
+  animation-delay: 1.2s;
+  transform: translateX(-90px);
 }
 
 .loader>span:nth-child(6) {
-    animation-delay: 1s;
-    transform: translateX(-60px);
+  animation-delay: 1s;
+  transform: translateX(-60px);
 }
 
 .loader>span:nth-child(7) {
-    animation-delay: .8s;
-    transform: translateX(-30px);
+  animation-delay: .8s;
+  transform: translateX(-30px);
 }
 
 .loader>span:nth-child(8) {
-    animation-delay: .6s;
-    transform: translateX(0);
+  animation-delay: .6s;
+  transform: translateX(0);
 }
 
 .loader>span:nth-child(9) {
-    animation-delay: .4s;
-    transform: translateX(30px);
+  animation-delay: .4s;
+  transform: translateX(30px);
 }
 
 .loader>span:nth-child(10) {
-    animation-delay: .2s;
-    transform: translateX(60px);
+  animation-delay: .2s;
+  transform: translateX(60px);
 }
 
 .loader>span:nth-child(11) {
-    animation-delay: 0s;
-    transform: translateX(90px);
+  animation-delay: 0s;
+  transform: translateX(90px);
 }
 
 .error {
-    color: #dc3545;
-    margin-bottom: 20px;
+  color: #dc3545;
+  margin-bottom: 20px;
 }
 
 .days {
-    display: flex;
+  display: flex;
 }
 
 @media (orientation: landscape) {
-    .days {
-        gap: 6px;
-    }
+  .days {
+    gap: 6px;
+  }
 }
 
 @media (orientation: portrait) {
-    .days {
-        justify-content: space-between;
-    }
+  .days {
+    justify-content: space-between;
+  }
 }
 
 .days input.today:not(:checked)+label {
-    box-shadow: 0 0 0 1px #1B75D0;
+  box-shadow: 0 0 0 1px #1B75D0;
 }
 
 .refresh {
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: end;
-    flex-flow: column;
-    margin: 0 20px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  flex-flow: column;
+  margin: 0 20px;
 }
 
 .refresh-arrow {
-    height: 50px;
-    fill: lightgray;
-    position: absolute;
+  height: 50px;
+  fill: lightgray;
+  position: absolute;
 }
 
 .refresh-arrow.ready.early {
-    fill: #eeb509;
+  fill: #eeb509;
 }
 
 .refresh-arrow.ready.normal {
-    fill: #28a745;
+  fill: #28a745;
 }
 
 .refresh-arrow.ready.late {
-    fill: #dc3545;
+  fill: #dc3545;
 }
 
 .hidden {
-    display: none !important;
+  display: none !important;
 }
 
 .invisible {
-    visibility: hidden !important;
+  visibility: hidden !important;
 }
 
 .flex {
-    display: flex;
+  display: flex;
 }
 
 .flex-stretch {
-    flex: 1 0 auto;
+  flex: 1 0 auto;
 }
 
 .gap-8 {
-    gap: 8px;
+  gap: 8px;
 }
 
 .transparent-button {
-    background: transparent;
-    border: none;
-    width: 50px;
-    border-radius: 5px;
-    height: 50px;
-    display: inline-flex;
+  background: transparent;
+  border: none;
+  width: 50px;
+  border-radius: 5px;
+  height: 50px;
+  display: inline-flex;
 }
 
 .transparent-button:not(:disabled) {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .transparent-button:not(:disabled).warning {
-    fill: #dc3545;
+  fill: #dc3545;
 }
 
 @media (pointer: fine) {
-    .transparent-button:not(.emoji):hover:not(:disabled) {
-        stroke: white;
-        fill: white;
-        color: white;
-        background-color: #1B75D0;
-    }
+  .transparent-button:not(.emoji):hover:not(:disabled) {
+    stroke: white;
+    fill: white;
+    color: white;
+    background-color: #1B75D0;
+  }
 
-    .transparent-button.emoji:hover:not(:disabled) {
-        text-shadow: 0 0 0 #fff;
-        background-color: #1B75D0;
-    }
+  .transparent-button.emoji:hover:not(:disabled) {
+    text-shadow: 0 0 0 #fff;
+    background-color: #1B75D0;
+  }
 
-    .transparent-button.glow:hover:not(:disabled) {
-        box-shadow: 0 0 0 5px #1B75D0;
-    }
+  .transparent-button.glow:hover:not(:disabled) {
+    box-shadow: 0 0 0 5px #1B75D0;
+  }
 }
 
 @media (pointer: coarse) {
-    .transparent-button:not(.emoji):active:not(:disabled):not(.content-updated) {
-        stroke: white;
-        fill: white;
-        color: white;
-        background-color: #1B75D0;
-    }
+  .transparent-button:not(.emoji):active:not(:disabled):not(.content-updated) {
+    stroke: white;
+    fill: white;
+    color: white;
+    background-color: #1B75D0;
+  }
 
-    .transparent-button.emoji:active:not(:disabled):not(.content-updated) {
-        text-shadow: 0 0 0 #fff;
-        background-color: #1B75D0;
-    }
+  .transparent-button.emoji:active:not(:disabled):not(.content-updated) {
+    text-shadow: 0 0 0 #fff;
+    background-color: #1B75D0;
+  }
 
-    .transparent-button.glow:active:not(:disabled):not(.content-updated) {
-        box-shadow: 0 0 0 5px #1B75D0;
-    }
+  .transparent-button.glow:active:not(:disabled):not(.content-updated) {
+    box-shadow: 0 0 0 5px #1B75D0;
+  }
 }
 
 .transparent-button.bordered {
-    border: 1px solid #ccc;
+  border: 1px solid #ccc;
 }
 
 .transparent-button.texted {
-    font-size: 38px;
-    align-items: center;
-    justify-content: center;
+  font-size: 38px;
+  align-items: center;
+  justify-content: center;
 }
 
 .transparent-button.texted.emoji {
-    color: transparent;
-    text-shadow: 0 0 0 #444;
-    line-height: 0;
+  color: transparent;
+  text-shadow: 0 0 0 #444;
+  line-height: 0;
 }
 
 .transparent-button.texted.emoji:disabled {
-    text-shadow: 0 0 0 #ccc;
+  text-shadow: 0 0 0 #ccc;
 }
 
 .transparent-button:disabled {
-    fill: lightgray;
+  fill: lightgray;
 }
 
 .refresh-loader {
-    width: 100%;
+  width: 100%;
 }
 
 .animated-rotate {
-    transition: transform 0.125s linear;
-    transform: rotate(0deg);
+  transition: transform 0.125s linear;
+  transform: rotate(0deg);
 }
 
 .rotated {
-    transform: rotate(45deg);
+  transform: rotate(45deg);
 }
 
 .link-select {
-    background: transparent;
-    border: none;
-    margin: 0;
-    padding: 0;
-    cursor: pointer;
-    outline: none;
-    font-size: inherit;
-    width: 100%;
-    margin-bottom: 3px;
-    height: 50px;
+  background: transparent;
+  border: none;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+  font-size: inherit;
+  width: 100%;
+  margin-bottom: 3px;
+  height: 50px;
 }
 
 .link-select option {
-    color: #000;
+  color: #000;
 }
 
 .employee-select {
-    margin-bottom: 8px;
-    font-size: 20px;
-    width: 100%;
+  margin-bottom: 8px;
+  font-size: 20px;
+  width: 100%;
 }
 
 option.empty {
-    color: #ccc;
+  color: #ccc;
 }
 
 #employeeSelect,
@@ -465,4 +465,11 @@ option.empty {
 
 #employeeSelect {
   align-items: center;
+}
+
+select option:not(.empty)::after {
+  content: attr(data-days);
+  color: gray;
+  position: absolute;
+  right: .5em;
 }

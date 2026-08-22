@@ -4,9 +4,8 @@ import * as mealState from './meal-state.js';
 import * as share from './share.js';
 
 export function populateEmployeeSelect(data) {
-  const employees = Object.keys(data).sort().map(employee => ({ name: employee, hasMeal: !!Object.keys(data[employee])[0] }));
   const selectedEmployee = localStorage.getItem("selectedEmployee");
-  page.populateEmployees(employees, selectedEmployee);
+  page.populateEmployees(data, selectedEmployee);
   if (!data) {
     page.showSettings(true, false);
   }

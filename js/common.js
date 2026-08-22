@@ -19,3 +19,5 @@ export function getDownloadSheetUrl(sheetUrl) {
 }
 
 export const mealIcons = ["🍳", "🧋", "🥐", "🫘", "🍲", "🥗", "🍗", "🍟", "🍰", "🧂", "🥪"];
+
+export const dayNames = ["пн", "вт", "ср", "чт", "пт"];

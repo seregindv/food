@@ -1,6 +1,7 @@
 import * as dates from './dates.js';
 import * as slider from './slider.js';
 import * as dropdownButton from './dropdown-button.js';
+import { dayNames } from './common.js';
 
 let _refresh;
 let _refreshArrow;
@@ -39,7 +40,16 @@ export function showSelectors(show) {
     document.getElementById("selectContainer").style.display = show ? "block" : "none";
 }
 
-export function populateEmployees(employees, selectedEmployee) {
+export function populateEmployees(data, selectedEmployee) {
+    const employees = Object.keys(data).sort().map(employee => {
+        const employeeData = data[employee];
+        return {
+            name: employee,
+            hasMeal: !!Object.keys(employeeData)[0],
+            meals: dayNames.map(day => employeeData[day] && '●' || '○').join('')
+        }
+    });
+
     const employeeSelect = getEmployeeSelect();
     employeeSelect.innerHTML = '<option value="">Выберите сотрудника</option>';
     employees.forEach(employee => {
@@ -49,6 +59,7 @@ export function populateEmployees(employees, selectedEmployee) {
         }
         option.value = employee.name;
         option.textContent = employee.name;
+        option.setAttribute('data-days', employee.meals);
         employeeSelect.appendChild(option);
     });
     if (selectedEmployee && employees.some(e => e.name === selectedEmployee)) {
