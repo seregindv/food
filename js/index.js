@@ -77,6 +77,35 @@ async function onAddSheet(sheetLink) {
   }
 }
 
+async function onAddMenu(sheetLink) {
+  const selectedDate = page.getSelectedDate();
+  if (!selectedDate) {
+    page.displayError("Сначала выберите неделю");
+    return;
+  }
+  if (!sheetLink) {
+    page.displayError("Пожалуйста, введите ссылку");
+    return;
+  }
+  const sheetId = sheet.extractId(sheetLink);
+  if (!sheetId) {
+    page.displayError("Неверная ссылка на Google-таблицу");
+    return;
+  }
+
+  try {
+    page.displayError("");
+    page.showLoading(true);
+    await sheet.addFoodInfo(selectedDate, sheet.getSheetUrl(sheetId));
+    onDateChanged(selectedDate);
+  } catch (error) {
+    console.error(error);
+    page.displayError(error.message);
+  } finally {
+    page.showLoading(false);
+  }
+}
+
 async function onAddToDay(sheetLink) {
   const selectedDate = page.getSelectedDate();
   if (!selectedDate) {
@@ -157,6 +186,7 @@ function setupEventListeners() {
   page.setupFoodInfo();
   page.setupDropdownButtons();
   page.onUpload(sheetLink => onDownloadSheet(sheetLink));
+  page.onAddMenu(sheetLink => onAddMenu(sheetLink));
   page.onAddSheet(sheetLink => onAddSheet(sheetLink));
   page.onAddToDay(sheetLink => onAddToDay(sheetLink));
   page.onDeleteSheet(date => deleteSheet(date));

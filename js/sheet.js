@@ -17,6 +17,11 @@ export async function download(sheetId, refreshing) {
 }
 
 export async function downloadData(sheetUrl, requireDate = true) {
+  const workbook = await downloadWorkbook(sheetUrl);
+  return parseWorkbook(workbook, requireDate);
+}
+
+export async function downloadWorkbook(sheetUrl) {
   const downloadUrl = getDownloadSheetUrl(sheetUrl);
   const response = await fetch(downloadUrl, {
     method: "GET",
@@ -28,8 +33,30 @@ export async function downloadData(sheetUrl, requireDate = true) {
     throw new Error(`Ошибка загрузки таблицы: ${response.statusText}`);
   }
   const arrayBuffer = await response.arrayBuffer();
-  const workbook = XLSX.read(arrayBuffer, { type: "array" });
-  return parseWorkbook(workbook, requireDate);
+  return XLSX.read(arrayBuffer, { type: "array" });
+}
+
+export async function addFoodInfo(date, sheetUrl) {
+  const workbook = await downloadWorkbook(sheetUrl);
+  const menuSheetName = workbook.SheetNames.find(name => name.toLowerCase() === "menu");
+  const sheetNames = menuSheetName
+    ? [menuSheetName, ...workbook.SheetNames.filter(name => name !== menuSheetName)]
+    : workbook.SheetNames;
+  let infoImported;
+  for (const sheetName of sheetNames) {
+    const foodInfo = parseFoodInfo(workbook.Sheets[sheetName]);
+    if (Object.keys(foodInfo).length > 0) {
+      infoImported = foodInfo;
+      break;
+    }
+  }
+  if (!infoImported) {
+    throw new Error("Не удалось найти меню");
+  }
+
+  const currentInfo = storage.getFoodInfo(date) || {};
+  Object.assign(currentInfo, infoImported);
+  storage.setFoodInfo(date, currentInfo);
 }
 
 export function getAvailableDays(sheetData) {

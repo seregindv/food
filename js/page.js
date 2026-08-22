@@ -140,6 +140,15 @@ export function onAddSheet(action) {
     });
 }
 
+export function onAddMenu(action) {
+    const button = document.getElementById("addMenuBtn");
+    button.addEventListener("click", e => {
+        e.preventDefault();
+        const sheetLink = document.getElementById("sheetLinkInput").value.trim();
+        action(sheetLink);
+    });
+}
+
 export function onAddToDay(action) {
     const button = document.getElementById("addToDayBtn");
     button.addEventListener("click", e => {
