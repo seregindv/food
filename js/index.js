@@ -239,7 +239,7 @@ async function onRefresh() {
 }
 
 function onRefreshStart(e) {
-  if (e.event.target.matches("option")) {
+  if (e.event.target.closest("dialog") || e.event.target.matches("option")) {
     e.cancel = true;
     return;
   }

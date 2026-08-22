@@ -182,9 +182,9 @@ input[type="checkbox"]:checked {
   height: 28px;
   margin: 8px 0 8px 8px;
   padding: 0;
-  border: 2px solid #1B75D0;
+  border: 2px solid #ccc;
   border-radius: 50%;
-  color: #1B75D0;
+  color: #ccc;
   background: transparent;
   font: 700 18px/24px Georgia, serif;
   cursor: pointer;
