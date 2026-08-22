@@ -60,6 +60,10 @@
   font-size: 20px;
 }
 
+.meal:has(input[type="checkbox"]:checked) .nutrition-grid {
+  color: #BABCBE;
+}
+
 .meal-main {
   display: flex;
   align-items: flex-start;
@@ -242,7 +246,7 @@ input[type="checkbox"]:checked {
 .nutrition-grid>div {
   box-sizing: border-box;
   min-width: 0;
-  padding: 8px 2px;
+  padding: 8px 0;
   border-radius: 4px;
 }
 
