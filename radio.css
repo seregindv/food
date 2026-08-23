@@ -61,7 +61,7 @@
 }
 
 .meal:has(input[type="checkbox"]:checked) .nutrition-grid {
-  color: #BABCBE;
+  color: #A2A6A9;
 }
 
 .meal-main {
@@ -210,14 +210,17 @@ input[type="checkbox"]:checked {
 }
 
 .meal-actions>button:nth-child(1) {
+  grid-column: 1;
   justify-self: start;
 }
 
 .meal-actions>button:nth-child(2) {
+  grid-column: 2;
   justify-self: center;
 }
 
 .meal-actions>button:nth-child(3) {
+  grid-column: 3;
   justify-self: end;
 }
 

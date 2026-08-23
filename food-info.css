@@ -107,7 +107,7 @@
 }
 
 .food-info-field.missing {
-  visibility: hidden;
+  display: none;
 }
 
 .food-info-label {
