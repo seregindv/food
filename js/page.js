@@ -503,9 +503,13 @@ function appendFoodInfo(details, info) {
         ["Белки", info.protein, " г"],
         ["Жиры", info.fat, " г"],
         ["Углеводы", info.carbs, " г"],
+        ["Срок хранения", info.shelfLife, " ч"],
     ];
     let hasFields = false;
     for (const [label, value, suffix = ""] of fields) {
+        if (!value) {
+            continue;
+        }
         const field = document.createElement("div");
         field.className = "food-info-field";
         const fieldLabel = document.createElement("div");
@@ -513,11 +517,7 @@ function appendFoodInfo(details, info) {
         fieldLabel.textContent = label;
         const fieldValue = document.createElement("div");
         fieldValue.textContent = value == null || value === "" ? "" : `${value}${suffix}`;
-        if (!fieldValue.textContent) {
-            field.classList.add("missing");
-        } else {
-            hasFields = true;
-        }
+        hasFields = true;
         field.append(fieldLabel, fieldValue);
         grid.appendChild(field);
     }

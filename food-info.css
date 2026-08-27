@@ -106,10 +106,6 @@
   min-width: 0;
 }
 
-.food-info-field.missing {
-  display: none;
-}
-
 .food-info-label {
   margin-bottom: 2px;
   color: #667;
