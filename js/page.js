@@ -89,9 +89,7 @@ export function getMeals(display = document.getElementById("jsonDisplay")) {
                 hasFoodInfo ||= !!mealElement.foodInfo;
 
                 const weight = mealElement.querySelector(".meal-weight");
-                weight.textContent = mealElement.foodInfo?.weight == null
-                    ? ""
-                    : `${mealElement.foodInfo.weight} г`;
+                weight.textContent = mealElement.foodInfo?.weight;
                 setHidden(weight, !weight.textContent);
 
                 const nutrition = mealElement.querySelector(".meal-nutrition");
@@ -499,7 +497,7 @@ function appendFoodInfo(details, info) {
     const grid = document.createElement("div");
     grid.className = "food-info-grid";
     const fields = [
-        ["Вес", info.weight, " г"],
+        ["Вес", info.weight],
         ["Цена", info.price, " дин"],
         ["Калории", info.calories, " ккал"],
         ["Белки", info.protein, " г"],

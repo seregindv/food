@@ -266,8 +266,8 @@ export function parseFoodInfo(worksheet) {
       continue;
     }
 
-    const weight = row[indexes.weight.index]?.toString();
-    if (!weight.includes("г")) {
+    let weight = row[indexes.weight.index]?.toString();
+    if (weight && !weight.includes("г")) {
       weight += " г";
     }
     const item = {
