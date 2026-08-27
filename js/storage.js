@@ -74,11 +74,13 @@ export function getSheets() {
     const dates = getSheetDates() || [];
     return dates.sort().map(date => {
         const links = getSheetLinks(date);
-        const additions = links.days.map(entry => ({
+        const additions = links.days?.map(entry => ({
             days: `${entry.mode === "add" ? "+" : ""}${entry.days.join("-")}`,
             link: entry.link
-        }));
-        additions.push(...links.menu.map(link => ({ days: "меню", link })));
+        })) || [];
+        if (links.menu) {
+            additions.push(...links.menu.map(link => ({ days: "меню", link })));
+        }
         return { date, link: links.main, additions };
     });
 }

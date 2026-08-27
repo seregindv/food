@@ -46,7 +46,18 @@ export async function addFoodInfo(date, sheetUrl) {
 
 async function downloadFoodInfo(sheetUrl) {
   const workbook = await downloadWorkbook(sheetUrl);
-  const menuSheetName = workbook.SheetNames.find(name => name.toLowerCase() === "menu");
+  const foodInfo = getFoodInfo(workbook);
+  if (foodInfo) {
+    return foodInfo;
+  }
+  throw new Error("Не удалось найти меню");
+}
+
+export function getFoodInfo(workbook) {
+  const menuSheetName = workbook.SheetNames.find(name => {
+    name = name.toLowerCase();
+    return name === "menu" || name === "меню";
+  });
   const sheetNames = menuSheetName
     ? [menuSheetName, ...workbook.SheetNames.filter(name => name !== menuSheetName)]
     : workbook.SheetNames;
@@ -56,7 +67,7 @@ async function downloadFoodInfo(sheetUrl) {
       return foodInfo;
     }
   }
-  throw new Error("Не удалось найти меню");
+  return null;
 }
 
 export function getAvailableDays(sheetData) {
@@ -206,7 +217,7 @@ function parseWorkbook(workbook, requireDate = true) {
     throw new Error("Не удалось найти дату");
   }
 
-  return { sheetData, sheetDate, foodInfo: parseFoodInfo(workbook.Sheets["Menu"]) };
+  return { sheetData, sheetDate, foodInfo: getFoodInfo(workbook) };
 }
 
 export function parseFoodInfo(worksheet) {
@@ -216,7 +227,7 @@ export function parseFoodInfo(worksheet) {
 
   const rows = XLSX.utils.sheet_to_json(worksheet, {
     defval: null,
-    range: "A1:I100",
+    range: "A1:Z200",
     header: 1,
     blankrows: false,
   });
@@ -226,7 +237,7 @@ export function parseFoodInfo(worksheet) {
 
   let nameIndex;
   const headerRowIndex = rows.findIndex(row => {
-    nameIndex = findHeaderIndex(row, "naziv", "наименование");
+    nameIndex = findHeaderIndex(row, "naziv", "наименование", "блюдо");
     return nameIndex !== -1;
   });
   if (headerRowIndex === -1) {
@@ -235,35 +246,47 @@ export function parseFoodInfo(worksheet) {
   const headers = rows[headerRowIndex];
   const indexes = {
     name: nameIndex,
-    weight: findHeaderIndex(headers, "вес", "гр/мл"),
+    weight: findHeaderIndex(headers, "вес", "гр/мл", "выход"),
     infoRU: findHeaderIndex(headers, "состав"),
     infoRS: findHeaderIndex(headers, "sastojci"),
     nutrition: findHeaderIndex(headers, "кбжу"),
     allergens: findHeaderIndex(headers, "аллергены"),
+    shelfLife: findHeaderIndex(headers, "срок")
   };
-  const vegetarianIndex = indexes.name > 0 ? indexes.name - 1 : -1;
-  const priceIndex = indexes.weight >= 0 ? indexes.weight + 1 : -1;
+  const vegetarianIndex = indexes.name.index > 0 ? indexes.name.index - 1 : -1;
+  const priceIndex = indexes.weight.index >= 0 && !headers[indexes.weight.index + 1] ? indexes.weight.index + 1 : -1;
+  const isTotalNutrition = !indexes.nutrition.text?.includes("100 г");
 
   const foodInfo = {};
   for (const row of rows.slice(headerRowIndex + 1)) {
-    const name = row[indexes.name]?.toString().trim();
+    const name = row[indexes.name.index]?.toString().trim();
     const hasDetails = row.some((value, index) =>
-      index !== indexes.name && value != null);
+      index !== indexes.name.index && value != null);
     if (!name || !hasDetails) {
       continue;
     }
 
-    const weight = parseNumber(row[indexes.weight]);
+    const weight = row[indexes.weight.index]?.toString();
+    if (!weight.includes("г")) {
+      weight += " г";
+    }
     const item = {
       weight,
-      price: parseNumber(row[priceIndex]),
-      infoRU: row[indexes.infoRU]?.toString().trim(),
-      infoRS: row[indexes.infoRS]?.toString().trim(),
-      ...parseNutrition(row[indexes.nutrition], weight),
-      allergens: row[indexes.allergens]?.toString().trim(),
+      infoRU: row[indexes.infoRU.index],
+      ...parseNutrition(row[indexes.nutrition.index], weight, isTotalNutrition),
+      allergens: row[indexes.allergens.index]
     };
-    if (vegetarianIndex >= 0
-      && row[vegetarianIndex]?.toString().toLowerCase().includes("вегета")) {
+    if (priceIndex >= 0) {
+      item.price = parseNumber(row[priceIndex]);
+    }
+    if (indexes.shelfLife.index >= 0) {
+      item.shelfLife = row[indexes.shelfLife.index];
+    }
+    if (indexes.infoRS.index >= 0) {
+      item.infoRS = row[indexes.infoRS.index];
+    }
+
+    if (vegetarianIndex >= 0 && row[vegetarianIndex]?.toString().toLowerCase().includes("вегета")) {
       item.vegeterian = true;
     }
     foodInfo[name] = item;
@@ -272,32 +295,37 @@ export function parseFoodInfo(worksheet) {
 }
 
 function findHeaderIndex(headers, ...expectedTexts) {
-  return headers.findIndex(header =>
-    expectedTexts.some(expectedText =>
-      header?.toString().toLowerCase().includes(expectedText)));
+  for (let i = 0; i < headers.length; i++) {
+    const header = headers[i];
+    const headerText = header?.toString().toLowerCase();
+    if (expectedTexts.some(expectedText => headerText?.includes(expectedText))) {
+      return { index: i, text: headerText };
+    }
+  }
+  return { index: -1, text: null };
 }
 
-function parseNutrition(value, weight) {
+function parseNutrition(value, weight, isTotal) {
   const text = value?.toString();
   if (!text || weight === null) {
     return {};
   }
 
   const result = {};
-  add(result, "calories", /[КK]\s*<?\s*(\d+(?:[.,]\d+)?)/i, 1);
-  add(result, "protein", /Б\s*<?\s*(\d+(?:[.,]\d+)?)/i, 10);
-  add(result, "fat", /Ж\s*<?\s*(\d+(?:[.,]\d+)?)/i, 10);
-  add(result, "carbs", /У\s*<?\s*(\d+(?:[.,]\d+)?)/i, 10);
+  add(result, "calories", /(?<!\p{L})[КK]\p{L}*\s*<?\s*(\d+(?:[.,]\d+)?)/iu, 1);
+  add(result, "protein", /(?<!\p{L})Б\p{L}*\s*<?\s*(\d+(?:[.,]\d+)?)/iu, 10);
+  add(result, "fat", /(?<!\p{L})Ж\p{L}*\s*<?\s*(\d+(?:[.,]\d+)?)/iu, 10);
+  add(result, "carbs", /(?<!\p{L})У\p{L}*\s*<?\s*(\d+(?:[.,]\d+)?)/iu, 10);
 
   return result;
 
   function add(result, key, pattern, round) {
     const match = text.match(pattern);
-    const perHundredGrams = match ? Number(match[1].replace(",", ".")) : null;
-    if (perHundredGrams === null) {
+    const nutrition = match ? Number(match[1].replace(",", ".")) : null;
+    if (nutrition === null) {
       return;
     }
-    result[key] = roundNutrition(perHundredGrams * weight / 100, round);
+    result[key] = isTotal ? nutrition : roundNutrition(nutrition * weight / 100, round);
   }
 }
 
