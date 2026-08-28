@@ -266,14 +266,15 @@ export function parseFoodInfo(worksheet) {
       continue;
     }
 
-    let weight = row[indexes.weight.index]?.toString();
+    const rawWeight = row[indexes.weight.index];
+    let weight = rawWeight?.toString();
     if (weight && !weight.includes("г")) {
       weight += " г";
     }
     const item = {
       weight,
       infoRU: row[indexes.infoRU.index],
-      ...parseNutrition(row[indexes.nutrition.index], weight, isTotalNutrition),
+      ...parseNutrition(row[indexes.nutrition.index], rawWeight, isTotalNutrition),
       allergens: row[indexes.allergens.index]
     };
     if (priceIndex >= 0) {

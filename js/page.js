@@ -516,7 +516,7 @@ function appendFoodInfo(details, info) {
         fieldLabel.className = "food-info-label";
         fieldLabel.textContent = label;
         const fieldValue = document.createElement("div");
-        fieldValue.textContent = value == null || value === "" ? "" : `${value}${suffix}`;
+        fieldValue.textContent = `${value}${suffix}`;
         hasFields = true;
         field.append(fieldLabel, fieldValue);
         grid.appendChild(field);
