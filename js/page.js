@@ -298,6 +298,7 @@ export function onMealCheckChanged(action) {
 
 export function onLoaded(action) {
     window.addEventListener("DOMContentLoaded", () => action());
+    document.addEventListener("resume", () => action());
 }
 
 export function initDates(sheetDates, onChange) {

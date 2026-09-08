@@ -251,10 +251,12 @@ export function parseFoodInfo(worksheet) {
     infoRS: findHeaderIndex(headers, "sastojci"),
     nutrition: findHeaderIndex(headers, "кбжу"),
     allergens: findHeaderIndex(headers, "аллергены"),
-    shelfLife: findHeaderIndex(headers, "срок")
+    shelfLife: findHeaderIndex(headers, "срок"),
+    price: findHeaderIndex(headers, "cena")
   };
   const vegetarianIndex = indexes.name.index > 0 ? indexes.name.index - 1 : -1;
-  const priceIndex = indexes.weight.index >= 0 && !headers[indexes.weight.index + 1] ? indexes.weight.index + 1 : -1;
+  const priceIndex = indexes.price.index >= 0 ? indexes.price.index
+    : indexes.weight.index >= 0 && !headers[indexes.weight.index + 1] ? indexes.weight.index + 1 : -1;
   const isTotalNutrition = !indexes.nutrition.text?.includes("100 г");
 
   const foodInfo = {};
