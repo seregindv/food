@@ -33,7 +33,11 @@ export async function downloadWorkbook(sheetUrl) {
     throw new Error(`Ошибка загрузки таблицы: ${response.statusText}`);
   }
   const arrayBuffer = await response.arrayBuffer();
-  return XLSX.read(arrayBuffer, { type: "array" });
+  const workbook = XLSX.read(arrayBuffer, { type: "array" });
+  const disposition = response.headers.get("Content-Disposition");
+  const filename = disposition?.match(/(?:^|;)\s*filename\s*=\s*(?:"([^"]*)"|([^;]*))/i);
+  workbook.fileName = filename ? (filename[1] ?? filename[2]).trim() : null;
+  return workbook;
 }
 
 export async function addFoodInfo(date, sheetUrl) {
@@ -56,7 +60,7 @@ async function downloadFoodInfo(sheetUrl) {
 export function getFoodInfo(workbook) {
   const menuSheetName = workbook.SheetNames.find(name => {
     name = name.toLowerCase();
-    return name === "menu" || name === "меню";
+    return name === "menu" || name === "меню" || name === "состав + кбжу";
   });
   const sheetNames = menuSheetName
     ? [menuSheetName, ...workbook.SheetNames.filter(name => name !== menuSheetName)]
@@ -129,23 +133,28 @@ function parseWorkbook(workbook, requireDate = true) {
   const sheetData = {};
   let sheetDate;
   let i = 0;
-  const daySheets = dayNames.map(dayName => ({
+  const fullDayNames = ["понедельник", "вторник", "среда", "четверг", "пятница"];
+  const daySheets = dayNames.map((dayName, dayIndex) => ({
     dayName,
-    sheetName: workbook.SheetNames.find(name => name.toLowerCase() === dayName)
+    dayIndex,
+    sheetName: workbook.SheetNames.find(name => {
+      const normalizedName = name.trim().toLowerCase();
+      return normalizedName === dayName || normalizedName === fullDayNames[dayIndex];
+    })
   })).filter(sheet => sheet.sheetName);
   const useFirstDataSheet = daySheets.length === 0;
   const sheetsToParse = useFirstDataSheet
     ? workbook.SheetNames.map(sheetName => ({ dayName: sheetName, sheetName }))
     : daySheets;
-  for (const { dayName, sheetName } of sheetsToParse) {
+  for (const { dayName, dayIndex, sheetName } of sheetsToParse) {
     const worksheet = workbook.Sheets[sheetName];
     if (!sheetDate) {
-      sheetDate = parseDate(worksheet["B1"], i);
+      sheetDate = parseDate(worksheet["B1"], useFirstDataSheet ? i : dayIndex);
     }
 
     const jsonData = XLSX.utils.sheet_to_json(worksheet, {
       defval: null,
-      range: "B3:M100",
+      range: "A3:M100",
       header: 1,
       blankrows: false,
     });
@@ -163,25 +172,30 @@ function parseWorkbook(workbook, requireDate = true) {
         switch (title) {
           case "завтраки":
           case "завтрак": mealIndexes[0] = j; mealTitleRow = i; break;
+          case "блюдо 1": mealIndexes[1] = j; mealTitleRow = i; break;
+          case "блюдо 2": mealIndexes[2] = j; mealTitleRow = i; break;
           case "напиток":
           case "напитки и десерты":
-          case "сок": mealIndexes[1] = j; mealTitleRow = i; break;
-          case "выпечка": mealIndexes[2] = j; mealTitleRow = i; break;
-          case "закуски": mealIndexes[3] = j; mealTitleRow = i; break;
+          case "сок": mealIndexes[3] = j; mealTitleRow = i; break;
+          case "выпечка": mealIndexes[4] = j; mealTitleRow = i; break;
+          case "закуски": mealIndexes[5] = j; mealTitleRow = i; break;
           case "супы":
-          case "суп": mealIndexes[4] = j; mealTitleRow = i; break;
+          case "суп": mealIndexes[6] = j; mealTitleRow = i; break;
           case "сaлат": // 1st а latin
           case "сaлаты и закуски":
-          case "салат": mealIndexes[5] = j; mealTitleRow = i; break;
+          case "салат": mealIndexes[7] = j; mealTitleRow = i; break;
           case "горячие блюда":
           case "бургер":
-          case "горячее": mealIndexes[6] = j; mealTitleRow = i; break;
+          case "горячее":
+          case "горячее - обеды": mealIndexes[8] = j; mealTitleRow = i; break;
           case "гарнир":
-          case "гарниры": mealIndexes[7] = j; mealTitleRow = i; break;
+          case "гарниры":
+          case "дополнительный гарнир по желанию": mealIndexes[9] = j; mealTitleRow = i; break;
           case "десерт":
-          case "десерты": mealIndexes[8] = j; mealTitleRow = i; break;
-          case "соусы и топпинги": mealIndexes[9] = j; mealTitleRow = i; break;
-          case "сендвичи": mealIndexes[10] = j; mealTitleRow = i; break;
+          case "десерты":
+          case "выпечка - десерты": mealIndexes[10] = j; mealTitleRow = i; break;
+          case "соусы и топпинги": mealIndexes[11] = j; mealTitleRow = i; break;
+          case "сендвичи": mealIndexes[12] = j; mealTitleRow = i; break;
         }
       }
     }
@@ -210,11 +224,17 @@ function parseWorkbook(workbook, requireDate = true) {
   if (Object.keys(sheetData).length === 0) {
     throw new Error("Не удалось ничего прочитать");
   }
-  if (requireDate && !sheetDate) {
-    sheetDate = parseDate(workbook.Sheets["WD"]?.["H3"]);
-  }
-  if (requireDate && !sheetDate) {
-    throw new Error("Не удалось найти дату");
+
+  if (requireDate) {
+    if (!sheetDate) {
+      sheetDate = parseDate(workbook.Sheets["WD"]?.["H3"]);
+    }
+    if (!sheetDate) {
+      sheetDate = parseFilenameDate(workbook.fileName);
+    }
+    if (!sheetDate) {
+      throw new Error("Не удалось найти дату");
+    }
   }
 
   return { sheetData, sheetDate, foodInfo: getFoodInfo(workbook) };
@@ -238,7 +258,7 @@ export function parseFoodInfo(worksheet) {
   let nameIndex;
   const headerRowIndex = rows.findIndex(row => {
     nameIndex = findHeaderIndex(row, "naziv", "наименование", "блюдо");
-    return nameIndex !== -1;
+    return nameIndex.index !== -1;
   });
   if (headerRowIndex === -1) {
     return {};
@@ -246,13 +266,18 @@ export function parseFoodInfo(worksheet) {
   const headers = rows[headerRowIndex];
   const indexes = {
     name: nameIndex,
-    weight: findHeaderIndex(headers, "вес", "гр/мл", "выход"),
+    weight: findHeaderIndex(headers, "вес", "гр/мл", "выход", "порция, г/мл"),
     infoRU: findHeaderIndex(headers, "состав"),
     infoRS: findHeaderIndex(headers, "sastojci"),
     nutrition: findHeaderIndex(headers, "кбжу"),
     allergens: findHeaderIndex(headers, "аллергены"),
     shelfLife: findHeaderIndex(headers, "срок"),
-    price: findHeaderIndex(headers, "cena")
+    price: findHeaderIndex(headers, "cena"),
+    calories: findHeaderIndex(headers, "ккал"),
+    protein: findHeaderIndex(headers, "белки"),
+    fat: findHeaderIndex(headers, "жиры"),
+    carbs: findHeaderIndex(headers, "углеводы"),
+    onion: findHeaderIndex(headers, "лук")
   };
   const vegetarianIndex = indexes.name.index > 0 ? indexes.name.index - 1 : -1;
   const priceIndex = indexes.price.index >= 0 ? indexes.price.index
@@ -279,6 +304,14 @@ export function parseFoodInfo(worksheet) {
       ...parseNutrition(row[indexes.nutrition.index], rawWeight, isTotalNutrition),
       allergens: row[indexes.allergens.index]
     };
+    if (indexes.nutrition.index === -1) {
+      for (const key of ["calories", "protein", "fat", "carbs"]) {
+        const value = parseNumber(row[indexes[key].index]);
+        if (value != null) {
+          item[key] = value;
+        }
+      }
+    }
     if (priceIndex >= 0) {
       item.price = parseNumber(row[priceIndex]);
     }
@@ -310,7 +343,8 @@ function findHeaderIndex(headers, ...expectedTexts) {
 
 function parseNutrition(value, weight, isTotal) {
   const text = value?.toString();
-  if (!text || weight === null) {
+  const numericWeight = parseNumber(weight);
+  if (!text || (!isTotal && numericWeight == null)) {
     return {};
   }
 
@@ -328,7 +362,7 @@ function parseNutrition(value, weight, isTotal) {
     if (nutrition === null) {
       return;
     }
-    result[key] = isTotal ? nutrition : roundNutrition(nutrition * weight / 100, round);
+    result[key] = isTotal ? nutrition : roundNutrition(nutrition * numericWeight / 100, round);
   }
 }
 
@@ -350,7 +384,21 @@ function parseDate(cell, dateOffset = 0) {
     return null;
   }
   const date = XLSX.SSF.parse_date_code(value);
+  if (!date) {
+    return null;
+  }
   return new Date(date.y, date.m - 1, date.d - dateOffset);
+}
+
+function parseFilenameDate(filename) {
+  const match = filename?.match(/(?:^|\D)(\d{1,2})\.(\d{1,2})(?!\d)/);
+  if (!match) {
+    return null;
+  }
+  const day = Number(match[1]);
+  const month = Number(match[2]);
+  const date = new Date(new Date().getFullYear(), month - 1, day);
+  return date.getDate() === day && date.getMonth() === month - 1 ? date : null;
 }
 
 function mergeSheetDays(targetData, sourceData, dayNames) {

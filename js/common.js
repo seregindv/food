@@ -18,6 +18,6 @@ export function getDownloadSheetUrl(sheetUrl) {
   return `${sheetUrl}/export?format=xlsx`;
 }
 
-export const mealIcons = ["🍳", "🧋", "🥨", "🫘", "🍲", "🥗", "🍗", "🍟", "🍰", "🧂", "🥪"];
+export const mealIcons = ["🍳", "1️⃣", "2️⃣", "🧋", "🥨", "🫘", "🍲", "🥗", "🍗", "🍟", "🍰", "🧂", "🥪"];
 
 export const dayNames = ["пн", "вт", "ср", "чт", "пт"];
