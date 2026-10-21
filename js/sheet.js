@@ -149,7 +149,8 @@ function parseWorkbook(workbook, requireDate = true) {
   for (const { dayName, dayIndex, sheetName } of sheetsToParse) {
     const worksheet = workbook.Sheets[sheetName];
     if (!sheetDate) {
-      sheetDate = parseDate(worksheet["B1"], useFirstDataSheet ? i : dayIndex);
+      const date = worksheet["B1"] || worksheet["B2"];
+      sheetDate = parseDate(date, useFirstDataSheet ? i : dayIndex);
     }
 
     const jsonData = XLSX.utils.sheet_to_json(worksheet, {
@@ -165,43 +166,46 @@ function parseWorkbook(workbook, requireDate = true) {
 
     const mealIndexes = new Array(mealIcons.length).fill(null);
     let mealTitleRow = 0;
-    for (let i = 0; i < 2; i++) {
-      const mealTitles = jsonData[i];
-      for (let j = 1; j < mealTitles.length; j++) {
-        const title = mealTitles[j]?.toLowerCase && mealTitles[j].toLowerCase();
+    let employeeColumnIndex = 0;
+    for (let row = 0; row < 2; row++) {
+      const mealTitles = jsonData[row];
+      for (let column = 0; column < mealTitles.length; column++) {
+        const title = mealTitles[column]?.toLowerCase && mealTitles[column].toLowerCase();
         switch (title) {
+          case "участник":
+          case "сотрудник": employeeColumnIndex = column; break;
           case "завтраки":
-          case "завтрак": mealIndexes[0] = j; mealTitleRow = i; break;
-          case "блюдо 1": mealIndexes[1] = j; mealTitleRow = i; break;
-          case "блюдо 2": mealIndexes[2] = j; mealTitleRow = i; break;
+          case "завтрак": mealIndexes[0] = column; mealTitleRow = row; break;
+          case "блюдо 1": mealIndexes[1] = column; mealTitleRow = row; break;
+          case "блюдо 2": mealIndexes[2] = column; mealTitleRow = row; break;
           case "напиток":
           case "напитки и десерты":
-          case "сок": mealIndexes[3] = j; mealTitleRow = i; break;
-          case "выпечка": mealIndexes[4] = j; mealTitleRow = i; break;
-          case "закуски": mealIndexes[5] = j; mealTitleRow = i; break;
+          case "сок": mealIndexes[3] = column; mealTitleRow = row; break;
+          case "выпечка": mealIndexes[4] = column; mealTitleRow = row; break;
+          case "закуски": mealIndexes[5] = column; mealTitleRow = row; break;
           case "супы":
-          case "суп": mealIndexes[6] = j; mealTitleRow = i; break;
+          case "суп": mealIndexes[6] = column; mealTitleRow = row; break;
           case "сaлат": // 1st а latin
           case "сaлаты и закуски":
-          case "салат": mealIndexes[7] = j; mealTitleRow = i; break;
+          case "салат": mealIndexes[7] = column; mealTitleRow = row; break;
           case "горячие блюда":
           case "бургер":
           case "горячее":
-          case "горячее - обеды": mealIndexes[8] = j; mealTitleRow = i; break;
+          case "горячее - обеды": mealIndexes[8] = column; mealTitleRow = row; break;
           case "гарнир":
           case "гарниры":
-          case "дополнительный гарнир по желанию": mealIndexes[9] = j; mealTitleRow = i; break;
+          case "дополнительный гарнир по желанию": mealIndexes[9] = column; mealTitleRow = row; break;
           case "десерт":
           case "десерты":
-          case "выпечка - десерты": mealIndexes[10] = j; mealTitleRow = i; break;
-          case "соусы и топпинги": mealIndexes[11] = j; mealTitleRow = i; break;
-          case "сендвичи": mealIndexes[12] = j; mealTitleRow = i; break;
+          case "выпечка - десерты": mealIndexes[10] = column; mealTitleRow = row; break;
+          case "соусы и топпинги": mealIndexes[11] = column; mealTitleRow = row; break;
+          case "сендвичи": mealIndexes[12] = column; mealTitleRow = row; break;
         }
       }
     }
     for (let i = mealTitleRow + 1; i < jsonData.length; i++) {
       const row = jsonData[i];
-      let employeeName = row[0];
+      let employeeName = row[employeeColumnIndex];
       if (employeeName == null || !(employeeName = employeeName.toString().trim()) || !employeeName.includes(" ")) {
         continue;
       }
