@@ -2,8 +2,8 @@ import * as page from './page.js';
 import * as storage from './storage.js';
 
 const _mascots = [
-    { name: "cake", fileName: "cake.png" },
-    { name: "donkey", fileName: "donkey.png" }
+    { name: "donkey", fileName: "donkey.png" },
+    { name: "cake", fileName: "cake.png" }
 ];
 
 export function init() {

@@ -1,19 +1,27 @@
-body {
+html, body {
+  height: 100%;
   margin: 0;
-  background-color: aliceblue;
+}
+body {
+  background-color: #f7f9fc;
   -webkit-tap-highlight-color: transparent;
 }
 
 .main {
+  min-height: 100%;
+  box-sizing: border-box;
+  background-color: aliceblue;
   font-family: Arial, sans-serif;
-  margin: 20px;
+  padding: 0 20px 20px 20px;
   color: #231F20;
+  max-width: 460px;
+  margin: 0 auto;
 }
 
 .title-container {
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
+  margin: 20px 0 10px 0;
 }
 
 .mascot {
@@ -276,18 +284,7 @@ body {
 
 .days {
   display: flex;
-}
-
-@media (orientation: landscape) {
-  .days {
-    gap: 6px;
-  }
-}
-
-@media (orientation: portrait) {
-  .days {
-    justify-content: space-between;
-  }
+  justify-content: space-between;
 }
 
 .days input.today:not(:checked)+label {
@@ -300,7 +297,6 @@ body {
   align-items: center;
   justify-content: end;
   flex-flow: column;
-  margin: 0 20px;
 }
 
 .refresh-arrow {

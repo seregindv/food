@@ -589,10 +589,6 @@ export function onChangeMascot(e) {
     mascotImage.addEventListener("click", () => e.changeMascot());
 }
 
-function getMascot() {
-    return _defaultMascot ? "cake" : "donkey";
-}
-
 function selectEnabledDay(direction) {
     const day = getEnabledDay(direction);
     if (!day) {

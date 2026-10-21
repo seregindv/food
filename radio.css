@@ -12,6 +12,8 @@
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
+  position: relative;
+  z-index: 1;
 }
 
 .rect-radios input:not(:disabled)+label {
@@ -142,7 +144,6 @@ input[type="checkbox"]:checked {
   top: 0;
   right: 0;
   bottom: 0;
-  z-index: -9999;
   display: flex;
   flex-direction: column;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
