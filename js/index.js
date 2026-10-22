@@ -186,6 +186,7 @@ function setupEventListeners() {
   page.setupMealIcons(mealIcons);
   page.setupFoodInfo();
   page.setupDropdownButtons();
+  page.onResume(loadMapFromLocalStorage);
   page.onUpload(sheetLink => onDownloadSheet(sheetLink));
   page.onAddMenu(sheetLink => onAddMenu(sheetLink));
   page.onAddSheet(sheetLink => onAddSheet(sheetLink));
