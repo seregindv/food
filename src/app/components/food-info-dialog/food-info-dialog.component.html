@@ -1,0 +1,45 @@
+<dialog #dialog class="food-info-dialog">
+  <form method="dialog">
+    <div class="food-info-header">
+      <strong>{{ itemName() }}</strong
+      ><button class="food-info-close" aria-label="Закрыть">×</button>
+    </div>
+    @if (info(); as item) {
+      <div class="food-info-content">
+        @if (item.weight) {
+          <p>Вес: {{ item.weight }}</p>
+        }
+        @if (item.calories != null) {
+          <p>Калорийность: {{ item.calories }} ккал</p>
+        }
+        @if (item.protein != null) {
+          <p>Белки: {{ item.protein }} г</p>
+        }
+        @if (item.fat != null) {
+          <p>Жиры: {{ item.fat }} г</p>
+        }
+        @if (item.carbs != null) {
+          <p>Углеводы: {{ item.carbs }} г</p>
+        }
+        @if (item.allergens) {
+          <p>Аллергены: {{ item.allergens }}</p>
+        }
+        @if (item.infoRU) {
+          <p>{{ item.infoRU }}</p>
+        }
+        @if (item.vegeterian) {
+          <p>Вегетарианское блюдо</p>
+        }
+        @if (item.price != null) {
+          <p>Цена: {{ item.price }}</p>
+        }
+        @if (item.shelfLife) {
+          <p>Срок годности: {{ item.shelfLife }}</p>
+        }
+        @if (item.infoRS) {
+          <p>{{ item.infoRS }}</p>
+        }
+      </div>
+    }
+  </form>
+</dialog>

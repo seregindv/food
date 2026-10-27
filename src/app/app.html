@@ -1,0 +1,17 @@
+<main class="main" #main>
+  <app-refresh-indicator
+    [pull]="device.pull()"
+    [ready]="device.ready()"
+    [refreshing]="device.refreshing()"
+  />
+  <app-week-selector (settingsToggle)="settingsOpen = !settingsOpen" />
+  @if (settingsOpen) {
+    <app-sheet-settings />
+  }
+  @if (meals.error()) {
+    <div class="error">{{ meals.error() }}</div>
+  }
+  <app-employee-selector />
+  <app-day-selector />
+  <app-meal-list />
+</main>

@@ -1,0 +1,41 @@
+<div class="title-container">
+  <div
+    class="mascot"
+    [class.cake]="meals.mascot() === 'cake'"
+    [class.donkey]="meals.mascot() === 'donkey'"
+  >
+    <img [src]="meals.mascot() + '.png'" alt="Сменить маскота" (click)="meals.updateMascot()" />
+  </div>
+  <div class="sheet-dates rect-radios" id="sheetDates">
+    @for (sheet of meals.sheets(); track sheet.date) {
+      <div
+        class="sheet-date"
+        [class.early]="datePriority(sheet.date) === 'early'"
+        [class.normal]="datePriority(sheet.date) === 'normal'"
+        [class.late]="datePriority(sheet.date) === 'late'"
+      >
+        <input
+          type="radio"
+          name="date"
+          [id]="'week-' + sheet.date"
+          [value]="sheet.date"
+          [checked]="sheet.date === meals.selectedWeek()"
+          (change)="meals.selectWeek(sheet.date)"
+        />
+        <label [for]="'week-' + sheet.date"></label>
+        <div>
+          <div class="content">{{ dateNumber(sheet.date) }}</div>
+          <div class="header">{{ monthName(sheet.date) }}</div>
+        </div>
+      </div>
+    }
+  </div>
+  <button
+    type="button"
+    class="transparent-button bordered texted emoji"
+    (click)="settingsToggle.emit()"
+    aria-label="Настройки"
+  >
+    ⚙️
+  </button>
+</div>

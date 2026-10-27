@@ -1,0 +1,88 @@
+<section id="settings" class="settings-panel">
+  <div class="loaded-sheets">
+    @for (sheet of meals.sheets(); track sheet.date) {
+      <div>
+        <a
+          [href]="sheet.link"
+          target="_blank"
+          rel="noopener"
+          [class.early]="datePriority(sheet.date) === 'early'"
+          [class.normal]="datePriority(sheet.date) === 'normal'"
+          [class.late]="datePriority(sheet.date) === 'late'"
+          >{{ sheet.date }}</a
+        >
+        @for (addition of sheet.additions; track addition.link) {
+          <a
+            [href]="addition.link"
+            target="_blank"
+            rel="noopener"
+            [class.early]="datePriority(sheet.date) === 'early'"
+            [class.normal]="datePriority(sheet.date) === 'normal'"
+            [class.late]="datePriority(sheet.date) === 'late'"
+            >{{ addition.days }}</a
+          >
+        }
+        <button
+          type="button"
+          class="sheet-delete"
+          (click)="meals.deleteWeek(sheet.date)"
+          [attr.aria-label]="'Удалить ' + sheet.date"
+        >
+          ×
+        </button>
+      </div>
+    }
+  </div>
+  <form (ngSubmit)="upload()">
+    <input
+      type="search"
+      name="sheetLink"
+      [(ngModel)]="link"
+      autocomplete="off"
+      placeholder="Ссылка на Google-таблицу"
+    />
+    <button id="uploadBtn" type="submit" class="button" [disabled]="meals.loading()">
+      {{ meals.loading() ? 'Загрузка…' : 'Загрузить' }}
+    </button>
+  </form>
+  <div class="sheet-actions">
+    <button type="button" class="button" (click)="beginAddition('replace')">Добавить дни…</button>
+    <button type="button" class="button" (click)="beginAddition('add')">Добавить в день…</button>
+    <button type="button" class="button" (click)="beginAddition('menu')">Добавить меню</button>
+  </div>
+</section>
+
+<dialog #daysDialog>
+  <form method="dialog" (submit)="$event.preventDefault()">
+    <h3>{{ additionMode === 'add' ? 'Добавить в день' : 'Добавить дни' }}</h3>
+    <div class="add-days-choices">
+      @for (day of availableDays; track day) {
+        <label
+          ><input
+            [type]="additionMode === 'add' ? 'radio' : 'checkbox'"
+            name="addition-day"
+            [value]="day"
+            [checked]="chosenDays.includes(day)"
+            (change)="
+              additionMode === 'add'
+                ? (chosenDays = [day])
+                : setChosenDay(day, $any($event.target).checked)
+            "
+          />
+          {{ day }}</label
+        >
+      }
+    </div>
+    <div class="dialog-actions">
+      <button type="button" class="button" (click)="cancelAddition()">Отмена</button>
+      <button
+        type="button"
+        class="button"
+        [disabled]="!chosenDays.length"
+        (click)="confirmAddition()"
+      >
+        ОК
+      </button>
+    </div>
+  </form>
+</dialog>

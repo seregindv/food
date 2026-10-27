@@ -1,0 +1,59 @@
+@if (meals.selectedEmployee()) {
+  <div id="jsonDisplay">
+    @if (meals.meals().length) {
+      <div class="values-list">
+        <div class="meals">
+          @for (meal of meals.meals(); track $index) {
+            @if (meal) {
+              <div class="meal">
+                <div class="meal-main">
+                  <input
+                    type="checkbox"
+                    [id]="'meal-' + $index"
+                    [checked]="meals.eaten().includes($index)"
+                    (change)="meals.setEaten($index, $any($event.target).checked)"
+                  />
+                  <label class="meal-name" [for]="'meal-' + $index"
+                    ><div class="meal-name-primary">{{ meal }}</div>
+                    @if (meals.foodInfo()[meal.trim()]?.weight) {
+                      <div class="meal-weight">{{ meals.foodInfo()[meal.trim()].weight }}</div>
+                    }
+                  </label>
+                  @if (meals.foodInfo()[meal.trim()]; as info) {
+                    <button
+                      type="button"
+                      class="transparent-button food-info-action"
+                      aria-label="Информация о блюде"
+                      (click)="foodDialog.open()"
+                    >
+                      i
+                    </button>
+                    <app-food-info-dialog #foodDialog [itemName]="meal" [info]="info" />
+                  }
+                </div>
+                @if (meals.foodInfo()[meal.trim()]; as info) {
+                  @if (
+                    info.calories != null ||
+                    info.protein != null ||
+                    info.fat != null ||
+                    info.carbs != null
+                  ) {
+                    <div class="nutrition-grid meal-nutrition">
+                      <div>{{ info.calories }} ккал</div>
+                      <div>{{ info.protein }} г</div>
+                      <div>{{ info.fat }} г</div>
+                      <div>{{ info.carbs }} г</div>
+                    </div>
+                  }
+                }
+              </div>
+            }
+          }
+        </div>
+        <app-meal-actions />
+      </div>
+    } @else {
+      <div id="noData">Нет еды на этот день</div>
+    }
+  </div>
+}

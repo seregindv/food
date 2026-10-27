@@ -1,0 +1,15 @@
+@if (meals.selectedEmployee()) {
+<div id="selectContainer">
+  <div class="select-wrapper">
+    <div class="days rect-radios">
+      @for (day of dayNames; track day; let i = $index) {
+      <div>
+        <input type="radio" name="day" [id]="'day-' + i" [value]="day" [checked]="meals.selectedDay() === day"
+          [disabled]="!meals.days().includes(day)" (change)="meals.selectDay(day)" />
+        <label [for]="'day-' + i">{{ day.toUpperCase() }}</label>
+      </div>
+      }
+    </div>
+  </div>
+</div>
+}
