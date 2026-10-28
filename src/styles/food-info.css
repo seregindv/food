@@ -91,6 +91,10 @@
   margin: 0;
 }
 
+.food-info-flags p:only-child {
+  grid-column: 1 / -1;
+}
+
 .food-info-composition p {
   margin: 0 0 8px;
   white-space: pre-line;

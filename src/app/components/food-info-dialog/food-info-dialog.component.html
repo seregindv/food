@@ -27,8 +27,12 @@
             </div>
             @if (info.allergens || info.vegeterian) {
               <div class="food-info-flags">
-                <p>{{ info.allergens ? '❗' + info.allergens : '' }}</p>
-                <p>{{ info.vegeterian ? '🌱 вегетарианское' : '' }}</p>
+                @if (info.allergens) {
+                  <p>❗{{ info.allergens }}</p>
+                }
+                @if (info.vegeterian) {
+                  <p>🌱 вегетарианское</p>
+                }
               </div>
             }
             @if (info.infoRS || info.infoRU) {
