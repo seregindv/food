@@ -16,7 +16,7 @@ import { MEAL_ICONS, MealDataService } from '../../services/meal-data.service';
   encapsulation: ViewEncapsulation.None,
 })
 export class MealActionsComponent {
-  readonly meals = inject(MealDataService);
+  readonly meals: MealDataService = inject(MealDataService);
   readonly day = input('');
   readonly preview = input(false);
   readonly hasFoodInfo = input(false);

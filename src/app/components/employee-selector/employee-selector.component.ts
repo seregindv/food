@@ -10,5 +10,5 @@ import { MealDataService } from '../../services/meal-data.service';
   encapsulation: ViewEncapsulation.None,
 })
 export class EmployeeSelectorComponent {
-  readonly meals = inject(MealDataService);
+  readonly meals: MealDataService = inject(MealDataService);
 }

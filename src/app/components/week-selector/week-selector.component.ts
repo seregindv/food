@@ -8,7 +8,7 @@ import { MealDataService } from '../../services/meal-data.service';
   encapsulation: ViewEncapsulation.None,
 })
 export class WeekSelectorComponent {
-  readonly meals = inject(MealDataService);
+  readonly meals: MealDataService = inject(MealDataService);
   readonly settingsOpen = input(false);
   readonly settingsToggle = output<void>();
 
