@@ -44,6 +44,7 @@ export class FoodInfoDialogComponent {
       ['Жиры', info.fat, ' г'],
       ['Углеводы', info.carbs, ' г'],
       ['Срок хранения', info.shelfLife, ' ч'],
+      ['', info.onion ? '🧅' : null, ''],
     ];
     return fields
       .filter(([, value]) => !!value)

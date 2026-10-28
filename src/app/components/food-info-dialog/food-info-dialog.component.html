@@ -49,7 +49,7 @@
               @for (field of fields(info); track field.label) {
                 <div class="food-info-field">
                   <div class="food-info-label">{{ field.label }}</div>
-                  <div>{{ field.value }}</div>
+                  <div [class.onion]="field.value === '🧅'">{{ field.value }}</div>
                 </div>
               }
             </div>

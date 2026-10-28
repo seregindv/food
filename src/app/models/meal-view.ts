@@ -5,6 +5,7 @@ export interface FoodInfo {
   fat?: number;
   carbs?: number;
   allergens?: string;
+  onion?: boolean;
   infoRU?: string;
   infoRS?: string;
   vegeterian?: boolean;

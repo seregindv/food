@@ -294,6 +294,7 @@ function parseFoodInfo(
     infoRS: findHeaderIndex(headers, 'sastojci'),
     nutrition: findHeaderIndex(headers, 'кбжу'),
     allergens: findHeaderIndex(headers, 'аллергены'),
+    onion: findHeaderIndex(headers, 'лук'),
     shelfLife: findHeaderIndex(headers, 'срок'),
     price: findHeaderIndex(headers, 'cena'),
     calories: findHeaderIndex(headers, 'ккал'),
@@ -328,6 +329,12 @@ function parseFoodInfo(
       ...parseNutrition(row[indexes.nutrition.index], rawWeight, isTotalNutrition),
       allergens: row[indexes.allergens.index],
     };
+    if (indexes.onion.index >= 0) {
+      const onion = !!row[indexes.onion.index];
+      if (onion) {
+        item['onion'] = onion;
+      }
+    }
     if (indexes.nutrition.index === -1) {
       for (const key of ['calories', 'protein', 'fat', 'carbs']) {
         const value = parseNumber(row[(indexes as Record<string, { index: number }>)[key].index]);
