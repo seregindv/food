@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, output } from '@angular/core';
+import { Component, ViewEncapsulation, input, output } from '@angular/core';
 import { MealDataService } from '../../services/meal-data.service';
 
 @Component({
@@ -8,6 +8,7 @@ import { MealDataService } from '../../services/meal-data.service';
   encapsulation: ViewEncapsulation.None,
 })
 export class WeekSelectorComponent {
+  readonly settingsOpen = input(false);
   readonly settingsToggle = output<void>();
 
   constructor(readonly meals: MealDataService) {}

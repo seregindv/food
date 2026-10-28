@@ -1,13 +1,15 @@
 import { Injectable } from '@angular/core';
 import type * as XLSXTypes from 'xlsx';
-import { MealDataService } from './meal-data.service';
+import { DAY_NAMES, MealDataService } from './meal-data.service';
 import { StorageService } from './storage.service';
-import { WorkbookParserService } from './workbook-parser.service';
+import { ParsedWorkbook, WorkbookParserService } from './workbook-parser.service';
 
 type XLSXWorkbook = XLSXTypes.WorkBook & { fileName?: string | null };
 
 @Injectable({ providedIn: 'root' })
 export class SheetImportService {
+  private pendingAddition: { sheetUrl: string; sheetData: ParsedWorkbook['sheetData'] } | null =
+    null;
   constructor(
     private meals: MealDataService,
     private storage: StorageService,
@@ -15,6 +17,7 @@ export class SheetImportService {
   ) {}
 
   async import(link: string): Promise<void> {
+    if (!link.trim()) throw new Error('Пожалуйста, введите ссылку');
     const sheetId = this.extractId(link.trim());
     if (!sheetId) {
       throw new Error('Неверная ссылка на Google-таблицу');
@@ -24,16 +27,20 @@ export class SheetImportService {
     this.meals.selectWeek(date);
   }
 
-  async availableDays(link: string): Promise<string[]> {
+  async availableDays(link: string, mode: 'replace' | 'add' = 'replace'): Promise<string[]> {
+    if (!link.trim()) throw new Error('Пожалуйста, введите ссылку');
     const sheetId = this.extractId(link.trim());
     if (!sheetId) {
       throw new Error('Неверная ссылка на Google-таблицу');
     }
-    const { sheetData } = await this.downloadData(this.getSheetUrl(sheetId), false);
-    const days = this.parser.getAvailableDays(sheetData);
+    const sheetUrl = this.getSheetUrl(sheetId);
+    this.pendingAddition = null;
+    const { sheetData } = await this.downloadData(sheetUrl, false);
+    const days = mode === 'add' ? DAY_NAMES : this.parser.getAvailableDays(sheetData);
     if (!days.length) {
       throw new Error('Не удалось найти дни с едой');
     }
+    this.pendingAddition = { sheetUrl, sheetData };
     return days;
   }
 
@@ -43,12 +50,17 @@ export class SheetImportService {
     days: string[],
     mode: 'replace' | 'add',
   ): Promise<void> {
+    if (!link.trim()) throw new Error('Пожалуйста, введите ссылку');
     const sheetId = this.extractId(link.trim());
     if (!sheetId) {
       throw new Error('Неверная ссылка на Google-таблицу');
     }
     const sheetUrl = this.getSheetUrl(sheetId);
-    const { sheetData } = await this.downloadData(sheetUrl, false);
+    const sheetData =
+      this.pendingAddition?.sheetUrl === sheetUrl
+        ? this.pendingAddition.sheetData
+        : (await this.downloadData(sheetUrl, false)).sheetData;
+    this.pendingAddition = null;
     const currentData = this.storage.getSheetData(date) ?? {};
     if (mode === 'add') {
       this.parser.mergeFoodIntoDay(currentData, sheetData, days[0]);
@@ -66,6 +78,7 @@ export class SheetImportService {
   }
 
   async addMenu(date: string, link: string): Promise<void> {
+    if (!link.trim()) throw new Error('Пожалуйста, введите ссылку');
     const sheetId = this.extractId(link.trim());
     if (!sheetId) {
       throw new Error('Неверная ссылка на Google-таблицу');

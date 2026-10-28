@@ -1,4 +1,13 @@
-import { AfterViewInit, Component, DestroyRef, ElementRef, ViewChild, inject } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  DestroyRef,
+  ElementRef,
+  ViewChild,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { MealDataService } from './services/meal-data.service';
 import { SheetImportService } from './services/sheet-import.service';
 import { DeviceInteractionService } from './services/device-interaction.service';
@@ -18,7 +27,7 @@ import { MealListComponent } from './components/meal-list/meal-list.component';
     SheetSettingsComponent,
     EmployeeSelectorComponent,
     DaySelectorComponent,
-    MealListComponent
+    MealListComponent,
   ],
   templateUrl: './app.html',
 })
@@ -28,14 +37,25 @@ export class App implements AfterViewInit {
   readonly sheetImport = inject(SheetImportService);
   readonly device = inject(DeviceInteractionService);
   private readonly destroyRef = inject(DestroyRef);
-  settingsOpen = this.meals.sheets().length === 0;
+  readonly settingsOpen = signal(this.meals.sheets().length === 0);
+
+  constructor() {
+    effect(() => {
+      if (!this.meals.sheets().length) this.settingsOpen.set(true);
+    });
+  }
+
+  toggleSettings(): void {
+    this.settingsOpen.update((open) => !open);
+  }
 
   ngAfterViewInit(): void {
-    const detach = this.device.attach(
-      this.main.nativeElement,
-      () => this.refresh(),
-      direction => this.navigateDay(direction),
-    );
+    const detach = this.device.attach(this.main.nativeElement, {
+      refresh: () => this.refresh(),
+      canRefresh: () => !!this.meals.selectedWeek(),
+      nextDay: (direction) => this.meals.nextDay(direction),
+      navigateDay: (direction) => this.navigateDay(direction),
+    });
     this.destroyRef.onDestroy(detach);
   }
 
@@ -48,9 +68,7 @@ export class App implements AfterViewInit {
   }
 
   navigateDay(direction: -1 | 1): void {
-    const days = this.meals.days();
-    const index = days.indexOf(this.meals.selectedDay());
-    const next = days[index + direction];
+    const next = this.meals.nextDay(direction);
     if (next) {
       this.meals.selectDay(next);
     }

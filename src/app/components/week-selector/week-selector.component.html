@@ -32,10 +32,13 @@
   </div>
   <button
     type="button"
+    id="showSettings"
     class="transparent-button bordered texted emoji"
+    style="margin-left: 6px"
+    [disabled]="meals.sheets().length === 0"
     (click)="settingsToggle.emit()"
     aria-label="Настройки"
   >
-    ⚙️
+    <div class="animated-rotate" [class.rotated]="settingsOpen()">⚙️</div>
   </button>
 </div>

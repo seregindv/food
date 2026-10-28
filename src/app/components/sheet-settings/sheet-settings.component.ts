@@ -1,28 +1,75 @@
-import { Component, ElementRef, ViewChild, ViewEncapsulation } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  ElementRef,
+  HostListener,
+  ViewChild,
+  ViewEncapsulation,
+  inject,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MealDataService } from '../../services/meal-data.service';
 import { SheetImportService } from '../../services/sheet-import.service';
+import { LoadingPanelComponent } from '../loading-panel/loading-panel.component';
 
 @Component({
   selector: 'app-sheet-settings',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, LoadingPanelComponent],
   templateUrl: './sheet-settings.component.html',
   encapsulation: ViewEncapsulation.None,
 })
 export class SheetSettingsComponent {
   @ViewChild('daysDialog') daysDialog!: ElementRef<HTMLDialogElement>;
   link = '';
+  dropdownOpen = false;
   additionMode: 'replace' | 'add' | 'menu' | null = null;
   availableDays: string[] = [];
   chosenDays: string[] = [];
+  private longPressTimer?: ReturnType<typeof setTimeout>;
+  private suppressUpload = false;
+  private readonly host = inject(ElementRef<HTMLElement>);
+
+  @HostListener('document:click', ['$event'])
+  closeDropdownOutside(event: MouseEvent): void {
+    const dropdown = this.host.nativeElement.querySelector('#uploadDropdown');
+    if (dropdown && !dropdown.contains(event.target as Node)) this.dropdownOpen = false;
+  }
+
+  @HostListener('document:keydown.escape')
+  closeDropdown(): void {
+    this.dropdownOpen = false;
+  }
+
+  startLongPress(event: PointerEvent): void {
+    if (event.pointerType !== 'touch') return;
+    this.longPressTimer = setTimeout(() => {
+      this.suppressUpload = true;
+      this.dropdownOpen = true;
+    }, 500);
+  }
+
+  cancelLongPress(): void {
+    clearTimeout(this.longPressTimer);
+  }
+
+  uploadClick(event: MouseEvent): void {
+    if (!this.suppressUpload) return;
+    event.preventDefault();
+    this.suppressUpload = false;
+  }
 
   constructor(
     readonly meals: MealDataService,
     private sheetImport: SheetImportService,
-  ) {}
+    private readonly changeDetector: ChangeDetectorRef,
+  ) {
+    inject(DestroyRef).onDestroy(() => clearTimeout(this.longPressTimer));
+  }
 
   async upload(): Promise<void> {
+    this.dropdownOpen = false;
     this.meals.error.set('');
     this.meals.loading.set(true);
     try {
@@ -35,6 +82,7 @@ export class SheetSettingsComponent {
   }
 
   async beginAddition(mode: 'replace' | 'add' | 'menu'): Promise<void> {
+    this.dropdownOpen = false;
     const date = this.meals.selectedWeek();
     if (!date) {
       this.meals.error.set('Сначала выберите неделю');
@@ -47,9 +95,10 @@ export class SheetSettingsComponent {
         await this.sheetImport.addMenu(date, this.link);
         return;
       }
-      this.availableDays = await this.sheetImport.availableDays(this.link);
+      this.availableDays = await this.sheetImport.availableDays(this.link, mode);
       this.additionMode = mode;
       this.chosenDays = [];
+      this.changeDetector.detectChanges();
       this.daysDialog.nativeElement.showModal();
     } catch (error) {
       this.meals.error.set(error instanceof Error ? error.message : 'Не удалось добавить таблицу');
@@ -60,10 +109,11 @@ export class SheetSettingsComponent {
 
   async confirmAddition(): Promise<void> {
     const mode = this.additionMode;
+    this.daysDialog.nativeElement.close();
     if (!mode || mode === 'menu' || !this.chosenDays.length) {
+      this.additionMode = null;
       return;
     }
-    this.daysDialog.nativeElement.close();
     this.meals.loading.set(true);
     try {
       await this.sheetImport.addDays(this.meals.selectedWeek(), this.link, this.chosenDays, mode);
@@ -95,5 +145,12 @@ export class SheetSettingsComponent {
     nextMonday.setDate(nextMonday.getDate() + 7);
     const week = new Date(`${date}T00:00:00`);
     return week < monday ? 'late' : week >= nextMonday ? 'early' : 'normal';
+  }
+
+  formatDate(date: string): string {
+    return new Date(date + 'T00:00:00').toLocaleDateString('ru-RU', {
+      day: 'numeric',
+      month: 'long',
+    });
   }
 }

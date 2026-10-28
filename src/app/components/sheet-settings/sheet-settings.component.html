@@ -1,61 +1,114 @@
 <section id="settings" class="settings-panel">
-  <div class="loaded-sheets">
-    @for (sheet of meals.sheets(); track sheet.date) {
-      <div>
-        <a
-          [href]="sheet.link"
-          target="_blank"
-          rel="noopener"
-          [class.early]="datePriority(sheet.date) === 'early'"
-          [class.normal]="datePriority(sheet.date) === 'normal'"
-          [class.late]="datePriority(sheet.date) === 'late'"
-          >{{ sheet.date }}</a
-        >
-        @for (addition of sheet.additions; track addition.link) {
+  <div id="uploadContainer">
+    <div id="loadedSheets" class="loaded-sheets">
+      @for (sheet of meals.sheets(); track sheet.date) {
+        <div>
           <a
-            [href]="addition.link"
+            [href]="sheet.link"
             target="_blank"
             rel="noopener"
             [class.early]="datePriority(sheet.date) === 'early'"
             [class.normal]="datePriority(sheet.date) === 'normal'"
             [class.late]="datePriority(sheet.date) === 'late'"
-            >{{ addition.days }}</a
+            >{{ formatDate(sheet.date) }}</a
           >
-        }
-        <button
-          type="button"
-          class="sheet-delete"
-          (click)="meals.deleteWeek(sheet.date)"
-          [attr.aria-label]="'Удалить ' + sheet.date"
-        >
-          ×
-        </button>
+          @for (addition of sheet.additions; track $index) {
+            <a
+              [href]="addition.link"
+              target="_blank"
+              rel="noopener"
+              [class.early]="datePriority(sheet.date) === 'early'"
+              [class.normal]="datePriority(sheet.date) === 'normal'"
+              [class.late]="datePriority(sheet.date) === 'late'"
+              >{{ addition.days }}</a
+            >
+          }
+          <div>
+            <button
+              type="button"
+              class="sheet-delete"
+              (click)="meals.deleteWeek(sheet.date)"
+              [attr.aria-label]="'Удалить ' + formatDate(sheet.date)"
+            >
+              +
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+    <form id="uploadForm" (ngSubmit)="upload()">
+      <input
+        id="sheetLinkInput"
+        type="search"
+        name="sheetLink"
+        [(ngModel)]="link"
+        autocomplete="off"
+        placeholder="Ссылка на Google-таблицу"
+      />
+      <div class="flex gap-8">
+        <div id="uploadDropdown" class="dropdown-button" [class.open]="dropdownOpen">
+          <div class="dropdown-button-main">
+            <button
+              id="uploadBtn"
+              type="submit"
+              class="button"
+              (pointerdown)="startLongPress($event)"
+              (pointerup)="cancelLongPress()"
+              (pointercancel)="cancelLongPress()"
+              (pointerleave)="cancelLongPress()"
+              (click)="uploadClick($event)"
+            >
+              Загрузить
+            </button>
+            <button
+              type="button"
+              class="button dropdown-button-toggle"
+              aria-label="Показать другие действия"
+              aria-haspopup="menu"
+              [attr.aria-expanded]="dropdownOpen"
+              (click)="dropdownOpen = !dropdownOpen"
+            ></button>
+            <div class="dropdown-button-menu" role="menu" [hidden]="!dropdownOpen">
+              <button type="submit" class="dropdown-button-item default" role="menuitem">
+                Загрузить
+              </button>
+              <button
+                type="button"
+                class="dropdown-button-item"
+                role="menuitem"
+                (click)="beginAddition('replace')"
+              >
+                Добавить дни...
+              </button>
+              <button
+                type="button"
+                class="dropdown-button-item"
+                role="menuitem"
+                (click)="beginAddition('add')"
+              >
+                Добавить в день...
+              </button>
+              <button
+                type="button"
+                class="dropdown-button-item"
+                role="menuitem"
+                (click)="beginAddition('menu')"
+              >
+                Добавить меню
+              </button>
+            </div>
+          </div>
+        </div>
+        <app-loading-panel [class.invisible]="!meals.loading()" />
       </div>
-    }
-  </div>
-  <form (ngSubmit)="upload()">
-    <input
-      type="search"
-      name="sheetLink"
-      [(ngModel)]="link"
-      autocomplete="off"
-      placeholder="Ссылка на Google-таблицу"
-    />
-    <button id="uploadBtn" type="submit" class="button" [disabled]="meals.loading()">
-      {{ meals.loading() ? 'Загрузка…' : 'Загрузить' }}
-    </button>
-  </form>
-  <div class="sheet-actions">
-    <button type="button" class="button" (click)="beginAddition('replace')">Добавить дни…</button>
-    <button type="button" class="button" (click)="beginAddition('add')">Добавить в день…</button>
-    <button type="button" class="button" (click)="beginAddition('menu')">Добавить меню</button>
+    </form>
   </div>
 </section>
 
-<dialog #daysDialog>
+<dialog id="addDaysDialog" #daysDialog>
   <form method="dialog" (submit)="$event.preventDefault()">
     <h3>{{ additionMode === 'add' ? 'Добавить в день' : 'Добавить дни' }}</h3>
-    <div class="add-days-choices">
+    <div id="addDaysChoices" class="add-days-choices">
       @for (day of availableDays; track day) {
         <label
           ><input
@@ -75,12 +128,7 @@
     </div>
     <div class="dialog-actions">
       <button type="button" class="button" (click)="cancelAddition()">Отмена</button>
-      <button
-        type="button"
-        class="button"
-        [disabled]="!chosenDays.length"
-        (click)="confirmAddition()"
-      >
+      <button id="confirmAddDays" type="button" class="button" (click)="confirmAddition()">
         ОК
       </button>
     </div>

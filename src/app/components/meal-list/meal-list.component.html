@@ -1,59 +1,71 @@
-@if (meals.selectedEmployee()) {
-  <div id="jsonDisplay">
-    @if (meals.meals().length) {
-      <div class="values-list">
-        <div class="meals">
-          @for (meal of meals.meals(); track $index) {
-            @if (meal) {
-              <div class="meal">
-                <div class="meal-main">
-                  <input
-                    type="checkbox"
-                    [id]="'meal-' + $index"
-                    [checked]="meals.eaten().includes($index)"
-                    (change)="meals.setEaten($index, $any($event.target).checked)"
-                  />
-                  <label class="meal-name" [for]="'meal-' + $index"
-                    ><div class="meal-name-primary">{{ meal }}</div>
-                    @if (meals.foodInfo()[meal.trim()]?.weight) {
-                      <div class="meal-weight">{{ meals.foodInfo()[meal.trim()].weight }}</div>
-                    }
-                  </label>
-                  @if (meals.foodInfo()[meal.trim()]; as info) {
-                    <button
-                      type="button"
-                      class="transparent-button food-info-action"
-                      aria-label="Информация о блюде"
-                      (click)="foodDialog.open()"
-                    >
-                      i
-                    </button>
-                    <app-food-info-dialog #foodDialog [itemName]="meal" [info]="info" />
-                  }
-                </div>
-                @if (meals.foodInfo()[meal.trim()]; as info) {
-                  @if (
-                    info.calories != null ||
-                    info.protein != null ||
-                    info.fat != null ||
-                    info.carbs != null
-                  ) {
-                    <div class="nutrition-grid meal-nutrition">
-                      <div>{{ info.calories }} ккал</div>
-                      <div>{{ info.protein }} г</div>
-                      <div>{{ info.fat }} г</div>
-                      <div>{{ info.carbs }} г</div>
-                    </div>
-                  }
-                }
+<ng-template #dayContent let-day="day" let-preview="preview">
+  @let items = meals.itemsForDay(day);
+  <div class="values-list" [class.hidden]="!meals.hasMeals(day)">
+    <div class="meals">
+      @for (item of items; track item.index) {
+        <div class="meal">
+          <div class="meal-main">
+            <input
+              type="checkbox"
+              name="meal"
+              [attr.id]="preview ? null : 'meal' + (item.index + 1)"
+              [attr.icon]="item.icon"
+              [checked]="item.checked"
+              (change)="meals.setEaten(item.index, $any($event.target).checked)"
+            />
+            <label class="meal-name" [attr.for]="preview ? null : 'meal' + (item.index + 1)">
+              <div class="meal-name-primary">{{ item.primary }}</div>
+              <div class="meal-name-secondary">{{ item.secondary }}</div>
+              <div class="meal-weight" [class.hidden]="!item.info?.weight">
+                {{ item.info?.weight }}
               </div>
+            </label>
+          </div>
+          <div class="nutrition-grid meal-nutrition" [class.hidden]="!item.hasNutrition">
+            @for (value of item.nutrition; track $index) {
+              <div>{{ value }}</div>
             }
-          }
+          </div>
         </div>
-        <app-meal-actions />
-      </div>
-    } @else {
-      <div id="noData">Нет еды на этот день</div>
-    }
+      }
+    </div>
+    <app-meal-actions
+      [day]="day"
+      [preview]="preview"
+      [hasFoodInfo]="meals.hasFoodInfo(day)"
+      (foodInfoOpen)="foodDialog.open()"
+    />
   </div>
-}
+  @if (!preview) {
+    <div id="noData" class="hidden"></div>
+  }
+</ng-template>
+<div class="swipe-viewport">
+  <div
+    id="jsonDisplay"
+    class="day-page"
+    [style.transform]="'translateX(' + device.swipeOffset() + 'px)'"
+    [style.opacity]="device.pageOpacity()"
+    [style.transition]="device.swipeTransition()"
+  >
+    <ng-container
+      [ngTemplateOutlet]="dayContent"
+      [ngTemplateOutletContext]="{ day: meals.selectedDay(), preview: false }"
+    />
+  </div>
+  @if (device.previewDay()) {
+    <div
+      class="day-preview"
+      aria-hidden="true"
+      [style.transform]="'translateX(' + device.previewOffset() + 'px)'"
+      [style.opacity]="device.previewOpacity()"
+      [style.transition]="device.swipeTransition()"
+    >
+      <ng-container
+        [ngTemplateOutlet]="dayContent"
+        [ngTemplateOutletContext]="{ day: device.previewDay(), preview: true }"
+      />
+    </div>
+  }
+</div>
+<app-food-info-dialog #foodDialog [items]="foodItems()" />

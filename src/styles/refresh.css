@@ -1,6 +1,3 @@
-app-refresh-indicator { display: contents; }
-.refresh.is-refreshing .refresh-arrow { display: none; }
-.refresh.ready .refresh-arrow { opacity: 1; }
-.refresh.ready.early .refresh-arrow { fill: #eeb509; }
-.refresh.ready.normal .refresh-arrow { fill: #28a745; }
-.refresh.ready.late .refresh-arrow { fill: #dc3545; }
+app-refresh-indicator {
+  display: contents;
+}

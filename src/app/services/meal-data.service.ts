@@ -1,8 +1,23 @@
 import { Injectable, signal } from '@angular/core';
 import { StorageService, SavedSheet } from './storage.service';
+import { FoodInfo, MealView, mealNames } from '../models/meal-view';
 
 export const DAY_NAMES = ['пн', 'вт', 'ср', 'чт', 'пт'];
-export const MEAL_ICONS = ['🍳', '1️⃣', '2️⃣', '🧋', '🥨', '🫘', '🍲', '🥗', '🍗', '🍟', '🍰', '🧂', '🥪'];
+export const MEAL_ICONS = [
+  '🍳',
+  '1️⃣',
+  '2️⃣',
+  '🧋',
+  '🥨',
+  '🫘',
+  '🍲',
+  '🥗',
+  '🍗',
+  '🍟',
+  '🍰',
+  '🧂',
+  '🥪',
+];
 
 @Injectable({ providedIn: 'root' })
 export class MealDataService {
@@ -13,7 +28,7 @@ export class MealDataService {
   readonly error = signal('');
   readonly loading = signal(false);
   readonly data = signal<Record<string, Record<string, (string | null)[]>>>({});
-  readonly foodInfo = signal<Record<string, any>>({});
+  readonly foodInfo = signal<Record<string, FoodInfo>>({});
   readonly employees = signal<string[]>([]);
   readonly meals = signal<(string | null)[]>([]);
   readonly eaten = signal<number[]>([]);
@@ -41,24 +56,27 @@ export class MealDataService {
     this.data.set(date ? (this.storage.getSheetData(date) ?? {}) : {});
     this.foodInfo.set(date ? this.storage.getFoodInfo(date) : {});
     this.employees.set(Object.keys(this.data()).sort());
-    if (!this.employees().includes(this.selectedEmployee())) {
-      this.selectedEmployee.set('');
-    }
-    this.selectEmployee(this.selectedEmployee());
+    const remembered = localStorage.getItem('selectedEmployee') ?? '';
+    this.selectedEmployee.set(this.employees().includes(remembered) ? remembered : '');
+    this.selectedDay.set(this.defaultDay());
+    this.selectEmployee(this.selectedEmployee(), false);
   }
 
-  selectEmployee(employee: string): void {
+  selectEmployee(employee: string, remember = true): void {
     this.selectedEmployee.set(employee);
-    if (employee) {
-      localStorage.setItem('selectedEmployee', employee);
-    } else {
-      localStorage.removeItem('selectedEmployee');
+    if (remember) {
+      if (employee) localStorage.setItem('selectedEmployee', employee);
+      else localStorage.removeItem('selectedEmployee');
     }
     const employeeData = this.data()[employee] ?? {};
     this.days.set(DAY_NAMES.filter((day) => (employeeData[day]?.length ?? 0) > 0));
     if (!this.days().includes(this.selectedDay())) {
-      const today = this.defaultDay();
-      this.selectedDay.set(this.days().includes(today) ? today : (this.days()[0] ?? ''));
+      const desired = DAY_NAMES.indexOf(this.selectedDay() || this.defaultDay());
+      const next = DAY_NAMES.slice(desired).find((day) => this.days().includes(day));
+      const previous = DAY_NAMES.slice(0, desired)
+        .reverse()
+        .find((day) => this.days().includes(day));
+      this.selectedDay.set(next ?? previous ?? '');
     }
     this.selectDay(this.selectedDay());
   }
@@ -100,7 +118,7 @@ export class MealDataService {
       'sheetDates',
       JSON.stringify(this.storage.getSheetDates().filter((item) => item !== date)),
     );
-    this.selectedWeek.set('');
+    if (this.selectedWeek() === date) this.selectedWeek.set('');
     this.reload();
   }
 
@@ -108,6 +126,78 @@ export class MealDataService {
     const next = this.mascot() === 'donkey' ? 'cake' : 'donkey';
     this.storage.setMascot(next);
     this.mascot.set(next);
+  }
+
+  itemsForDay(day: string): MealView[] {
+    const values = this.data()[this.selectedEmployee()]?.[day] ?? [];
+    const eaten =
+      day === this.selectedDay()
+        ? this.eaten()
+        : (this.storage.getEaten(this.selectedWeek())[this.selectedEmployee()]?.[day] ?? []);
+    return values.flatMap((name, index) => {
+      if (!name) return [];
+      const info = this.foodInfo()[name.trim()];
+      const numbers = [info?.calories, info?.protein, info?.fat, info?.carbs];
+      return [
+        {
+          index,
+          icon: MEAL_ICONS[index],
+          name,
+          ...mealNames(name),
+          info,
+          checked: eaten.includes(index),
+          hasNutrition: numbers.some((value) => value != null),
+          nutrition: numbers.map((value, i) =>
+            value == null ? '' : String(value) + (i === 0 ? ' ккал' : ' г'),
+          ),
+        },
+      ];
+    });
+  }
+
+  hasFoodInfo(day: string): boolean {
+    return this.itemsForDay(day).some((item) => !!item.info);
+  }
+
+  hasMeals(day: string): boolean {
+    return (this.data()[this.selectedEmployee()]?.[day]?.length ?? 0) > 0;
+  }
+
+  employeeDays(employee: string): string {
+    const data = this.data()[employee] ?? {};
+    return DAY_NAMES.map((day) => (data[day] ? '●' : '○')).join('');
+  }
+
+  employeeIsEmpty(employee: string): boolean {
+    return Object.keys(this.data()[employee] ?? {}).length === 0;
+  }
+
+  nextDay(direction: -1 | 1): string {
+    const index = this.days().indexOf(this.selectedDay());
+    return index < 0 ? '' : (this.days()[index + direction] ?? '');
+  }
+
+  warningForDay(day: string): boolean {
+    const index = DAY_NAMES.indexOf(day);
+    if (!this.selectedWeek() || index < 0) return true;
+    const date = new Date(this.selectedWeek() + 'T00:00:00');
+    date.setDate(date.getDate() + index);
+    return date.toDateString() !== new Date().toDateString();
+  }
+
+  weekPriority(date = this.selectedWeek()): 'late' | 'normal' | 'early' {
+    const monday = new Date();
+    const weekday = monday.getDay();
+    monday.setDate(monday.getDate() - weekday + (weekday === 0 ? -6 : 1));
+    monday.setHours(0, 0, 0, 0);
+    const nextMonday = new Date(monday);
+    nextMonday.setDate(nextMonday.getDate() + 7);
+    const week = new Date(date + 'T00:00:00');
+    return week < monday ? 'late' : week >= nextMonday ? 'early' : 'normal';
+  }
+
+  isToday(day: string): boolean {
+    return this.weekPriority() === 'normal' && DAY_NAMES[new Date().getDay() - 1] === day;
   }
 
   private defaultWeek(dates: string[]): string {
@@ -131,6 +221,6 @@ export class MealDataService {
 
   private defaultDay(): string {
     const weekday = new Date().getDay();
-    return DAY_NAMES[Math.min(Math.max(weekday - 1, 0), 4)] ?? 'пн';
+    return DAY_NAMES[weekday - 1] ?? 'пн';
   }
 }
