@@ -232,16 +232,14 @@ function parseWorkbook(
   if (Object.keys(sheetData).length === 0) {
     throw new Error('Не удалось ничего прочитать');
   }
-  if (requireDate) {
-    if (!sheetDate) {
-      sheetDate = parseDate(workbook.Sheets['WD']?.['H3'], xlsx);
-    }
-    if (!sheetDate) {
-      sheetDate = parseFilenameDate(workbook['fileName']);
-    }
-    if (!sheetDate) {
-      throw new Error('Не удалось найти дату');
-    }
+  if (!sheetDate) {
+    sheetDate = parseDate(workbook.Sheets['WD']?.['H3'], xlsx);
+  }
+  if (!sheetDate) {
+    sheetDate = parseFilenameDate(workbook['fileName']);
+  }
+  if (requireDate && !sheetDate) {
+    throw new Error('Не удалось найти дату');
   }
   return { sheetData, sheetDate, foodInfo: getFoodInfo(workbook, xlsx) };
 }

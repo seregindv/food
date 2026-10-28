@@ -129,18 +129,30 @@ body {
   background-color: #28a745;
 }
 
-#addDaysDialog {
+#addDaysDialog,
+#importDateDialog {
   border: none;
   border-radius: 8px;
   padding: 20px;
 }
 
-#addDaysDialog::backdrop {
+#addDaysDialog::backdrop,
+#importDateDialog::backdrop {
   background: rgb(0 0 0 / 35%);
 }
 
-#addDaysDialog h3 {
+#addDaysDialog h3,
+#importDateDialog h3 {
   margin-top: 0;
+}
+
+#importDateDialog input[type='date'] {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 8px 0 20px;
+  padding: 8px;
+  font: inherit;
 }
 
 .add-days-choices {
@@ -160,7 +172,8 @@ body {
   gap: 8px;
 }
 
-#confirmAddDays {
+#confirmAddDays,
+#confirmImportDate {
   color: white;
   background-color: #28a745;
 }

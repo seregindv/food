@@ -8,6 +8,7 @@ type XLSXWorkbook = XLSXTypes.WorkBook & { fileName?: string | null };
 
 @Injectable({ providedIn: 'root' })
 export class SheetImportService {
+  private pendingImport: { sheetData: ParsedWorkbook['sheetData']; sheetDate: Date | null; foodInfo: Record<string, any>; sheetUrl: string } | null = null;
   private pendingAddition: { sheetUrl: string; sheetData: ParsedWorkbook['sheetData'] } | null =
     null;
   constructor(
@@ -16,15 +17,48 @@ export class SheetImportService {
     private parser: WorkbookParserService,
   ) {}
 
-  async import(link: string): Promise<void> {
+  async import(link: string): Promise<string | null> {
     if (!link.trim()) throw new Error('Пожалуйста, введите ссылку');
     const sheetId = this.extractId(link.trim());
     if (!sheetId) {
       throw new Error('Неверная ссылка на Google-таблицу');
     }
-    const date = await this.download(sheetId, false);
+    const sheetUrl = this.getSheetUrl(sheetId);
+    const parsed = await this.downloadData(sheetUrl, false);
+    if (!parsed.sheetDate) {
+      this.pendingImport = { ...parsed, sheetUrl };
+      return null;
+    }
+    const date = this.saveImport(parsed, sheetUrl);
     this.meals.reload();
     this.meals.selectWeek(date);
+    return date;
+  }
+
+  completeImport(date: string): void {
+    if (!this.pendingImport) return;
+    const parsed = this.pendingImport;
+    this.pendingImport = null;
+    const selectedDate = new Date(`${date}T00:00:00`);
+    const weekday = selectedDate.getDay();
+    selectedDate.setDate(selectedDate.getDate() - weekday + (weekday === 0 ? -6 : 1));
+    parsed.sheetDate = selectedDate;
+    const week = this.saveImport(parsed, parsed.sheetUrl);
+    this.meals.reload();
+    this.meals.selectWeek(week);
+  }
+
+  cancelPendingImport(): void {
+    this.pendingImport = null;
+  }
+
+  private saveImport(parsed: ParsedWorkbook, sheetUrl: string): string {
+    const { sheetData, sheetDate, foodInfo } = parsed;
+    const week = this.getDateString(sheetDate!);
+    this.storage.dropOldSheets(this.getDateString(this.getMonday()));
+    this.storage.setSheetData(week, sheetData, sheetUrl);
+    this.storage.setFoodInfo(week, foodInfo);
+    return week;
   }
 
   async availableDays(link: string, mode: 'replace' | 'add' = 'replace'): Promise<string[]> {
@@ -99,7 +133,7 @@ export class SheetImportService {
     if (!date || !links?.main) {
       return;
     }
-    const { sheetData, foodInfo } = await this.downloadData(links.main);
+    const { sheetData, foodInfo } = await this.downloadData(links.main, false);
     for (const addition of links.days) {
       const { sheetData: addedData } = await this.downloadData(addition.link, false);
       if (addition.mode === 'add') {
@@ -115,18 +149,6 @@ export class SheetImportService {
     this.storage.setFoodInfo(date, foodInfo);
     this.meals.reload();
     this.meals.selectWeek(date);
-  }
-
-  private async download(sheetId: string, refreshing: boolean): Promise<string> {
-    const sheetUrl = this.getSheetUrl(sheetId);
-    const { sheetData, sheetDate, foodInfo } = await this.downloadData(sheetUrl);
-    if (!refreshing) {
-      this.storage.dropOldSheets(this.getDateString(this.getMonday()));
-    }
-    const sheetDateString = this.getDateString(sheetDate!);
-    this.storage.setSheetData(sheetDateString, sheetData, refreshing ? null : sheetUrl);
-    this.storage.setFoodInfo(sheetDateString, foodInfo);
-    return sheetDateString;
   }
 
   private async downloadData(sheetUrl: string, requireDate = true) {

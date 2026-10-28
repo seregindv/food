@@ -22,11 +22,13 @@ import { LoadingPanelComponent } from '../loading-panel/loading-panel.component'
 })
 export class SheetSettingsComponent {
   @ViewChild('daysDialog') daysDialog!: ElementRef<HTMLDialogElement>;
+  @ViewChild('dateDialog') dateDialog!: ElementRef<HTMLDialogElement>;
   link = '';
   dropdownOpen = false;
   additionMode: 'replace' | 'add' | 'menu' | null = null;
   availableDays: string[] = [];
   chosenDays: string[] = [];
+  importDate = this.getNextMondayString();
   private longPressTimer?: ReturnType<typeof setTimeout>;
   private suppressUpload = false;
   private readonly host = inject(ElementRef<HTMLElement>);
@@ -73,12 +75,37 @@ export class SheetSettingsComponent {
     this.meals.error.set('');
     this.meals.loading.set(true);
     try {
-      await this.sheetImport.import(this.link);
+      const date = await this.sheetImport.import(this.link);
+      if (date === null) {
+        this.importDate = this.getNextMondayString();
+        this.changeDetector.detectChanges();
+        this.dateDialog.nativeElement.showModal();
+      }
     } catch (error) {
       this.meals.error.set(error instanceof Error ? error.message : 'Не удалось загрузить таблицу');
     } finally {
       this.meals.loading.set(false);
     }
+  }
+
+  confirmImportDate(): void {
+    this.dateDialog.nativeElement.close();
+    this.sheetImport.completeImport(this.importDate);
+  }
+
+  cancelImportDate(): void {
+    this.dateDialog.nativeElement.close();
+    this.sheetImport.cancelPendingImport();
+  }
+
+  private getNextMondayString(): string {
+    const date = new Date();
+    const day = date.getDay();
+    date.setDate(date.getDate() + ((8 - day) % 7 || 7));
+    const year = date.getFullYear();
+    const month = `${date.getMonth() + 1}`.padStart(2, '0');
+    const dayOfMonth = `${date.getDate()}`.padStart(2, '0');
+    return `${year}-${month}-${dayOfMonth}`;
   }
 
   async beginAddition(mode: 'replace' | 'add' | 'menu'): Promise<void> {

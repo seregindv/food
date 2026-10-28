@@ -105,6 +105,18 @@
   </div>
 </section>
 
+<dialog id="importDateDialog" #dateDialog>
+  <form method="dialog" (submit)="$event.preventDefault()">
+    <h3>Выберите дату недели</h3>
+    <label for="importDate">Дата</label>
+    <input id="importDate" type="date" name="importDate" [(ngModel)]="importDate" required />
+    <div class="dialog-actions">
+      <button type="button" class="button" (click)="cancelImportDate()">Отмена</button>
+      <button type="button" class="button" (click)="confirmImportDate()">ОК</button>
+    </div>
+  </form>
+</dialog>
+
 <dialog id="addDaysDialog" #daysDialog>
   <form method="dialog" (submit)="$event.preventDefault()">
     <h3>{{ additionMode === 'add' ? 'Добавить в день' : 'Добавить дни' }}</h3>
