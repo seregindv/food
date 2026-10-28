@@ -32,6 +32,9 @@ export class SheetSettingsComponent {
   private longPressTimer?: ReturnType<typeof setTimeout>;
   private suppressUpload = false;
   private readonly host = inject(ElementRef<HTMLElement>);
+  readonly meals: MealDataService = inject(MealDataService);
+  private readonly sheetImport = inject(SheetImportService);
+  private readonly changeDetector = inject(ChangeDetectorRef);
 
   @HostListener('document:click', ['$event'])
   closeDropdownOutside(event: MouseEvent): void {
@@ -62,11 +65,7 @@ export class SheetSettingsComponent {
     this.suppressUpload = false;
   }
 
-  constructor(
-    readonly meals: MealDataService,
-    private sheetImport: SheetImportService,
-    private readonly changeDetector: ChangeDetectorRef,
-  ) {
+  constructor() {
     inject(DestroyRef).onDestroy(() => clearTimeout(this.longPressTimer));
   }
 

@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+import { Component, ViewEncapsulation, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MealDataService } from '../../services/meal-data.service';
 
@@ -10,5 +10,5 @@ import { MealDataService } from '../../services/meal-data.service';
   encapsulation: ViewEncapsulation.None,
 })
 export class EmployeeSelectorComponent {
-  constructor(readonly meals: MealDataService) {}
+  readonly meals = inject(MealDataService);
 }

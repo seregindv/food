@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, computed } from '@angular/core';
+import { Component, ViewEncapsulation, computed, inject } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { MealDataService } from '../../services/meal-data.service';
 import { DeviceInteractionService } from '../../services/device-interaction.service';
@@ -13,11 +13,9 @@ import { MealActionsComponent } from '../meal-actions/meal-actions.component';
   encapsulation: ViewEncapsulation.None,
 })
 export class MealListComponent {
+  readonly meals = inject(MealDataService);
+  readonly device = inject(DeviceInteractionService);
   readonly foodItems = computed(() =>
     this.meals.itemsForDay(this.meals.selectedDay()).filter((item) => item.info),
   );
-  constructor(
-    readonly meals: MealDataService,
-    readonly device: DeviceInteractionService,
-  ) {}
 }

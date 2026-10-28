@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+import { Component, ViewEncapsulation, inject } from '@angular/core';
 import { DAY_NAMES, MealDataService } from '../../services/meal-data.service';
 
 @Component({
@@ -8,7 +8,6 @@ import { DAY_NAMES, MealDataService } from '../../services/meal-data.service';
   encapsulation: ViewEncapsulation.None,
 })
 export class DaySelectorComponent {
+  readonly meals = inject(MealDataService);
   readonly dayNames = DAY_NAMES;
-
-  constructor(readonly meals: MealDataService) {}
 }

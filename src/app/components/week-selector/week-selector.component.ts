@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, input, output } from '@angular/core';
+import { Component, ViewEncapsulation, inject, input, output } from '@angular/core';
 import { MealDataService } from '../../services/meal-data.service';
 
 @Component({
@@ -8,10 +8,9 @@ import { MealDataService } from '../../services/meal-data.service';
   encapsulation: ViewEncapsulation.None,
 })
 export class WeekSelectorComponent {
+  readonly meals = inject(MealDataService);
   readonly settingsOpen = input(false);
   readonly settingsToggle = output<void>();
-
-  constructor(readonly meals: MealDataService) {}
 
   dateNumber(date: string): number {
     return new Date(`${date}T00:00:00`).getDate();

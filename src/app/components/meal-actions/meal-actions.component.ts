@@ -16,6 +16,7 @@ import { MEAL_ICONS, MealDataService } from '../../services/meal-data.service';
   encapsulation: ViewEncapsulation.None,
 })
 export class MealActionsComponent {
+  readonly meals = inject(MealDataService);
   readonly day = input('');
   readonly preview = input(false);
   readonly hasFoodInfo = input(false);
@@ -24,7 +25,7 @@ export class MealActionsComponent {
   readonly canShare = typeof navigator.share === 'function';
   private copyTimer?: ReturnType<typeof setTimeout>;
 
-  constructor(readonly meals: MealDataService) {
+  constructor() {
     inject(DestroyRef).onDestroy(() => clearTimeout(this.copyTimer));
   }
 
