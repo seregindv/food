@@ -363,7 +363,7 @@ body {
 }
 
 .transparent-button:not(:disabled).warning {
-  fill: #dc3545;
+  fill: lightgray;
 }
 
 @media (pointer: fine) {
@@ -425,7 +425,7 @@ body {
 }
 
 .transparent-button:disabled {
-  fill: lightgray;
+  fill: #eeeeee;
 }
 
 .refresh-loader {
