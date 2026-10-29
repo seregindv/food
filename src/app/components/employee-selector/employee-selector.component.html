@@ -1,0 +1,20 @@
+<div class="employee-select">
+  <select
+    id="employeeSelect"
+    class="link-select flex-stretch"
+    [ngModel]="meals.selectedEmployee()"
+    (ngModelChange)="meals.selectEmployee($event)"
+    aria-label="Сотрудник"
+  >
+    <option value="">Выберите сотрудника</option>
+    @for (employee of meals.employees(); track employee) {
+      <option
+        [value]="employee"
+        [class.empty]="meals.employeeIsEmpty(employee)"
+        [attr.data-days]="meals.employeeDays(employee)"
+      >
+        {{ employee }}
+      </option>
+    }
+  </select>
+</div>

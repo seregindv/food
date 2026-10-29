@@ -1,0 +1,14 @@
+<main class="main" #main>
+  <app-refresh-indicator
+    [pull]="device.pull()"
+    [ready]="device.ready()"
+    [refreshing]="device.refreshing()"
+    [priority]="meals.weekPriority()"
+  />
+  <app-week-selector [settingsOpen]="settingsOpen()" (settingsToggle)="toggleSettings()" />
+  <app-employee-selector />
+  <app-sheet-settings [class.hidden]="!settingsOpen()" />
+  <div id="errorDisplay" class="error">{{ meals.error() }}</div>
+  <app-day-selector />
+  <app-meal-list />
+</main>

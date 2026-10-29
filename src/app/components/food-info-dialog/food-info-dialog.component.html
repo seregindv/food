@@ -1,0 +1,61 @@
+<dialog id="foodInfoDialog" #dialog class="food-info-dialog" (click)="closeOutside($event)">
+  <form method="dialog">
+    <div class="food-info-header">
+      <div id="foodInfoNav" class="food-info-nav">
+        @for (item of items(); track item.index) {
+          <button type="button" [attr.aria-label]="item.name" (click)="scrollTo(item.index)">
+            {{ item.icon }}
+          </button>
+        }
+      </div>
+      <button class="food-info-close" aria-label="Закрыть">×</button>
+    </div>
+    <div id="foodInfoDetails" #content class="food-info-content">
+      @for (item of items(); track item.index) {
+        @if (item.info; as info) {
+          <section
+            class="food-info-meal"
+            [id]="'foodInfo' + item.icon"
+            [attr.data-index]="item.index"
+          >
+            <div class="food-info-meal-heading">
+              <span class="food-info-meal-icon">{{ item.icon }}</span>
+              <div class="meal-name food-info-meal-name">
+                <div class="meal-name-primary">{{ item.primary }}</div>
+                <div class="meal-name-secondary">{{ item.secondary }}</div>
+              </div>
+            </div>
+            @if (info.allergens || info.vegeterian) {
+              <div class="food-info-flags">
+                @if (info.allergens) {
+                  <p>❗{{ info.allergens }}</p>
+                }
+                @if (info.vegeterian) {
+                  <p>🌱 вегетарианское</p>
+                }
+              </div>
+            }
+            @if (info.infoRS || info.infoRU) {
+              <section class="food-info-composition">
+                @if (info.infoRS) {
+                  <p>{{ info.infoRS }}</p>
+                }
+                @if (info.infoRU) {
+                  <p>{{ info.infoRU }}</p>
+                }
+              </section>
+            }
+            <div class="food-info-grid">
+              @for (field of fields(info); track field.label) {
+                <div class="food-info-field">
+                  <div class="food-info-label">{{ field.label }}</div>
+                  <div [class.onion]="field.value === '🧅'">{{ field.value }}</div>
+                </div>
+              }
+            </div>
+          </section>
+        }
+      }
+    </div>
+  </form>
+</dialog>

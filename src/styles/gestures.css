@@ -1,0 +1,18 @@
+.swipe-viewport {
+  display: grid;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+.day-page,
+.day-preview {
+  grid-area: 1 / 1;
+  min-width: 0;
+  touch-action: pan-y;
+  will-change: transform, opacity;
+}
+
+.day-preview {
+  pointer-events: none;
+}

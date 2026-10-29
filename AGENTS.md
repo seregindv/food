@@ -2,66 +2,56 @@
 
 ## Project Structure & Module Organization
 
-This is a static vanilla JavaScript app. The entry point is `index.html`, with global styling in `index.css` and radio/meal control styling in `radio.css`.
+This is a standalone Angular application. The entry point is `src/main.ts`; the root UI is `src/app/app.ts` and `src/app/app.html`.
 
-JavaScript modules live in `js/`:
-
-- `js/index.js`: app startup, data loading, rendering decisions, sharing/copy actions.
-- `js/page.js`: DOM-facing UI helpers and event wiring.
-- `js/slider.js` and `js/refresh.js`: touch gesture behavior.
-- `js/storage.js`: localStorage access.
-- `js/dates.js`, `js/common.js`, `js/mascot.js`: focused helper modules.
-
-Root image assets (`cake.png`, `donkey.png`, `excel.svg`, `fridge.svg`) are loaded directly by the page. There is no test directory.
+- `src/app/components/`: week, settings, employee, day, meal, and food-info UI.
+- `src/app/services/`: persistence, meal view state, sheet import, and touch interactions.
+- `src/app/refresh-indicator/`: refresh gesture indicator.
+- `src/styles.css`: global style entry point; feature styles are in `src/styles/` and component encapsulation is disabled.
+- `public/`: static image assets.
 
 ## Build, Test, and Development Commands
 
-There is no build step and no package manager configuration. Open `index.html` in a browser to run the app.
+Use `npm start` to run the development server and `npm run build` for a production build.
 
 Useful checks:
 
 ```powershell
-node --check js\index.js
-node --check js\page.js
-node --check js\slider.js
+npm run build
 ```
 
-These validate syntax only. Run them for any changed module. If tooling is added later, document it here and keep normal static usage simple.
-
-For testing on an Android device, serve the repository with the npm `http-server`
-package and forward the port over USB with ADB. This avoids Wi-Fi routing and
-Windows Firewall configuration:
+For Android testing, run the Angular server and forward it over USB with ADB:
 
 ```powershell
-http-server -p 8080
+npm start -- --host 0.0.0.0
 adb devices
-adb reverse tcp:8080 tcp:8080
+adb reverse tcp:4200 tcp:4200
 ```
 
-Open `http://localhost:8080` in Chrome on the connected device. After testing,
-remove the forwarding rule with `adb reverse --remove tcp:8080`. USB debugging
+Open `http://localhost:4200` in Chrome on the connected device. After testing,
+remove the forwarding rule with `adb reverse --remove tcp:4200`. USB debugging
 must be enabled and the development computer authorized on the device.
 
 ## Coding Style & Naming Conventions
 
-Use ES modules and keep functions small and module-local. Existing code uses 2-space indentation in `js/index.js` and 4-space indentation in several helper modules; match the file you edit. Prefer `const` unless reassignment is required.
+Use standalone Angular components and injectable services. Keep component templates declarative, use signals for view state, and prefer `const` unless reassignment is required.
 
 Use descriptive camelCase names (`displaySelectedData`, `getSelectedDate`). Preserve current DOM ids such as `jsonDisplay`, `employeeSelect`, and classes such as `values-list`.
 
-Keep comments sparse. Add them only for non-obvious parsing, gesture, or browser behavior.
+Keep global CSS organized by feature and import it through `src/styles.css`. Keep comments sparse and reserve them for non-obvious parsing, gesture, or browser behavior.
 
 ## Testing Guidelines
 
-No automated tests are configured. Combine syntax checks with manual browser verification. Test:
+No automated tests are configured. Use a production build plus manual browser verification. Test:
 
 - Loading stored sheet data from localStorage.
 - Selecting employees and enabled/disabled day radios.
 - Opening and scrolling the employee picker on Android Chrome, including
   `appearance: base-select` option styling and interaction with pull-to-refresh.
-- Swiping `#jsonDisplay` left/right, including disabled-day skips.
+- Day navigation and disabled-day handling.
 - Meal checkbox state, copy/share buttons, and refresh gestures.
 
-When adding tests, prefer focused coverage for helpers in `js/common.js`, `js/storage.js`, and gesture edge cases in `js/slider.js`.
+When adding tests, prefer focused coverage for storage compatibility, sheet parsing, and gesture edge cases.
 
 ## Commit & Pull Request Guidelines
 
