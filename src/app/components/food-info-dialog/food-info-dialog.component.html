@@ -3,7 +3,12 @@
     <div class="food-info-header">
       <div id="foodInfoNav" class="food-info-nav">
         @for (item of items(); track item.index) {
-          <button type="button" [attr.aria-label]="item.name" (click)="scrollTo(item.index)">
+          <button
+            type="button"
+            [attr.aria-label]="item.name"
+            [class.selected]="selectedIndex() === item.index"
+            (click)="scrollTo(item.index)"
+          >
             {{ item.icon }}
           </button>
         }
@@ -15,8 +20,10 @@
         @if (item.info; as info) {
           <section
             class="food-info-meal"
+            [class.selected]="selectedIndex() === item.index"
             [id]="'foodInfo' + item.icon"
             [attr.data-index]="item.index"
+            (click)="select(item.index)"
           >
             <div class="food-info-meal-heading">
               <span class="food-info-meal-icon">{{ item.icon }}</span>

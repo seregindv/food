@@ -8,6 +8,6 @@ import { DAY_NAMES, MealDataService } from '../../services/meal-data.service';
   encapsulation: ViewEncapsulation.None,
 })
 export class DaySelectorComponent {
-  readonly meals = inject(MealDataService);
+  readonly meals: MealDataService = inject(MealDataService);
   readonly dayNames = DAY_NAMES;
 }

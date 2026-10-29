@@ -38,6 +38,14 @@
   .days input[type="radio"]:checked+label:active {
     background: #0C3B6A;
   }
+
+  .days input[type="radio"]:not(:disabled):not(:checked)+label:hover {
+    background: #CEE6FF;
+  }
+
+  .days input[type="radio"]:not(:disabled):not(:checked)+label:active {
+    background: #BED2E5;
+  }
 }
 
 .days input[type="radio"]:disabled+label {
@@ -48,14 +56,6 @@
 .days label {
   border-radius: 6px;
   border: 1px solid #B8CCE0;
-}
-
-.days input[type="radio"]:not(:disabled):not(:checked)+label:hover {
-  background: #CEE6FF;
-}
-
-.days input[type="radio"]:not(:disabled):not(:checked)+label:active {
-  background: #BED2E5;
 }
 
 .meal {

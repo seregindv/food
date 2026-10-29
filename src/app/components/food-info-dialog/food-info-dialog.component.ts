@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, ViewEncapsulation, input } from '@angular/core';
+import { Component, ViewChild, ElementRef, ViewEncapsulation, input, signal } from '@angular/core';
 import { FoodInfo, MealView } from '../../models/meal-view';
 
 @Component({
@@ -9,6 +9,7 @@ import { FoodInfo, MealView } from '../../models/meal-view';
 })
 export class FoodInfoDialogComponent {
   readonly items = input<MealView[]>([]);
+  readonly selectedIndex = signal<number | null>(null);
   @ViewChild('dialog') dialog!: ElementRef<HTMLDialogElement>;
   @ViewChild('content') content!: ElementRef<HTMLElement>;
 
@@ -18,9 +19,14 @@ export class FoodInfoDialogComponent {
   }
 
   scrollTo(index: number): void {
+    this.selectedIndex.set(index);
     const content = this.content.nativeElement;
     const section = content.querySelector<HTMLElement>('[data-index="' + index + '"]');
     if (section) content.scrollTo({ top: section.offsetTop, behavior: 'smooth' });
+  }
+
+  select(index: number): void {
+    this.selectedIndex.set(index);
   }
 
   closeOutside(event: MouseEvent): void {
@@ -47,7 +53,7 @@ export class FoodInfoDialogComponent {
       ['', info.onion ? '🧅' : null, ''],
     ];
     return fields
-      .filter(([, value]) => !!value)
+      .filter(([, value]) => value)
       .map(([label, value, suffix]) => ({ label, value: String(value) + suffix }));
   }
 }

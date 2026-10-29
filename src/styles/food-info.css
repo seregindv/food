@@ -42,7 +42,29 @@
   border: 0;
   background: transparent;
   font-size: 22px;
+}
+
+.food-info-meal {
+  padding: 20px;
+  border-bottom: 1px solid #ddd;
+  scroll-margin-top: 20px;
+}
+
+.food-info-nav button:not(.selected),
+.food-info-meal:not(.selected) {
   cursor: pointer;
+}
+
+.food-info-nav button.selected,
+.food-info-meal.selected {
+  background: #ddecfc;
+}
+
+@media (pointer: fine) {
+  .food-info-nav button:not(.selected):hover,
+  .food-info-meal:not(.selected):hover {
+    background: aliceblue;
+  }
 }
 
 .food-info-content {
@@ -50,12 +72,6 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-}
-
-.food-info-meal {
-  padding: 20px;
-  border-bottom: 1px solid #ddd;
-  scroll-margin-top: 20px;
 }
 
 .food-info-meal:last-child {
