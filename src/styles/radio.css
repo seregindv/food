@@ -71,7 +71,8 @@
   margin-top: 7px;
 }
 
-.meal:has(input[type="checkbox"]:checked) .nutrition-grid {
+.meal:has(input[type="checkbox"]:checked) .nutrition-grid,
+.meal:has(input[type="checkbox"]:checked) .meal-weight {
   color: #A2A6A9;
 }
 
