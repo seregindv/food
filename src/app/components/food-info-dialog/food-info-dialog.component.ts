@@ -13,10 +13,11 @@ export class FoodInfoDialogComponent {
   @ViewChild('dialog') dialog!: ElementRef<HTMLDialogElement>;
   @ViewChild('content') content!: ElementRef<HTMLElement>;
 
-  open(): void {
-    this.selectedIndex.set(null);
+  open(index?: number): void {
+    this.selectedIndex.set(index ?? null);
     this.dialog.nativeElement.showModal();
     this.content.nativeElement.scrollTop = 0;
+    if (index !== undefined) this.scrollTo(index);
   }
 
   scrollTo(index: number): void {

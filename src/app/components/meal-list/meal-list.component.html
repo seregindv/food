@@ -16,10 +16,15 @@
             <label class="meal-name" [attr.for]="preview ? null : 'meal' + (item.index + 1)">
               <div class="meal-name-primary">{{ item.primary }}</div>
               <div class="meal-name-secondary">{{ item.secondary }}</div>
-              <div class="meal-weight" [class.hidden]="!item.info?.weight">
-                {{ item.info?.weight }}
-              </div>
             </label>
+            <button
+              type="button"
+              class="meal-weight"
+              [class.hidden]="!item.info?.weight"
+              (click)="foodDialog.open(item.index)"
+            >
+              {{ item.info?.weight }}
+            </button>
           </div>
           <div class="nutrition-grid meal-nutrition" [class.hidden]="!item.hasNutrition">
             @for (value of item.nutrition; track $index) {
