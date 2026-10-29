@@ -57,7 +57,7 @@
 
 .food-info-nav button.selected,
 .food-info-meal.selected {
-  background: #ddecfc;
+  background: #e2effa;
 }
 
 @media (pointer: fine) {

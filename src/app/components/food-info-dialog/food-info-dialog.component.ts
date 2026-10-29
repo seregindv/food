@@ -14,6 +14,7 @@ export class FoodInfoDialogComponent {
   @ViewChild('content') content!: ElementRef<HTMLElement>;
 
   open(): void {
+    this.selectedIndex.set(null);
     this.dialog.nativeElement.showModal();
     this.content.nativeElement.scrollTop = 0;
   }
