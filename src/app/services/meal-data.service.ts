@@ -34,11 +34,18 @@ export class MealDataService {
   readonly eaten = signal<number[]>([]);
   readonly days = signal<string[]>(DAY_NAMES);
   readonly mascot = signal('donkey');
+  readonly displayNutrition = signal(true);
 
   constructor(private storage: StorageService) {
     this.mascot.set(storage.getMascot());
+    this.displayNutrition.set(storage.getSettings().displayNutrition ?? true);
     this.selectedEmployee.set(localStorage.getItem('selectedEmployee') ?? '');
     this.reload();
+  }
+
+  setDisplayNutrition(displayNutrition: boolean): void {
+    this.displayNutrition.set(displayNutrition);
+    this.storage.setSettings({ displayNutrition });
   }
 
   reload(): void {

@@ -12,8 +12,21 @@ interface StoredSheetLinks {
   menu: string[];
 }
 
+interface AppSettings {
+  displayNutrition?: boolean | null;
+  [key: string]: unknown;
+}
+
 @Injectable({ providedIn: 'root' })
 export class StorageService {
+  getSettings(): AppSettings {
+    return this.read<AppSettings>('settings') ?? {};
+  }
+
+  setSettings(settings: Partial<AppSettings>): void {
+    this.write('settings', { ...this.getSettings(), ...settings });
+  }
+
   getSheetDates(): string[] {
     return this.read<string[]>('sheetDates') ?? [];
   }

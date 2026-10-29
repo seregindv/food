@@ -62,6 +62,15 @@
   font-size: 20px;
 }
 
+.nutrition-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  align-self: flex-start;
+  margin-top: 7px;
+}
+
 .meal:has(input[type="checkbox"]:checked) .nutrition-grid {
   color: #A2A6A9;
 }
@@ -249,6 +258,8 @@ input[type="checkbox"]:checked {
   box-sizing: border-box;
   width: 100%;
   gap: 3px;
+  margin-bottom: 7px;
+  padding-left: 32px;
   font-size: 16px;
   text-align: center;
 }
@@ -274,9 +285,4 @@ input[type="checkbox"]:checked {
 
 .nutrition-grid>div:nth-child(4) {
   background: #e3f3e5;
-}
-
-.meal-nutrition {
-  margin-bottom: 7px;
-  padding-left: 32px;
 }

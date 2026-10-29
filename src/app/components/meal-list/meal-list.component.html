@@ -26,7 +26,10 @@
               {{ item.info?.weight }}
             </button>
           </div>
-          <div class="nutrition-grid meal-nutrition" [class.hidden]="!item.hasNutrition">
+          <div
+            class="nutrition-grid"
+            [class.hidden]="!item.hasNutrition || !meals.displayNutrition()"
+          >
             @for (value of item.nutrition; track $index) {
               <div>{{ value }}</div>
             }
