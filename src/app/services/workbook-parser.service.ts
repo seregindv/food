@@ -115,7 +115,7 @@ function parseWorkbook(
       continue;
     }
 
-    const mealIndexes = new Array(MEAL_ICONS.length).fill(null);
+    const mealColumns: Partial<Record<(typeof MEAL_ICONS)[number], number>> = {};
     let mealTitleRow = 0;
     let employeeColumnIndex = 0;
     for (let row = 0; row < 2; row++) {
@@ -129,40 +129,40 @@ function parseWorkbook(
             break;
           case 'завтраки':
           case 'завтрак':
-            mealIndexes[0] = column;
+            mealColumns['🍳'] = column;
             mealTitleRow = row;
             break;
           case 'блюдо 1':
-            mealIndexes[1] = column;
+            mealColumns['1️⃣'] = column;
             mealTitleRow = row;
             break;
           case 'блюдо 2':
-            mealIndexes[2] = column;
+            mealColumns['2️⃣'] = column;
             mealTitleRow = row;
             break;
           case 'напиток':
           case 'напитки и десерты':
           case 'сок':
-            mealIndexes[3] = column;
+            mealColumns['🧋'] = column;
             mealTitleRow = row;
             break;
           case 'выпечка':
-            mealIndexes[4] = column;
+            mealColumns['🥨'] = column;
             mealTitleRow = row;
             break;
           case 'закуски':
-            mealIndexes[5] = column;
+            mealColumns['🌯'] = column;
             mealTitleRow = row;
             break;
           case 'супы':
           case 'суп':
-            mealIndexes[6] = column;
+            mealColumns['🍲'] = column;
             mealTitleRow = row;
             break;
           case 'сaлат': // First 'а' is Latin.
           case 'сaлаты и закуски':
           case 'салат':
-            mealIndexes[7] = column;
+            mealColumns['🥗'] = column;
             mealTitleRow = row;
             break;
           case 'горячие блюда':
@@ -170,34 +170,35 @@ function parseWorkbook(
           case 'горячее':
           case 'горячее - обеды':
           case 'горячее / супы / салаты':
-            mealIndexes[8] = column;
+            mealColumns['🍗'] = column;
             mealTitleRow = row;
             break;
           case 'гарнир':
           case 'гарниры':
           case 'дополнительный гарнир по желанию':
-            mealIndexes[9] = column;
+            mealColumns['🍟'] = column;
             mealTitleRow = row;
             break;
           case 'десерт':
           case 'десерты':
           case 'выпечка - десерты':
           case 'выпечка - десерты - фрукты':
-            mealIndexes[10] = column;
+            mealColumns['🍰'] = column;
             mealTitleRow = row;
             break;
           case 'соусы и топпинги':
-            mealIndexes[11] = column;
+            mealColumns['🧂'] = column;
             mealTitleRow = row;
             break;
           case 'сендвичи':
-            mealIndexes[12] = column;
+            mealColumns['🥪'] = column;
             mealTitleRow = row;
             break;
         }
       }
     }
 
+    const mealIndexes = MEAL_ICONS.map(icon => mealColumns[icon]);
     for (let rowIndex = mealTitleRow + 1; rowIndex < jsonData.length; rowIndex++) {
       const row = jsonData[rowIndex];
       let employeeName = row[employeeColumnIndex];
@@ -210,7 +211,7 @@ function parseWorkbook(
       }
       const meals = new Array(MEAL_ICONS.length).fill(null);
       mealIndexes.forEach((index, mealIndex) => {
-        if (index !== null) {
+        if (index !== undefined) {
           meals[mealIndex] = row[index];
         }
       });

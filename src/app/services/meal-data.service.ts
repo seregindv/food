@@ -3,21 +3,7 @@ import { StorageService, SavedSheet } from './storage.service';
 import { FoodInfo, MealView, mealNames } from '../models/meal-view';
 
 export const DAY_NAMES = ['пн', 'вт', 'ср', 'чт', 'пт'];
-export const MEAL_ICONS = [
-  '🍳',
-  '1️⃣',
-  '2️⃣',
-  '🧋',
-  '🥨',
-  '🌯',
-  '🍲',
-  '🥗',
-  '🍗',
-  '🍟',
-  '🍰',
-  '🧂',
-  '🥪',
-];
+export const MEAL_ICONS = ['🍳', '1️⃣', '2️⃣', '🧋', '🥨', '🌯', '🍲', '🥗', '🍗', '🍟', '🍰', '🧂', '🥪'] as const;
 
 @Injectable({ providedIn: 'root' })
 export class MealDataService {
