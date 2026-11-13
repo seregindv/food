@@ -169,6 +169,7 @@ function parseWorkbook(
           case 'бургер':
           case 'горячее':
           case 'горячее - обеды':
+          case 'горячее / супы / салаты':
             mealIndexes[8] = column;
             mealTitleRow = row;
             break;
@@ -181,6 +182,7 @@ function parseWorkbook(
           case 'десерт':
           case 'десерты':
           case 'выпечка - десерты':
+          case 'выпечка - десерты - фрукты':
             mealIndexes[10] = column;
             mealTitleRow = row;
             break;
