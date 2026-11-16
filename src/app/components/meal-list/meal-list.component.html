@@ -39,8 +39,13 @@
       @if (meals.displayNutrition() && meals.nutritionTotals(items); as totals) {
         <div class="meal-nutrition-total" role="group" aria-label="Итого КБЖУ">
           <div class="nutrition-grid">
-            @for (value of totals; track $index) {
-              <div>{{ value }}</div>
+            @for (total of totals; track $index) {
+              <div
+                [class.nutrition-progress]="total.progress !== null"
+                [style.--nutrition-progress]="total.progress"
+              >
+                {{ total.text }}
+              </div>
             }
           </div>
         </div>

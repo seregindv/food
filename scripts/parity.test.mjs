@@ -361,16 +361,22 @@ test('meal presentation keeps original slot indexes, bilingual names and zero nu
   assert.equal(items[1].icon, '🧋');
 });
 
-test('nutrition totals sum available values in column order and preserve zero', () => {
+test('nutrition totals show the day or the checked meals and their share', () => {
   const state = mealState();
   const items = [
-    { info: { calories: 0, protein: 10, fat: 0.1 }, checked: true },
-    { info: { protein: 5, fat: 0.2 } },
+    { info: { calories: 0, protein: 5, fat: 0.1 }, checked: false },
+    { info: { protein: 15, fat: 0.3 } },
     { info: { weight: '200 г' } },
     {},
   ];
 
-  assert.deepEqual(Array.from(state.nutritionTotals(items)), ['0 ккал', '15 г', '0.3 г', '']);
+  const readTotals = () => Array.from(state.nutritionTotals(items), ({ text, progress }) => [
+    text,
+    progress,
+  ]);
+  assert.deepEqual(readTotals(), [['0 ккал', null], ['20 г', null], ['0.4 г', null], ['', null]]);
+  items[0].checked = true;
+  assert.deepEqual(readTotals(), [['0 ккал', '0%'], ['5 г', '25%'], ['0.1 г', '25%'], ['', '0%']]);
   assert.equal(state.nutritionTotals(items.slice(2)), null);
 });
 

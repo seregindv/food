@@ -276,20 +276,34 @@ input[type="checkbox"]:checked {
   min-width: 0;
   padding: 8px 0;
   border-radius: 4px;
+  background-color: var(--nutrition-color);
+}
+
+.nutrition-grid>div.nutrition-progress {
+  background-color: var(--nutrition-track-color);
+  background-image: linear-gradient(
+    to right,
+    var(--nutrition-color) var(--nutrition-progress),
+    transparent var(--nutrition-progress)
+  );
 }
 
 .nutrition-grid>div:nth-child(1) {
-  background: #e2effa;
+  --nutrition-color: #e2effa;
+  --nutrition-track-color: #f0f7fc;
 }
 
 .nutrition-grid>div:nth-child(2) {
-  background: #f8e4e4;
+  --nutrition-color: #f8e4e4;
+  --nutrition-track-color: #fbf1f1;
 }
 
 .nutrition-grid>div:nth-child(3) {
-  background: #fff4cc;
+  --nutrition-color: #fff4cc;
+  --nutrition-track-color: #fff9e5;
 }
 
 .nutrition-grid>div:nth-child(4) {
-  background: #e3f3e5;
+  --nutrition-color: #e3f3e5;
+  --nutrition-track-color: #f1f9f2;
 }
