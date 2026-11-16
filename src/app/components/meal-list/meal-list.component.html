@@ -36,6 +36,15 @@
           </div>
         </div>
       }
+      @if (meals.displayNutrition() && meals.nutritionTotals(items); as totals) {
+        <div class="meal-nutrition-total" role="group" aria-label="Итого КБЖУ">
+          <div class="nutrition-grid">
+            @for (value of totals; track $index) {
+              <div>{{ value }}</div>
+            }
+          </div>
+        </div>
+      }
     </div>
     <app-meal-actions
       [day]="day"

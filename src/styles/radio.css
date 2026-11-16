@@ -253,6 +253,12 @@ input[type="checkbox"]:checked {
   height: 44px;
 }
 
+.meal-nutrition-total {
+  border-top: 1px solid #ccc;
+  margin-top: .8lh;
+  padding-top: .8lh;
+}
+
 .nutrition-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

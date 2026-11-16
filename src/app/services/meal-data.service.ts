@@ -4,6 +4,11 @@ import { FoodInfo, MealView, mealNames } from '../models/meal-view';
 
 export const DAY_NAMES = ['пн', 'вт', 'ср', 'чт', 'пт'];
 export const MEAL_ICONS = ['🍳', '1️⃣', '2️⃣', '🧋', '🥨', '🌯', '🍲', '🥗', '🍗', '🍟', '🍰', '🧂', '🥪'] as const;
+const nutritionKeys = ['calories', 'protein', 'fat', 'carbs'] as const;
+
+function formatNutrition(value: number | undefined, index: number): string {
+  return value == null ? '' : String(value) + (index === 0 ? ' ккал' : ' г');
+}
 
 @Injectable({ providedIn: 'root' })
 export class MealDataService {
@@ -130,7 +135,7 @@ export class MealDataService {
     return values.flatMap((name, index) => {
       if (!name) return [];
       const info = this.foodInfo()[name.trim()];
-      const numbers = [info?.calories, info?.protein, info?.fat, info?.carbs];
+      const numbers = nutritionKeys.map((key) => info?.[key]);
       return [
         {
           index,
@@ -140,12 +145,22 @@ export class MealDataService {
           info,
           checked: eaten.includes(index),
           hasNutrition: numbers.some((value) => value != null),
-          nutrition: numbers.map((value, i) =>
-            value == null ? '' : String(value) + (i === 0 ? ' ккал' : ' г'),
-          ),
+          nutrition: numbers.map(formatNutrition),
         },
       ];
     });
+  }
+
+  nutritionTotals(items: MealView[]): string[] | null {
+    const totals = nutritionKeys.map((key) => {
+      let total: number | undefined;
+      for (const item of items) {
+        const value = item.info?.[key];
+        if (value != null) total = (total ?? 0) + value;
+      }
+      return total == null ? undefined : Number(total.toFixed(2));
+    });
+    return totals.some((total) => total != null) ? totals.map(formatNutrition) : null;
   }
 
   hasFoodInfo(day: string): boolean {
