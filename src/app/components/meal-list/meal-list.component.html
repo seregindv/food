@@ -1,5 +1,6 @@
 <ng-template #dayContent let-day="day" let-preview="preview">
   @let items = meals.itemsForDay(day);
+  @let dailyNutrition = meals.dailyNutrition(items);
   <div class="values-list" [class.hidden]="!meals.hasMeals(day)">
     <div class="meals">
       @for (item of items; track item.index) {
@@ -31,12 +32,17 @@
             [class.hidden]="!item.hasNutrition || !meals.displayNutrition()"
           >
             @for (value of item.nutrition; track $index) {
-              <div>{{ value }}</div>
+              <div
+                class="nutrition-progress"
+                [style.--nutrition-progress]="meals.mealNutritionShare(item, $index, dailyNutrition[$index])"
+              >
+                {{ value }}
+              </div>
             }
           </div>
         </div>
       }
-      @if (meals.displayTotalNutrition() && meals.nutritionTotals(items); as totals) {
+      @if (meals.displayTotalNutrition() && meals.nutritionTotals(items, dailyNutrition); as totals) {
         <div class="meal-nutrition-total" role="group" aria-label="Итого КБЖУ">
           <div class="nutrition-grid">
             @for (total of totals; track $index) {

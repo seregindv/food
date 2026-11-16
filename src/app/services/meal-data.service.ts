@@ -19,6 +19,11 @@ function sumNutrition(items: MealView[], key: (typeof nutritionKeys)[number]): n
   return total;
 }
 
+function nutritionShare(value: number | undefined, total: number | undefined): string {
+  const ratio = total != null && total > 0 ? Math.min(1, Math.max(0, (value ?? 0) / total)) : 0;
+  return ratio * 100 + '%';
+}
+
 @Injectable({ providedIn: 'root' })
 export class MealDataService {
   readonly sheets = signal<SavedSheet[]>([]);
@@ -168,18 +173,27 @@ export class MealDataService {
     });
   }
 
-  nutritionTotals(items: MealView[]): { text: string; progress: string | null }[] | null {
-    const totals = nutritionKeys.map((key) => sumNutrition(items, key));
+  dailyNutrition(items: MealView[]): (number | undefined)[] {
+    return nutritionKeys.map((key) => sumNutrition(items, key));
+  }
+
+  mealNutritionShare(item: MealView, index: number, total: number | undefined): string {
+    return nutritionShare(item.info?.[nutritionKeys[index]], total);
+  }
+
+  nutritionTotals(
+    items: MealView[],
+    totals = this.dailyNutrition(items),
+  ): { text: string; progress: string | null }[] | null {
     if (totals.every((total) => total == null)) return null;
 
     const checkedItems = items.filter((item) => item.checked);
     const hasCheckedItems = checkedItems.length > 0;
     return totals.map((total, index) => {
       const value = hasCheckedItems ? sumNutrition(checkedItems, nutritionKeys[index]) : total;
-      const ratio = total != null && total > 0 ? Math.min(1, Math.max(0, (value ?? 0) / total)) : 0;
       return {
         text: formatNutrition(value == null ? undefined : Number(value.toFixed(2)), index),
-        progress: hasCheckedItems ? ratio * 100 + '%' : null,
+        progress: hasCheckedItems ? nutritionShare(value, total) : null,
       };
     });
   }
