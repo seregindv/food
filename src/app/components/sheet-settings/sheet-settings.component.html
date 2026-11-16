@@ -99,15 +99,26 @@
             </div>
           </div>
         </div>
-        <label class="nutrition-toggle" [class.hidden]="downloading()">
-          <input
-            type="checkbox"
-            name="displayNutrition"
-            [ngModel]="meals.displayNutrition()"
-            (ngModelChange)="meals.setDisplayNutrition($event)"
-          />
-          Показывать КБЖУ
-        </label>
+        <div [class.hidden]="downloading()">
+          <label class="nutrition-toggle">
+            <input
+              type="checkbox"
+              name="displayNutrition"
+              [ngModel]="meals.displayNutrition()"
+              (ngModelChange)="meals.setDisplayNutrition($event)"
+            />
+            Показывать КБЖУ
+          </label>
+          <label class="nutrition-toggle">
+            <input
+              type="checkbox"
+              name="displayTotalNutrition"
+              [ngModel]="meals.displayTotalNutrition()"
+              (ngModelChange)="meals.setDisplayTotalNutrition($event)"
+            />
+            Показывать итоги
+          </label>
+        </div>
         <app-loading-panel [class.invisible]="!meals.loading()" />
       </div>
     </form>

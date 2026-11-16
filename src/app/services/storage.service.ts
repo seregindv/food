@@ -14,6 +14,7 @@ interface StoredSheetLinks {
 
 interface AppSettings {
   displayNutrition?: boolean | null;
+  displayTotalNutrition?: boolean;
   [key: string]: unknown;
 }
 
