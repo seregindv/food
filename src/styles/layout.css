@@ -76,6 +76,10 @@ body {
   display: block;
 }
 
+.loaded-sheets a[href] {
+  text-decoration: underline;
+}
+
 .loaded-sheets a:first-of-type {
   border-start-start-radius: 5px;
   border-end-start-radius: 5px;
@@ -84,10 +88,6 @@ body {
 .loaded-sheets a:last-of-type {
   border-start-end-radius: 5px;
   border-end-end-radius: 5px;
-}
-
-.loaded-sheets a:hover {
-  text-decoration: underline;
 }
 
 .loaded-sheets .early {

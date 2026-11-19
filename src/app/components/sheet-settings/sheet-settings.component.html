@@ -4,7 +4,7 @@
       @for (sheet of meals.sheets(); track sheet.date) {
         <div>
           <a
-            [href]="sheet.link"
+            [attr.href]="sheet.link"
             target="_blank"
             rel="noopener"
             [class.early]="datePriority(sheet.date) === 'early'"
@@ -14,7 +14,7 @@
           >
           @for (addition of sheet.additions; track $index) {
             <a
-              [href]="addition.link"
+              [attr.href]="addition.link"
               target="_blank"
               rel="noopener"
               [class.early]="datePriority(sheet.date) === 'early'"
