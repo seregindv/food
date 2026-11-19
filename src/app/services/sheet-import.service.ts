@@ -9,7 +9,7 @@ type XLSXWorkbook = XLSXTypes.WorkBook & { fileName?: string | null };
 @Injectable({ providedIn: 'root' })
 export class SheetImportService {
   private pendingImport: { sheetData: ParsedWorkbook['sheetData']; sheetDate: Date | null; foodInfo: Record<string, any>; sheetUrl: string } | null = null;
-  private pendingAddition: { sheetUrl: string; sheetData: ParsedWorkbook['sheetData'] } | null =
+  private pendingAddition: { sheetUrl: string; sheetData: ParsedWorkbook['sheetData']; foodInfo: Record<string, any> } | null =
     null;
   constructor(
     private meals: MealDataService,
@@ -69,12 +69,12 @@ export class SheetImportService {
     }
     const sheetUrl = this.getSheetUrl(sheetId);
     this.pendingAddition = null;
-    const { sheetData } = await this.downloadData(sheetUrl, false);
+    const { sheetData, foodInfo } = await this.downloadData(sheetUrl, false);
     const days = mode === 'add' ? DAY_NAMES : this.parser.getAvailableDays(sheetData);
     if (!days.length) {
       throw new Error('Не удалось найти дни с едой');
     }
-    this.pendingAddition = { sheetUrl, sheetData };
+    this.pendingAddition = { sheetUrl, sheetData, foodInfo };
     return days;
   }
 
@@ -83,6 +83,7 @@ export class SheetImportService {
     link: string,
     days: string[],
     mode: 'replace' | 'add',
+    makeMain = false,
   ): Promise<void> {
     if (!link.trim()) throw new Error('Пожалуйста, введите ссылку');
     const sheetId = this.extractId(link.trim());
@@ -90,10 +91,11 @@ export class SheetImportService {
       throw new Error('Неверная ссылка на Google-таблицу');
     }
     const sheetUrl = this.getSheetUrl(sheetId);
-    const sheetData =
+    const pending =
       this.pendingAddition?.sheetUrl === sheetUrl
-        ? this.pendingAddition.sheetData
-        : (await this.downloadData(sheetUrl, false)).sheetData;
+        ? this.pendingAddition
+        : await this.downloadData(sheetUrl, false);
+    const { sheetData } = pending;
     this.pendingAddition = null;
     const currentData = this.storage.getSheetData(date) ?? {};
     this.storage.ensureWeek(date);
@@ -105,7 +107,11 @@ export class SheetImportService {
     } else {
       this.parser.mergeSheetDays(currentData, sheetData, days);
       this.storage.setSheetData(date, currentData);
-      this.storage.setAddedSheetLink(date, sheetUrl, days);
+      if (makeMain) {
+        this.storage.setMainSheetLink(date, sheetUrl);
+      } else {
+        this.storage.setAddedSheetLink(date, sheetUrl, days);
+      }
       this.storage.clearEatenDays(date, days);
     }
     this.meals.reload();

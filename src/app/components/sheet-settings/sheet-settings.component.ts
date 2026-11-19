@@ -29,6 +29,7 @@ export class SheetSettingsComponent {
   additionMode: 'replace' | 'add' | 'menu' | null = null;
   availableDays: string[] = [];
   chosenDays: string[] = [];
+  makeMainSheet = false;
   importDate = this.getNextMondayString();
   readonly meals: MealDataService = inject(MealDataService);
   readonly downloading = signal(false);
@@ -172,6 +173,7 @@ export class SheetSettingsComponent {
       this.availableDays = await this.sheetImport.availableDays(this.link, mode);
       this.additionMode = mode;
       this.chosenDays = [];
+      this.makeMainSheet = false;
       this.changeDetector.detectChanges();
       this.daysDialog.nativeElement.showModal();
     } catch (error) {
@@ -190,12 +192,19 @@ export class SheetSettingsComponent {
     }
     this.meals.loading.set(true);
     try {
-      await this.sheetImport.addDays(this.meals.selectedWeek(), this.link, this.chosenDays, mode);
+      await this.sheetImport.addDays(
+        this.meals.selectedWeek(),
+        this.link,
+        this.chosenDays,
+        mode,
+        this.makeMainSheet,
+      );
     } catch (error) {
       this.meals.error.set(error instanceof Error ? error.message : 'Не удалось добавить дни');
     } finally {
       this.meals.loading.set(false);
       this.additionMode = null;
+      this.makeMainSheet = false;
     }
   }
 
@@ -208,6 +217,7 @@ export class SheetSettingsComponent {
   cancelAddition(): void {
     this.daysDialog.nativeElement.close();
     this.additionMode = null;
+    this.makeMainSheet = false;
   }
 
   datePriority(date: string): string {

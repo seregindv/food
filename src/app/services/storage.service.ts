@@ -76,6 +76,13 @@ export class StorageService {
     this.write(`sheetLink_${date}`, { main: link, days: [], menu: [] });
   }
 
+  setMainSheetLink(date: string, link: string): void {
+    this.ensureWeek(date);
+    const links = this.getSheetLinks(date);
+    links.main = link;
+    this.write(`sheetLink_${date}`, links);
+  }
+
   ensureWeek(date: string): void {
     const dates = this.getSheetDates();
     if (!dates.includes(date)) {
