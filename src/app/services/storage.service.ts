@@ -76,6 +76,17 @@ export class StorageService {
     this.write(`sheetLink_${date}`, { main: link, days: [], menu: [] });
   }
 
+  ensureWeek(date: string): void {
+    const dates = this.getSheetDates();
+    if (!dates.includes(date)) {
+      dates.push(date);
+      this.write('sheetDates', dates);
+    }
+    if (this.read(`sheetData_${date}`) === null) {
+      this.write(`sheetData_${date}`, {});
+    }
+  }
+
   dropOldSheets(monday: string): void {
     const dates = this.getSheetDates();
     const remaining = dates.filter((date) => date >= monday);

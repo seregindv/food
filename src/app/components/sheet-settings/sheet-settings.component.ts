@@ -94,11 +94,16 @@ export class SheetSettingsComponent {
 
   confirmImportDate(): void {
     this.dateDialog.nativeElement.close();
+    if (this.additionMode === 'add') {
+      void this.addToSelectedDate();
+      return;
+    }
     this.sheetImport.completeImport(this.importDate);
   }
 
   cancelImportDate(): void {
     this.dateDialog.nativeElement.close();
+    this.additionMode = null;
     this.sheetImport.cancelPendingImport();
   }
 
@@ -112,8 +117,46 @@ export class SheetSettingsComponent {
     return `${year}-${month}-${dayOfMonth}`;
   }
 
+  private toDateString(date: Date): string {
+    return `${date.getFullYear()}-${`${date.getMonth() + 1}`.padStart(2, '0')}-${`${date.getDate()}`.padStart(2, '0')}`;
+  }
+
+  private async addToSelectedDate(): Promise<void> {
+    this.meals.loading.set(true);
+    try {
+      const selectedDate = new Date(`${this.importDate}T00:00:00`);
+      const dayIndex = (selectedDate.getDay() + 6) % 7;
+      if (dayIndex > 4) throw new Error('Выберите будний день');
+      const day = ['пн', 'вт', 'ср', 'чт', 'пт'][dayIndex];
+      const weekday = selectedDate.getDay();
+      selectedDate.setDate(selectedDate.getDate() - weekday + (weekday === 0 ? -6 : 1));
+      await this.sheetImport.addDays(this.toDateString(selectedDate), this.link, [day], 'add');
+    } catch (error) {
+      this.meals.error.set(error instanceof Error ? error.message : 'Не удалось добавить таблицу');
+    } finally {
+      this.meals.loading.set(false);
+      this.additionMode = null;
+    }
+  }
+
   async beginAddition(mode: 'replace' | 'add' | 'menu'): Promise<void> {
     this.dropdownOpen = false;
+    if (mode === 'add') {
+      this.meals.error.set('');
+      this.meals.loading.set(true);
+      try {
+        await this.sheetImport.availableDays(this.link, 'add');
+        this.importDate = this.getNextMondayString();
+        this.additionMode = 'add';
+        this.changeDetector.detectChanges();
+        this.dateDialog.nativeElement.showModal();
+      } catch (error) {
+        this.meals.error.set(error instanceof Error ? error.message : 'Не удалось добавить таблицу');
+      } finally {
+        this.meals.loading.set(false);
+      }
+      return;
+    }
     const date = this.meals.selectedWeek();
     if (!date) {
       this.meals.error.set('Сначала выберите неделю');

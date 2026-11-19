@@ -127,7 +127,7 @@
 
 <dialog id="importDateDialog" #dateDialog>
   <form method="dialog" (submit)="$event.preventDefault()">
-    <h3>Выберите неделю</h3>
+    <h3>{{ additionMode === 'add' ? 'Выберите день' : 'Выберите неделю' }}</h3>
     <label for="importDate">Дата</label>
     <input id="importDate" type="date" name="importDate" [(ngModel)]="importDate" required />
     <div class="dialog-actions">
@@ -144,15 +144,11 @@
       @for (day of availableDays; track day) {
         <label
           ><input
-            [type]="additionMode === 'add' ? 'radio' : 'checkbox'"
+            type="checkbox"
             name="addition-day"
             [value]="day"
             [checked]="chosenDays.includes(day)"
-            (change)="
-              additionMode === 'add'
-                ? (chosenDays = [day])
-                : setChosenDay(day, $any($event.target).checked)
-            "
+            (change)="setChosenDay(day, $any($event.target).checked)"
           />
           {{ day }}</label
         >

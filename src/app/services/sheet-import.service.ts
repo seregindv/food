@@ -96,6 +96,7 @@ export class SheetImportService {
         : (await this.downloadData(sheetUrl, false)).sheetData;
     this.pendingAddition = null;
     const currentData = this.storage.getSheetData(date) ?? {};
+    this.storage.ensureWeek(date);
     if (mode === 'add') {
       this.parser.mergeFoodIntoDay(currentData, sheetData, days[0]);
       this.storage.setSheetData(date, currentData);
@@ -130,10 +131,12 @@ export class SheetImportService {
   async refresh(): Promise<void> {
     const date = this.meals.selectedWeek();
     const links = date ? this.storage.getSheetLinks(date) : null;
-    if (!date || !links?.main) {
+    if (!date || !links || (!links.main && !links.days.length && !links.menu.length)) {
       return;
     }
-    const { sheetData, foodInfo } = await this.downloadData(links.main, false);
+    const { sheetData, foodInfo } = links.main
+      ? await this.downloadData(links.main, false)
+      : { sheetData: {}, foodInfo: {} };
     for (const addition of links.days) {
       const { sheetData: addedData } = await this.downloadData(addition.link, false);
       if (addition.mode === 'add') {
