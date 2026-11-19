@@ -7,7 +7,6 @@ import {
   ViewChild,
   ViewEncapsulation,
   inject,
-  signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MealDataService } from '../../services/meal-data.service';
@@ -32,7 +31,6 @@ export class SheetSettingsComponent {
   makeMainSheet = false;
   importDate = this.getNextMondayString();
   readonly meals: MealDataService = inject(MealDataService);
-  readonly downloading = signal(false);
 
   private longPressTimer?: ReturnType<typeof setTimeout>;
   private suppressUpload = false;
@@ -76,7 +74,6 @@ export class SheetSettingsComponent {
   async upload(): Promise<void> {
     this.dropdownOpen = false;
     this.meals.error.set('');
-    this.downloading.set(true);
     this.meals.loading.set(true);
     try {
       const date = await this.sheetImport.import(this.link);
@@ -89,7 +86,6 @@ export class SheetSettingsComponent {
       this.meals.error.set(error instanceof Error ? error.message : 'Не удалось загрузить таблицу');
     } finally {
       this.meals.loading.set(false);
-      this.downloading.set(false);
     }
   }
 
