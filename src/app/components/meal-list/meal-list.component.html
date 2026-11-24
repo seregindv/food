@@ -17,28 +17,28 @@
             <label class="meal-name" [attr.for]="preview ? null : 'meal' + (item.index + 1)">
               <div class="meal-name-primary">{{ item.primary }}</div>
               <div class="meal-name-secondary">{{ item.secondary }}</div>
-            </label>
-            <button
-              type="button"
-              class="meal-weight"
-              [class.hidden]="!item.info?.weight"
-              (click)="foodDialog.open(item.index)"
-            >
-              {{ item.info?.weight }}
-            </button>
-          </div>
-          <div
-            class="nutrition-grid"
-            [class.hidden]="!item.hasNutrition || !meals.displayNutrition()"
-          >
-            @for (value of item.nutrition; track $index) {
-              <div
-                class="nutrition-progress"
-                [style.--nutrition-progress]="meals.mealNutritionShare(item, $index, dailyNutrition[$index])"
+              <button
+                type="button"
+                class="meal-weight"
+                [class.hidden]="!item.info?.weight"
+                (click)="foodDialog.open(item.index)"
               >
-                {{ value }}
+                {{ item.info?.weight }}
+              </button>
+              <div
+                class="nutrition-grid"
+                [class.hidden]="!item.hasNutrition || !meals.displayNutrition()"
+              >
+                @for (value of item.nutrition; track $index) {
+                  <div
+                    class="nutrition-progress"
+                    [style.--nutrition-progress]="meals.mealNutritionShare(item, $index, dailyNutrition[$index])"
+                  >
+                    {{ value }}
+                  </div>
+                }
               </div>
-            }
+            </label>
           </div>
         </div>
       }
