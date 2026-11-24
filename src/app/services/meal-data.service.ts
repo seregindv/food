@@ -191,8 +191,10 @@ export class MealDataService {
     const hasCheckedItems = checkedItems.length > 0;
     return totals.map((total, index) => {
       const value = hasCheckedItems ? sumNutrition(checkedItems, nutritionKeys[index]) : total;
+      const roundedValue =
+        value == null ? undefined : index === 0 ? Math.round(value) : Number(value.toFixed(2));
       return {
-        text: formatNutrition(value == null ? undefined : Number(value.toFixed(2)), index),
+        text: formatNutrition(roundedValue, index),
         progress: hasCheckedItems ? nutritionShare(value, total) : null,
       };
     });
