@@ -55,15 +55,21 @@
   cursor: pointer;
 }
 
-.food-info-nav button.selected,
-.food-info-meal.selected {
+.food-info-nav button.selected {
   background: #e2effa;
 }
 
+.food-info-meal.selected {
+  background: aliceblue;
+}
+
 @media (pointer: fine) {
-  .food-info-nav button:not(.selected):hover,
-  .food-info-meal:not(.selected):hover {
+  .food-info-nav button:not(.selected):hover {
     background: aliceblue;
+  }
+
+  .food-info-meal:not(.selected):hover {
+    background: #f8fcff;
   }
 }
 
