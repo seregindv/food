@@ -43,8 +43,8 @@ export class MealDataService {
   readonly displayTotalNutrition = signal(false);
 
   constructor(private storage: StorageService) {
-    this.mascot.set(storage.getMascot());
     const settings = storage.getSettings();
+    this.mascot.set(settings.mascot ?? 'donkey');
     this.displayNutrition.set(settings.displayNutrition ?? false);
     this.displayTotalNutrition.set(settings.displayTotalNutrition ?? false);
     this.selectedEmployee.set(localStorage.getItem('selectedEmployee') ?? '');
@@ -144,7 +144,7 @@ export class MealDataService {
 
   updateMascot(): void {
     const next = this.mascot() === 'donkey' ? 'cake' : 'donkey';
-    this.storage.setMascot(next);
+    this.storage.setSettings({ mascot: next });
     this.mascot.set(next);
   }
 

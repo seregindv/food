@@ -13,6 +13,7 @@ interface StoredSheetLinks {
 }
 
 interface AppSettings {
+  mascot?: string;
   displayNutrition?: boolean;
   displayTotalNutrition?: boolean;
   [key: string]: unknown;
@@ -150,14 +151,6 @@ export class StorageService {
       }
     }
     this.setEaten(date, eaten);
-  }
-
-  getMascot(): string {
-    return this.read<{ name: string }>('mascot')?.name ?? 'donkey';
-  }
-
-  setMascot(name: string): void {
-    this.write('mascot', { name });
   }
 
   private read<T>(key: string): T | null {
