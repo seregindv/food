@@ -118,11 +118,11 @@
 .food-info-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px 16px;
 }
 
 .food-info-field {
   min-width: 0;
+  padding: 5px 8px;
 }
 
 .food-info-field>.onion {
