@@ -138,7 +138,7 @@ export class StorageService {
 
   addMenuLink(date: string, link: string): void {
     const links = this.getSheetLinks(date);
-    links.menu.push(link);
+    if (!links.menu.includes(link)) links.menu.push(link);
     this.write(`sheetLink_${date}`, links);
   }
 

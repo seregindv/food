@@ -95,10 +95,15 @@ export class SheetImportService {
       this.pendingAddition?.sheetUrl === sheetUrl
         ? this.pendingAddition
         : await this.downloadData(sheetUrl, false);
-    const { sheetData } = pending;
+    const { sheetData, foodInfo } = pending;
     this.pendingAddition = null;
     const currentData = this.storage.getSheetData(date) ?? {};
     this.storage.ensureWeek(date);
+    if (Object.keys(foodInfo).length) {
+      const currentInfo = this.storage.getFoodInfo(date);
+      Object.assign(currentInfo, foodInfo);
+      this.storage.setFoodInfo(date, currentInfo);
+    }
     if (mode === 'add') {
       this.parser.mergeFoodIntoDay(currentData, sheetData, days[0]);
       this.storage.setSheetData(date, currentData);
@@ -144,7 +149,8 @@ export class SheetImportService {
       ? await this.downloadData(links.main, false)
       : { sheetData: {}, foodInfo: {} };
     for (const addition of links.days) {
-      const { sheetData: addedData } = await this.downloadData(addition.link, false);
+      const { sheetData: addedData, foodInfo: addedFoodInfo } = await this.downloadData(addition.link, false);
+      Object.assign(foodInfo, addedFoodInfo);
       if (addition.mode === 'add') {
         this.parser.mergeFoodIntoDay(sheetData, addedData, addition.days[0]);
       } else {
