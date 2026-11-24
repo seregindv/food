@@ -54,7 +54,13 @@
             }
             <div class="food-info-grid">
               @for (field of fields(info); track field.label) {
-                <div class="food-info-field">
+                <div
+                  class="food-info-field"
+                  [class.calories]="field.label === 'Калории'"
+                  [class.protein]="field.label === 'Белки'"
+                  [class.fat]="field.label === 'Жиры'"
+                  [class.carbs]="field.label === 'Углеводы'"
+                >
                   <div class="food-info-label">{{ field.label }}</div>
                   <div [class.onion]="field.value === '🧅'">{{ field.value }}</div>
                 </div>

@@ -125,6 +125,22 @@
   padding: 5px 8px;
 }
 
+.food-info-field.calories {
+  background: #e2effa;
+}
+
+.food-info-field.protein {
+  background: #f8e4e4;
+}
+
+.food-info-field.fat {
+  background: #fff4cc;
+}
+
+.food-info-field.carbs {
+  background: #e3f3e5;
+}
+
 .food-info-field>.onion {
   font-size: 42px;
   line-height: 1;
