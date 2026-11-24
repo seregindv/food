@@ -13,7 +13,7 @@ interface StoredSheetLinks {
 }
 
 interface AppSettings {
-  displayNutrition?: boolean | null;
+  displayNutrition?: boolean;
   displayTotalNutrition?: boolean;
   [key: string]: unknown;
 }
