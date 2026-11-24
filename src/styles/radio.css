@@ -71,7 +71,6 @@
   margin-top: 7px;
 }
 
-.meal:has(input[type="checkbox"]:checked) .nutrition-grid,
 .meal:has(input[type="checkbox"]:checked) .meal-weight {
   color: #A2A6A9;
 }
@@ -93,13 +92,23 @@
   column-gap: 10px;
   flex: 1 1 auto;
   cursor: pointer;
-  padding: 12px 0 2px 10px;
+  padding: 12px 0 0 10px;
+}
+
+.meal-main>label:has(.nutrition-grid.hidden) {
+  padding-bottom: 2px;
 }
 
 .meal-main>label .nutrition-grid {
   grid-column: 1 / -1;
   grid-row: 3;
+  margin-top: 2px;
+  margin-bottom: 7px;
   padding-left: 0;
+}
+
+.meal:not(:has(~ .meal)) .meal-main>label .nutrition-grid:not(.hidden) {
+  margin-bottom: 0;
 }
 
 .meal-name-primary {
@@ -156,7 +165,8 @@ input[type="checkbox"]:checked {
   cursor: pointer;
 }
 
-.meal input[type="checkbox"]:checked+label div {
+.meal input[type="checkbox"]:checked+label .meal-name-primary,
+.meal input[type="checkbox"]:checked+label .meal-name-secondary {
   text-decoration: line-through;
   color: #A2A6A9;
 }
